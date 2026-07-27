@@ -16,7 +16,7 @@ WORKDIR /app
 # Desktop (Mac/Windows) never passes GPU/MPS through to a Linux container,
 # so CPU is what this image actually runs on regardless of host hardware.
 COPY requirements.txt .
-RUN pip install --no-cache-dir torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu \
+RUN pip install --no-cache-dir torch==2.8.0 --extra-index-url https://download.pytorch.org/whl/cpu \
     && pip install --no-cache-dir -r requirements.txt
 
 COPY . .
