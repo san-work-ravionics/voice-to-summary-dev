@@ -49,7 +49,7 @@ cp .env.example .env        # optional — fill in ANTHROPIC_API_KEY etc. if nee
 docker compose up --build
 ```
 
-Open `http://localhost:8743/webapp/index.html`. First start downloads the local models (~3GB) into a `model_cache` volume, so later restarts are fast. Each scenario's output, `custom/`, and `eval/output/` are also named volumes — `docker compose down` keeps them; add `-v` to actually discard them. Runs entirely on CPU inside the container (no GPU/MPS passthrough), so local/Mistral summarization is slower than on bare metal — `--provider claude` avoids that if you have an API key.
+Open `http://localhost:8743/webapp/index.html`. First start downloads the local models (~3GB) into a `model_cache` volume, so later restarts are fast. Each scenario's output, `custom/`, `eval/output/`, and `logs/` are bind-mounted from the project directory (not named volumes) — the container reads/writes the exact same files a local `python vN/src/main.py` run would, so history from either one shows up in both. Runs entirely on CPU inside the container (no GPU/MPS passthrough), so local/Mistral summarization is slower than on bare metal — `--provider claude` avoids that if you have an API key.
 
 ### Choosing a summarization provider
 

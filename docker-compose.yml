@@ -9,28 +9,31 @@ services:
       - MISTRAL_MODEL=${MISTRAL_MODEL:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
     volumes:
-      # Per-scenario generated output — one volume each so a rebuild/restart
-      # doesn't lose prior recordings/transcripts/summaries.
-      - v1_output:/app/v1/output
-      - v2_output:/app/v2/output
-      - v3_output:/app/v3/output
-      - v4_output:/app/v4/output
-      - story_output:/app/story/output
+      # Bind-mounted (not named volumes) so the container reads/writes the
+      # exact same directories a local `python vN/src/main.py` run would —
+      # one shared history instead of two disconnected copies. This is what
+      # made a container-only run "lose" all pre-Docker history: a named
+      # volume starts empty and .dockerignore keeps these dirs out of the
+      # build context, so there was nothing to seed it from.
+      - ./v1/output:/app/v1/output
+      - ./v2/output:/app/v2/output
+      - ./v3/output:/app/v3/output
+      - ./v4/output:/app/v4/output
+      - ./story/output:/app/story/output
       # Real (non-scripted) audio dropped via the Custom Audio page, and
       # its derived output.
-      - custom_audio:/app/custom/audio
-      - custom_output:/app/custom/output
+      - ./custom/audio:/app/custom/audio
+      - ./custom/output:/app/custom/output
       # Evaluation run history (used by the Evaluation page's provider
       # comparison) and cross-process pipeline stage-progress files.
-      - eval_output:/app/eval/output
-      - run_status:/app/webapp/.run_status
-      # Whisper + Hugging Face model downloads (~3GB+) — keeps them off the
-      # image and off the container's writable layer.
+      - ./eval/output:/app/eval/output
+      - ./webapp/.run_status:/app/webapp/.run_status
+      # Rotating application logs (webapp requests, pipeline run output).
+      - ./logs:/app/logs
+      # Whisper + Hugging Face model downloads (~3GB+) — a named volume
+      # (not bind-mounted) since this is pure binary cache, not something
+      # to keep alongside the source tree.
       - model_cache:/cache
-      # Rotating application logs (webapp requests, pipeline run output) —
-      # separate from `docker compose logs`, which is tied to the container
-      # object and is lost on `docker compose rm`/`down` without this.
-      - app_logs:/app/logs
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8743/healthz', timeout=3)"]
@@ -40,14 +43,4 @@ services:
       retries: 3
 
 volumes:
-  v1_output:
-  v2_output:
-  v3_output:
-  v4_output:
-  story_output:
-  custom_audio:
-  custom_output:
-  eval_output:
-  run_status:
   model_cache:
-  app_logs:
