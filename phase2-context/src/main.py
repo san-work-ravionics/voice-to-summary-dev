@@ -9,19 +9,21 @@ from eval_scoring import evaluate_variant
 from generate_dummy_audio import generate as generate_audio
 from pipeline_status import write_status
 from run_history import append_run
-from summarize import summarize
+from summarize import summarize_baseline, summarize_with_context
 from transcribe import transcribe
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
 RECORDING_PATH = os.path.join(OUTPUT_DIR, "recording.wav")
 TRANSCRIPT_PATH = os.path.join(OUTPUT_DIR, "transcript.txt")
-SUMMARY_PATH = os.path.join(OUTPUT_DIR, "summary.txt")
+BASELINE_SUMMARY_PATH = os.path.join(OUTPUT_DIR, "summary_baseline.txt")
+CONTEXT_SUMMARY_PATH = os.path.join(OUTPUT_DIR, "summary_with_context.txt")
 
 
 def run_pipeline(regenerate=False, provider=None, judge_provider=None, on_stage=None):
-    """Stages: 'recording', 'transcribing', 'summarizing', 'judging' (only
-    when judge_provider is given — skipped by default), 'done'."""
+    """Stages: 'recording', 'transcribing', 'summarizing_baseline',
+    'summarizing_context', plus 'judging_baseline'/'judging_context' when
+    judge_provider is given (skipped by default), 'done'."""
     on_stage = on_stage or (lambda stage, detail=None: None)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -41,25 +43,40 @@ def run_pipeline(regenerate=False, provider=None, judge_provider=None, on_stage=
     print("\n--- Transcript ---")
     print(transcript)
 
-    on_stage("summarizing")
-    print("\nSummarizing (context + checklist, 3-actor transcript)...")
-    summary = summarize(transcript, provider=provider)
-    with open(SUMMARY_PATH, "w") as f:
-        f.write(summary)
-    print("\n--- Summary ---")
-    print(summary)
+    on_stage("summarizing_baseline")
+    print("\nSummarizing (baseline, no context)...")
+    baseline = summarize_baseline(transcript, provider=provider)
+    with open(BASELINE_SUMMARY_PATH, "w") as f:
+        f.write(baseline)
 
     if judge_provider is not None:
-        on_stage("judging")
-        print("\nJudging...")
-        evaluation = evaluate_variant(transcript, summary, provider=judge_provider)
-        append_run("v4", "context_checklist_assistant", provider, judge_provider, transcript, summary, evaluation)
+        on_stage("judging_baseline")
+        print("Judging (baseline)...")
+        evaluation = evaluate_variant(transcript, baseline, provider=judge_provider)
+        append_run("phase2-context", "baseline", provider, judge_provider, transcript, baseline, evaluation)
+
+    on_stage("summarizing_context")
+    print("Summarizing (with meeting context)...")
+    with_context = summarize_with_context(transcript, provider=provider)
+    with open(CONTEXT_SUMMARY_PATH, "w") as f:
+        f.write(with_context)
+
+    if judge_provider is not None:
+        on_stage("judging_context")
+        print("Judging (with context)...")
+        evaluation = evaluate_variant(transcript, with_context, provider=judge_provider)
+        append_run("phase2-context", "with_context", provider, judge_provider, transcript, with_context, evaluation)
+
+    print("\n--- Baseline summary (no context) ---")
+    print(baseline)
+    print("\n--- Context-aware summary ---")
+    print(with_context)
 
     on_stage("done")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Voice (3-actor, incl. AI assistant) -> transcript -> checklist-aware summary demo pipeline")
+    parser = argparse.ArgumentParser(description="Voice -> transcript -> summary demo pipeline (context comparison)")
     parser.add_argument(
         "--regenerate", action="store_true",
         help="Regenerate the dummy recording even if one already exists",
@@ -71,7 +88,7 @@ def main():
     )
     parser.add_argument(
         "--judge-provider", choices=["local", "mistral", "claude"], default=None,
-        help="If set, score the resulting summary and append it to "
+        help="If set, score both summaries and append them to "
         "eval/output/run_history.jsonl. Skipped by default.",
     )
     parser.add_argument(

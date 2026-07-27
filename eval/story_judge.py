@@ -3,11 +3,22 @@ import os
 import sys
 from datetime import datetime, timezone
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import judge  # reuse build_judge_generator, run_judge, _parse_judge_json, split_brief_and_checklist
-
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STORY_OUTPUT_DIR = os.path.join(PROJECT_ROOT, "story", "output")
+sys.path.insert(0, PROJECT_ROOT)
+
+# judge.py used to expose build_judge_generator/run_judge/etc. directly; it
+# was refactored to delegate to eval_scoring.py's evaluate_variant, which
+# builds its own generator per call. Story scoring reuses one generator
+# across ~20 judge calls (5 weeks x 2 variants x layer2 + continuity) to
+# avoid reloading the local model that many times, so it calls
+# llm_provider/eval_scoring directly instead of going through judge.py.
+from llm_provider import build_generator, generate as llm_generate  # noqa: E402
+from eval_scoring import (  # noqa: E402
+    check_actions_prefix, check_schema, split_brief_and_checklist,
+    JUDGE_SYSTEM_PROMPT, _parse_judge_json,
+)
+
+STORY_OUTPUT_DIR = os.path.join(PROJECT_ROOT, "phase4-history", "output")
 RESULTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", "story_results.json")
 
 WEEKS = [1, 2, 3, 4, 5]
@@ -58,9 +69,9 @@ def _extract_decisions_and_actions(summary_text):
 
 
 def judge_extract_section(text, heading_name):
-    # Mirrors story/src/summarize.py's extract_section — reimplemented here
+    # Mirrors phase4-history/src/summarize.py's extract_section — reimplemented here
     # (rather than imported) so this eval script only depends on eval/judge.py,
-    # not on story/src, keeping the two independently runnable.
+    # not on phase4-history/src, keeping the two independently runnable.
     import re
     lines = text.split("\n")
     heading_re = re.compile(rf"^#{{1,6}}\s*{heading_name}\s*$", re.IGNORECASE)
@@ -81,37 +92,37 @@ def judge_extract_section(text, heading_name):
 
 
 def run_continuity_judge(generator, history_text, transcript, summary_text):
-    messages = [
-        {"role": "system", "content": CONTINUITY_JUDGE_PROMPT},
-        {"role": "user", "content": (
-            f"Prior history:\n{history_text}\n\n"
-            f"Current transcript:\n{transcript}\n\n"
-            f"Summary to grade:\n{summary_text}"
-        )},
-    ]
-    output = generator(messages, max_new_tokens=200, do_sample=False)
-    reply = output[0]["generated_text"][-1]["content"].strip()
-    return judge._parse_judge_json(reply)
+    reply = llm_generate(
+        generator, CONTINUITY_JUDGE_PROMPT,
+        f"Prior history:\n{history_text}\n\nCurrent transcript:\n{transcript}\n\nSummary to grade:\n{summary_text}",
+        max_new_tokens=200,
+    )
+    return _parse_judge_json(reply)
 
 
 def score_layer2(generator, transcript, summary_text):
-    brief_text, _ = judge.split_brief_and_checklist(summary_text)
-    return judge.run_judge(generator, transcript, brief_text)
+    brief_text, _ = split_brief_and_checklist(summary_text)
+    reply = llm_generate(
+        generator, JUDGE_SYSTEM_PROMPT,
+        f"Transcript:\n{transcript}\n\nSummary:\n{brief_text}",
+        max_new_tokens=300,
+    )
+    return _parse_judge_json(reply)
 
 
 def score_layer1(summary_text):
     # Story summaries have no checklist section, so the whole file is brief
     # text — same deterministic schema/Actions-prefix checks judge.py already
-    # runs for v1-v4, added here for "Structure & Format Control" parity
-    # across every scenario in the project, not just v1-v4.
+    # runs for every scenario, added here for "Structure & Format Control"
+    # parity across the whole project, not just the single-meeting scenarios.
     return {
-        "schema": judge.check_schema(summary_text),
-        "actions": judge.check_actions_prefix(summary_text),
+        "schema": check_schema(summary_text),
+        "actions": check_actions_prefix(summary_text),
     }
 
 
 def main():
-    generator = judge.build_judge_generator()
+    generator = build_generator()
 
     meetings_out = []
     # Built from each week's own actual context-aware summary, in order —
@@ -164,7 +175,7 @@ def main():
 
     results = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "model": judge.DEFAULT_MODEL,
+        "model": generator.model_name,
         "meetings": meetings_out,
     }
 

@@ -15,11 +15,11 @@ services:
       # made a container-only run "lose" all pre-Docker history: a named
       # volume starts empty and .dockerignore keeps these dirs out of the
       # build context, so there was nothing to seed it from.
-      - ./v1/output:/app/v1/output
-      - ./v2/output:/app/v2/output
-      - ./v3/output:/app/v3/output
-      - ./v4/output:/app/v4/output
-      - ./story/output:/app/story/output
+      - ./phase2-baseline/output:/app/phase2-baseline/output
+      - ./phase2-context/output:/app/phase2-context/output
+      - ./phase3-checklist/output:/app/phase3-checklist/output
+      - ./phase3-assistant/output:/app/phase3-assistant/output
+      - ./phase4-history/output:/app/phase4-history/output
       # Real (non-scripted) audio dropped via the Custom Audio page, and
       # its derived output.
       - ./custom/audio:/app/custom/audio

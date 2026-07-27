@@ -1,10 +1,11 @@
 """Shared summary-quality scoring, used by eval/judge.py (bulk offline scoring)
-and by vN/main.py's run_pipeline() (automatic per-run scoring for the
-webapp's Pipeline/Evaluation pages).
+and by each scenario's main.py's run_pipeline() (automatic per-run scoring for
+the webapp's Pipeline/Evaluation pages).
 
 Two layers:
   - Layer 1 (deterministic): Markdown schema compliance, Actions-bullet
-    prefix compliance, and checklist coverage precision/recall (v3/v4 only).
+    prefix compliance, and checklist coverage precision/recall
+    (phase3-checklist/phase3-assistant only).
   - Layer 2 (LLM-as-judge): faithfulness/completeness/conciseness, routed
     through llm_provider so the judge itself is local-or-Claude swappable.
 """
@@ -13,9 +14,10 @@ import re
 
 from llm_provider import build_generator, generate as llm_generate
 
-# Ground truth for the fixed dummy dialogue used by v1-v4 (see v3/README.md):
-# every checklist topic is actually discussed except budget/cost impact,
-# which is left out on purpose so the "Not covered" path is exercised.
+# Ground truth for the fixed dummy dialogue used by phase2-baseline through
+# phase3-assistant (see phase3-checklist/README.md): every checklist topic is
+# actually discussed except budget/cost impact, which is left out on purpose
+# so the "Not covered" path is exercised.
 CHECKLIST_GROUND_TRUTH = {
     "Onboarding flow status": True,
     "Payments integration status": True,
@@ -29,8 +31,8 @@ CHECKLIST_GROUND_TRUTH = {
 REQUIRED_HEADINGS = ["Topic", "Key Points", "Decisions", "Actions"]
 
 # Deliberately does NOT judge checklist coverage — that's the deterministic
-# layer-1 check below, kept separate because v3's README already found a
-# small model unreliable at that specific judgment.
+# layer-1 check below, kept separate because phase3-checklist's README already
+# found a small model unreliable at that specific judgment.
 JUDGE_SYSTEM_PROMPT = (
     "You are an evaluator grading a meeting summary against the transcript "
     "it was generated from. Score the summary on three dimensions, each on "

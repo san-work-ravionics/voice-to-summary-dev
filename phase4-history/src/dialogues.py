@@ -1,5 +1,6 @@
 # Five weekly status syncs for the same Mobile App Redesign project (same
-# premise as v1-v4), telling one continuous story instead of a single
+# premise as phase2-baseline/phase2-context/phase3-checklist/phase3-assistant),
+# telling one continuous story instead of a single
 # snapshot meeting. Each week's dialogue deliberately references earlier
 # weeks by name ("the sandbox issue from week one", "the extra engineer we
 # talked about last week") so that a summarizer without access to prior
@@ -15,7 +16,7 @@
 #   - Analytics: scoped (W1) -> chased again (W2) -> engineer requested (W3)
 #     -> wired up, validating (W4) -> validated (W5)
 #   - Budget / cost impact: never discussed on any call, called out explicitly
-#     in week 5 (mirrors the deliberate checklist gap in v1-v4)
+#     in week 5 (mirrors the deliberate checklist gap in phase3-checklist/phase3-assistant)
 #
 # Each meeting also opens with a few lines of clearly non-project small talk
 # (weather, a TV series, a game, coffee, pre-review nerves) — distinct

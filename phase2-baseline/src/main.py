@@ -58,7 +58,7 @@ def run_pipeline(regenerate=False, provider=None, judge_provider=None, on_stage=
         on_stage("judging")
         print("\nJudging...")
         evaluation = evaluate_variant(transcript, summary, provider=judge_provider)
-        append_run("v1", "baseline", provider, judge_provider, transcript, summary, evaluation)
+        append_run("phase2-baseline", "baseline", provider, judge_provider, transcript, summary, evaluation)
 
     on_stage("done")
 

@@ -1,4 +1,4 @@
-"""Shared summarization backend, shared by v1-v4, story/, and webapp/.
+"""Shared summarization backend, shared by every phaseN-*/, phase4-history/, and webapp/.
 
 Three providers:
   - "local":   Qwen2.5-1.5B-Instruct via transformers (small, fast).

@@ -1,4 +1,4 @@
-"""Shared name-anonymization logic, used by v1-v4 and story/ summarizers.
+"""Shared name-anonymization logic, used by every phaseN-*/ and phase4-history/ summarizer.
 
 Every recording uses real-sounding TTS voice names as speaker labels
 (e.g. "Sam", "Priya") that must never reach a transcript or summary as-is —

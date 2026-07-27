@@ -1,4 +1,4 @@
-# v1 — Baseline pipeline
+# phase2-baseline — Baseline pipeline (Phase 2)
 
 Part of the [voice-to-summary](../README.md) progression. This is the baseline: transcript in, structured summary out, no extra grounding.
 
@@ -13,7 +13,7 @@ A small end-to-end demo pipeline, entirely local (no API keys required):
 From the project root, after completing the shared [Setup](../README.md#setup):
 
 ```bash
-python v1/src/main.py
+python phase2-baseline/src/main.py
 ```
 
 This will create, on first run:
@@ -24,7 +24,7 @@ This will create, on first run:
 On later runs, the existing recording is reused. Pass `--regenerate` to create a fresh one:
 
 ```bash
-python v1/src/main.py --regenerate
+python phase2-baseline/src/main.py --regenerate
 ```
 
 ## Notes
@@ -33,4 +33,4 @@ python v1/src/main.py --regenerate
 - The dummy recording uses two distinct macOS system voices if available (e.g. Samantha and Fred), falling back to a single voice with varied speaking rate if only one is installed.
 - The transcript (`output/transcript.txt`) is a faithful, unredacted transcription. Only the summary (`output/summary.txt`) anonymizes speakers — names known from the dummy dialogue are redacted before and after the LLM call as a safety net, and the LLM is instructed to only ever refer to speakers as "Person A" / "Person B".
 - Each stage (`src/generate_dummy_audio.py`, `src/transcribe.py`, `src/summarize.py`) can also be run standalone for debugging.
-- See [v2](../v2/README.md) for what adding meeting context improves on top of this baseline.
+- See [phase2-context](../phase2-context/README.md) for what adding meeting context improves on top of this baseline.

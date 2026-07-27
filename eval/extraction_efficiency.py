@@ -18,23 +18,23 @@ COMMITMENT_PATTERN = re.compile(r"\bi'll\b|\bi will\b|\blet me\b(?!\s+(know|see)
 
 VERSION_SCENARIOS = [
     {
-        "id": "v1", "dialogue_module": "v1/src/generate_dummy_audio.py",
-        "variants": [{"key": "baseline", "summary": "v1/output/summary.txt"}],
+        "id": "phase2-baseline", "dialogue_module": "phase2-baseline/src/generate_dummy_audio.py",
+        "variants": [{"key": "baseline", "summary": "phase2-baseline/output/summary.txt"}],
     },
     {
-        "id": "v2", "dialogue_module": "v2/src/generate_dummy_audio.py",
+        "id": "phase2-context", "dialogue_module": "phase2-context/src/generate_dummy_audio.py",
         "variants": [
-            {"key": "baseline", "summary": "v2/output/summary_baseline.txt"},
-            {"key": "with_context", "summary": "v2/output/summary_with_context.txt"},
+            {"key": "baseline", "summary": "phase2-context/output/summary_baseline.txt"},
+            {"key": "with_context", "summary": "phase2-context/output/summary_with_context.txt"},
         ],
     },
     {
-        "id": "v3", "dialogue_module": "v3/src/generate_dummy_audio.py",
-        "variants": [{"key": "context_checklist", "summary": "v3/output/summary.txt"}],
+        "id": "phase3-checklist", "dialogue_module": "phase3-checklist/src/generate_dummy_audio.py",
+        "variants": [{"key": "context_checklist", "summary": "phase3-checklist/output/summary.txt"}],
     },
     {
-        "id": "v4", "dialogue_module": "v4/src/generate_dummy_audio.py",
-        "variants": [{"key": "context_checklist_assistant", "summary": "v4/output/summary.txt"}],
+        "id": "phase3-assistant", "dialogue_module": "phase3-assistant/src/generate_dummy_audio.py",
+        "variants": [{"key": "context_checklist_assistant", "summary": "phase3-assistant/output/summary.txt"}],
     },
 ]
 
@@ -175,18 +175,18 @@ def main():
             variants_out.append({"variant": variant["key"], **result})
         scenarios_out.append({"id": scenario["id"], "variants": variants_out})
 
-    dialogues_module = _load_module("story/src/dialogues.py", "_ee_story_dialogues")
+    dialogues_module = _load_module("phase4-history/src/dialogues.py", "_ee_story_dialogues")
     for week in STORY_WEEKS:
         meeting = next(m for m in dialogues_module.MEETINGS if m["week"] == week)
         ground_truth = ground_truth_commitments(meeting["dialogue"])
-        meeting_dir = os.path.join("story", "output", f"meeting-{week}")
+        meeting_dir = os.path.join("phase4-history", "output", f"meeting-{week}")
         variants_out = []
         for key, filename in (("baseline", "summary_baseline.txt"), ("with_context", "summary_with_context.txt")):
             summary_text = _read(os.path.join(meeting_dir, filename))
             bullets = extract_section(summary_text, "Actions")
             result = match_commitments(ground_truth, bullets)
             variants_out.append({"variant": key, **result})
-        scenarios_out.append({"id": f"story-week-{week}", "variants": variants_out})
+        scenarios_out.append({"id": f"phase4-history-week-{week}", "variants": variants_out})
 
     results = {
         "generated_at": datetime.now(timezone.utc).isoformat(),

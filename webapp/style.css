@@ -135,7 +135,7 @@ body {
 
 /* Technology summary (Scenarios landing page) */
 .tech-card {
-  border: 1px solid var(--border);
+  border: 1px solid var(--seq-500);
   background: var(--surface-1);
   border-radius: 12px;
   padding: 16px 18px;
@@ -176,7 +176,7 @@ body {
 
 .scenario-card {
   text-align: left;
-  border: 1px solid var(--border);
+  border: 1px solid var(--seq-500);
   background: var(--surface-1);
   border-radius: 12px;
   padding: 16px;
@@ -202,7 +202,7 @@ body {
 .detail-header p { margin: 0 0 20px; color: var(--text-secondary); font-size: 13px; }
 
 .variant-block {
-  border: 1px solid var(--border);
+  border: 1px solid var(--seq-500);
   border-radius: 12px;
   background: var(--surface-1);
   margin-bottom: 18px;
@@ -273,7 +273,7 @@ table.eval-table {
   width: 100%;
   font-size: 13px;
   background: var(--surface-1);
-  border: 1px solid var(--border);
+  border: 1px solid var(--seq-500);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -299,7 +299,7 @@ table.eval-table tr:last-child td { border-bottom: none; }
   margin-bottom: 24px;
 }
 .trend-card {
-  border: 1px solid var(--border);
+  border: 1px solid var(--seq-500);
   background: var(--surface-1);
   border-radius: 12px;
   padding: 14px 16px;
@@ -353,7 +353,7 @@ table.summary-table th:nth-child(9), table.summary-table td:nth-child(9) { width
 
 /* Audio / transcript blocks (scenario detail + custom audio) */
 .audio-block {
-  border: 1px solid var(--border);
+  border: 1px solid var(--seq-500);
   background: var(--surface-1);
   border-radius: 12px;
   padding: 14px 16px;
@@ -367,7 +367,7 @@ table.summary-table th:nth-child(9), table.summary-table td:nth-child(9) { width
 .audio-block .audio-link { font-size: 12.5px; margin-top: 6px; display: inline-block; }
 
 .transcript-block {
-  border: 1px solid var(--border);
+  border: 1px solid var(--seq-500);
   background: var(--surface-1);
   border-radius: 12px;
   margin-bottom: 18px;
@@ -390,7 +390,7 @@ table.summary-table th:nth-child(9), table.summary-table td:nth-child(9) { width
   padding: 24px; text-align: center; color: var(--text-muted); font-size: 13px;
 }
 .custom-item {
-  border: 1px solid var(--border);
+  border: 1px solid var(--seq-500);
   background: var(--surface-1);
   border-radius: 12px;
   padding: 16px;
@@ -426,7 +426,7 @@ table.summary-table th:nth-child(9), table.summary-table td:nth-child(9) { width
   margin-bottom: 24px;
 }
 .stat-tile {
-  border: 1px solid var(--border);
+  border: 1px solid var(--seq-500);
   background: var(--surface-1);
   border-radius: 12px;
   padding: 16px 18px;
@@ -444,7 +444,7 @@ table.summary-table th:nth-child(9), table.summary-table td:nth-child(9) { width
   gap: 16px;
 }
 .pipeline-panel {
-  border: 1px solid var(--border);
+  border: 1px solid var(--seq-500);
   background: var(--surface-1);
   border-radius: 12px;
   padding: 18px;
@@ -500,6 +500,30 @@ table.summary-table th:nth-child(9), table.summary-table td:nth-child(9) { width
   font-size: 12.5px; color: var(--text-secondary); cursor: pointer;
 }
 
+/* Roadmap page */
+.roadmap-foundation {
+  border: 1px solid var(--seq-500);
+  background: var(--surface-1);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 8px;
+}
+.roadmap-foundation-badge {
+  display: inline-block;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--seq-500);
+  background: var(--seq-100);
+  border-radius: 999px;
+  padding: 4px 10px;
+  margin-bottom: 10px;
+}
+.roadmap-connector {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 4px 0 24px;
+}
+
 /* Story page */
 .story-verdict {
   border-left: 3px solid var(--seq-500);
@@ -512,7 +536,7 @@ table.summary-table th:nth-child(9), table.summary-table td:nth-child(9) { width
 }
 
 .story-meeting {
-  border: 1px solid var(--border);
+  border: 1px solid var(--seq-500);
   background: var(--surface-1);
   border-radius: 14px;
   padding: 18px 20px;
@@ -537,7 +561,7 @@ table.summary-table th:nth-child(9), table.summary-table td:nth-child(9) { width
 }
 
 .compare-col {
-  border: 1px solid var(--gridline);
+  border: 1px solid var(--seq-500);
   border-radius: 10px;
   padding: 12px 14px;
 }
@@ -583,7 +607,7 @@ table.summary-table th:nth-child(9), table.summary-table td:nth-child(9) { width
 .score-num { font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--text-secondary); }
 
 .eval-card {
-  border: 1px solid var(--border);
+  border: 1px solid var(--seq-500);
   background: var(--surface-1);
   border-radius: 12px;
   padding: 16px;

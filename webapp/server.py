@@ -20,10 +20,11 @@ from run_history import read_history  # noqa: E402
 logger = get_logger("webapp")
 
 # New audio dropped in custom/audio/ is arbitrary, real content — it doesn't
-# belong to the scripted "Mobile App Redesign" dummy meeting, so v2's
-# MEETING_CONTEXT and v3/v4's CHECKLIST (both hardcoded to that scenario)
-# would not apply. Run v1's plain baseline pipeline instead.
-sys.path.insert(0, os.path.join(PROJECT_ROOT, "v1", "src"))
+# belong to the scripted "Mobile App Redesign" dummy meeting, so
+# phase2-context's MEETING_CONTEXT and phase3-checklist/phase3-assistant's
+# CHECKLIST (both hardcoded to that scenario) would not apply. Run
+# phase2-baseline's plain baseline pipeline instead.
+sys.path.insert(0, os.path.join(PROJECT_ROOT, "phase2-baseline", "src"))
 
 # filename -> "processing" | "done" | "error:<message>"
 JOBS = {}
@@ -31,48 +32,49 @@ JOBS = {}
 JOB_STAGE = {}
 JOBS_LOCK = threading.Lock()
 
-# --- Scenario pipelines (v1-v4, story): triggered + monitored from the
-# Pipeline page. Each is run as a subprocess of its own main.py — the same
-# script the README tells you to run by hand — rather than imported in
-# process, since v1-v4/story all define sibling modules with the same names
-# (summarize, transcribe, ...) and Python's module cache is keyed by name,
-# not by directory; importing more than one version into the same process
-# would silently alias them.
+# --- Scenario pipelines (phase2-baseline, phase2-context, phase3-checklist,
+# phase3-assistant, phase4-history): triggered + monitored from the Pipeline
+# page. Each is run as a subprocess of its own main.py — the same script the
+# README tells you to run by hand — rather than imported in process, since
+# all of them define sibling modules with the same names (summarize,
+# transcribe, ...) and Python's module cache is keyed by name, not by
+# directory; importing more than one into the same process would silently
+# alias them.
 SCENARIOS = {
-    "v1": {
-        "label": "v1 — Baseline pipeline",
-        "main_path": os.path.join(PROJECT_ROOT, "v1", "src", "main.py"),
+    "phase2-baseline": {
+        "label": "Phase 2 — Baseline summary",
+        "main_path": os.path.join(PROJECT_ROOT, "phase2-baseline", "src", "main.py"),
         "stages": ["recording", "transcribing", "summarizing", "judging", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "v1", "output", "summary.txt"),
+        "final_output": os.path.join(PROJECT_ROOT, "phase2-baseline", "output", "summary.txt"),
     },
-    "v2": {
-        "label": "v2 — Context-aware pipeline",
-        "main_path": os.path.join(PROJECT_ROOT, "v2", "src", "main.py"),
+    "phase2-context": {
+        "label": "Phase 2 — Context-aware summary",
+        "main_path": os.path.join(PROJECT_ROOT, "phase2-context", "src", "main.py"),
         "stages": ["recording", "transcribing", "summarizing_baseline", "judging_baseline",
                    "summarizing_context", "judging_context", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "v2", "output", "summary_with_context.txt"),
+        "final_output": os.path.join(PROJECT_ROOT, "phase2-context", "output", "summary_with_context.txt"),
     },
-    "v3": {
-        "label": "v3 — Checklist coverage pipeline",
-        "main_path": os.path.join(PROJECT_ROOT, "v3", "src", "main.py"),
+    "phase3-checklist": {
+        "label": "Phase 3 — Checklist coverage",
+        "main_path": os.path.join(PROJECT_ROOT, "phase3-checklist", "src", "main.py"),
         "stages": ["recording", "transcribing", "summarizing", "judging", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "v3", "output", "summary.txt"),
+        "final_output": os.path.join(PROJECT_ROOT, "phase3-checklist", "output", "summary.txt"),
     },
-    "v4": {
-        "label": "v4 — AI assistant in the room",
-        "main_path": os.path.join(PROJECT_ROOT, "v4", "src", "main.py"),
+    "phase3-assistant": {
+        "label": "Phase 3 — AI assistant in the room",
+        "main_path": os.path.join(PROJECT_ROOT, "phase3-assistant", "src", "main.py"),
         "stages": ["recording", "transcribing", "summarizing", "judging", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "v4", "output", "summary.txt"),
+        "final_output": os.path.join(PROJECT_ROOT, "phase3-assistant", "output", "summary.txt"),
     },
-    "story": {
-        "label": "story — 5-meeting arc",
-        "main_path": os.path.join(PROJECT_ROOT, "story", "src", "main.py"),
+    "phase4-history": {
+        "label": "Phase 4 — 5-meeting RAG history",
+        "main_path": os.path.join(PROJECT_ROOT, "phase4-history", "src", "main.py"),
         "stages": ["recording", "transcribing", "summarizing_baseline", "judging_baseline",
                    "summarizing_context", "judging_context", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "story", "output", "meeting-5", "summary_with_context.txt"),
+        "final_output": os.path.join(PROJECT_ROOT, "phase4-history", "output", "meeting-5", "summary_with_context.txt"),
     },
 }
-SCENARIO_ORDER = ["v1", "v2", "v3", "v4", "story"]
+SCENARIO_ORDER = ["phase2-baseline", "phase2-context", "phase3-checklist", "phase3-assistant", "phase4-history"]
 RUN_STATUS_DIR = os.path.join(PROJECT_ROOT, "webapp", ".run_status")
 
 # scenario id -> {"status": "running"|"done"|"error", "error": str|None,

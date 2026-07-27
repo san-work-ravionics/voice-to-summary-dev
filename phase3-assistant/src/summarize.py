@@ -44,8 +44,8 @@ BRIEF_SYSTEM_PROMPT = (
     "bullet saying so."
 )
 
-# Checklist coverage is deliberately NOT another LLM call — see v3's
-# summarize.py for why (a small local model was unreliable at judging
+# Checklist coverage is deliberately NOT another LLM call — see
+# phase3-checklist's summarize.py for why (a small local model was unreliable at judging
 # coverage across three different prompt framings). A plain keyword match
 # against the transcript, quoting the matched sentence as evidence, is
 # correct by construction for this known content.
@@ -56,7 +56,7 @@ def _split_sentences(text):
 # A sentence that names a topic while saying it WASN'T discussed (e.g. the
 # assistant recapping "budget wasn't discussed") must not itself count as
 # coverage — the keyword is present, but only inside a denial of coverage.
-# This matters more here than in v3: the assistant explicitly names any
+# This matters more here than in phase3-checklist: the assistant explicitly names any
 # missed checklist topic while explaining that it's missing.
 NEGATION_PHRASES = [
     "wasn't discussed", "was not discussed", "isn't discussed", "is not discussed",

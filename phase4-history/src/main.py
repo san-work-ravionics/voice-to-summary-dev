@@ -85,7 +85,7 @@ def run_pipeline(regenerate=False, provider=None, judge_provider=None, on_stage=
             on_stage("judging_baseline", detail)
             print("Judging (baseline)...")
             evaluation = evaluate_variant(transcript, baseline_summary, provider=judge_provider)
-            append_run("story", "baseline", provider, judge_provider, transcript, baseline_summary,
+            append_run("phase4-history", "baseline", provider, judge_provider, transcript, baseline_summary,
                        evaluation, meeting=week)
 
         on_stage("summarizing_context", detail)
@@ -98,7 +98,7 @@ def run_pipeline(regenerate=False, provider=None, judge_provider=None, on_stage=
             on_stage("judging_context", detail)
             print("Judging (with context)...")
             evaluation = evaluate_variant(transcript, context_summary, provider=judge_provider)
-            append_run("story", "with_context", provider, judge_provider, transcript, context_summary,
+            append_run("phase4-history", "with_context", provider, judge_provider, transcript, context_summary,
                        evaluation, meeting=week)
 
         history_entries.append(f"{meeting['label']}: " + extract_decisions_and_actions(context_summary))

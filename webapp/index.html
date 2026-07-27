@@ -13,7 +13,8 @@
   <aside id="sidebar" class="sidebar">
     <div class="brand">Voice to Summary</div>
     <nav class="side-nav">
-      <button class="nav-item" data-page="scenarios" aria-pressed="true">Scenarios</button>
+      <button class="nav-item" data-page="roadmap" aria-pressed="true">Roadmap</button>
+      <button class="nav-item" data-page="scenarios" aria-pressed="false">Scenarios</button>
       <button class="nav-item" data-page="story" aria-pressed="false">Story</button>
       <button class="nav-item" data-page="custom" aria-pressed="false">Custom Audio</button>
       <button class="nav-item" data-page="pipeline" aria-pressed="false">Pipeline</button>
@@ -22,7 +23,11 @@
   </aside>
 
   <main class="app-main">
-    <section id="scenarios-page" class="page">
+    <section id="roadmap-page" class="page">
+      <div id="roadmap-root"></div>
+    </section>
+
+    <section id="scenarios-page" class="page hidden">
       <div id="scenario-list">
         <div id="tech-summary"></div>
         <div id="eval-summary"></div>

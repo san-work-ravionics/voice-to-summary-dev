@@ -15,40 +15,40 @@ RESULTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output"
 
 SCENARIOS = [
     {
-        "id": "v1",
-        "label": "v1 — Baseline pipeline",
-        "transcript": "v1/output/transcript.txt",
+        "id": "phase2-baseline",
+        "label": "Phase 2 — Baseline summary",
+        "transcript": "phase2-baseline/output/transcript.txt",
         "has_checklist": False,
         "variants": [
-            {"variant": "baseline", "summary_path": "v1/output/summary.txt"},
+            {"variant": "baseline", "summary_path": "phase2-baseline/output/summary.txt"},
         ],
     },
     {
-        "id": "v2",
-        "label": "v2 — Context-aware summarization",
-        "transcript": "v2/output/transcript.txt",
+        "id": "phase2-context",
+        "label": "Phase 2 — Context-aware summarization",
+        "transcript": "phase2-context/output/transcript.txt",
         "has_checklist": False,
         "variants": [
-            {"variant": "baseline", "summary_path": "v2/output/summary_baseline.txt"},
-            {"variant": "with_context", "summary_path": "v2/output/summary_with_context.txt"},
+            {"variant": "baseline", "summary_path": "phase2-context/output/summary_baseline.txt"},
+            {"variant": "with_context", "summary_path": "phase2-context/output/summary_with_context.txt"},
         ],
     },
     {
-        "id": "v3",
-        "label": "v3 — Checklist coverage check",
-        "transcript": "v3/output/transcript.txt",
+        "id": "phase3-checklist",
+        "label": "Phase 3 — Checklist coverage check",
+        "transcript": "phase3-checklist/output/transcript.txt",
         "has_checklist": True,
         "variants": [
-            {"variant": "context_checklist", "summary_path": "v3/output/summary.txt"},
+            {"variant": "context_checklist", "summary_path": "phase3-checklist/output/summary.txt"},
         ],
     },
     {
-        "id": "v4",
-        "label": "v4 — AI Assistant as third actor",
-        "transcript": "v4/output/transcript.txt",
+        "id": "phase3-assistant",
+        "label": "Phase 3 — AI Assistant as third actor",
+        "transcript": "phase3-assistant/output/transcript.txt",
         "has_checklist": True,
         "variants": [
-            {"variant": "context_checklist_assistant", "summary_path": "v4/output/summary.txt"},
+            {"variant": "context_checklist_assistant", "summary_path": "phase3-assistant/output/summary.txt"},
         ],
     },
 ]

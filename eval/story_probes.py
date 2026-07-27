@@ -4,16 +4,22 @@ import re
 import sys
 from datetime import datetime, timezone
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import judge  # reuse build_judge_generator, _parse_judge_json
-
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STORY_OUTPUT_DIR = os.path.join(PROJECT_ROOT, "story", "output")
+sys.path.insert(0, PROJECT_ROOT)
+
+# judge.py used to expose build_judge_generator/_parse_judge_json directly;
+# it was refactored to delegate to eval_scoring.py. Probes reuse one
+# generator across every week/probe to avoid reloading the local model
+# repeatedly, so this calls llm_provider/eval_scoring directly.
+from llm_provider import build_generator, generate as llm_generate  # noqa: E402
+from eval_scoring import _parse_judge_json  # noqa: E402
+
+STORY_OUTPUT_DIR = os.path.join(PROJECT_ROOT, "phase4-history", "output")
 RESULTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", "story_probes.json")
 
 WEEKS = [1, 2, 3, 4, 5]
 
-# Distinct per-week small-talk words (see story/src/dialogues.py) that never
+# Distinct per-week small-talk words (see phase4-history/src/dialogues.py) that never
 # appear in the real project content — a plain substring check is exact here,
 # unlike the holistic 1-5 rubric that couldn't reliably tell variants apart.
 NOISE_KEYWORDS = [
@@ -192,16 +198,12 @@ def check_noise_leakage(summary_text):
 
 
 def run_probe(generator, transcript, summary_text, question):
-    messages = [
-        {"role": "system", "content": PROBE_JUDGE_PROMPT},
-        {"role": "user", "content": (
-            f"Transcript:\n{transcript}\n\nSummary:\n{summary_text}\n\n"
-            f"Question: {question}"
-        )},
-    ]
-    output = generator(messages, max_new_tokens=150, do_sample=False)
-    reply = output[0]["generated_text"][-1]["content"].strip()
-    return judge._parse_judge_json(reply)
+    reply = llm_generate(
+        generator, PROBE_JUDGE_PROMPT,
+        f"Transcript:\n{transcript}\n\nSummary:\n{summary_text}\n\nQuestion: {question}",
+        max_new_tokens=150,
+    )
+    return _parse_judge_json(reply)
 
 
 def _answer_is_yes(parsed):
@@ -209,10 +211,10 @@ def _answer_is_yes(parsed):
 
 
 def main():
-    generator = judge.build_judge_generator()
+    generator = build_generator()
 
     weeks_out = []
-    history_entries = []  # built the same way story/src/main.py does, week by week
+    history_entries = []  # built the same way phase4-history/src/main.py does, week by week
 
     for week in WEEKS:
         meeting_dir = _meeting_dir(week)
@@ -270,7 +272,7 @@ def main():
 
     results = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "model": judge.DEFAULT_MODEL,
+        "model": generator.model_name,
         "noise_keywords": NOISE_KEYWORDS,
         "weeks": weeks_out,
     }

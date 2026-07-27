@@ -24,13 +24,15 @@ Given a meeting recording, the system:
 
 The project was developed as four progressively richer capability stages, each one demonstrating a specific improvement in isolation, plus a fifth stage that tests the same "context helps" idea across a series of meetings instead of one:
 
-| Stage | Capability added | Business value |
-|---|---|---|
-| 1 | Baseline: recording → transcript → structured summary | Establishes the core automation |
-| 2 | Meeting context injected into the summarizer | More accurate, specific summaries |
-| 3 | Checklist-based coverage check | Confidence that nothing important was missed |
-| 4 | An AI assistant present in the meeting itself | A live note-taker that recaps, checks coverage, and closes the meeting with a spoken summary |
-| 5 | A 5-meeting story with a running history carried forward | Tests whether context helps across time, not just within one meeting — with a real, evidenced answer: yes and no (see below) |
+| Stage | Scenario | Capability added | Business value |
+|---|---|---|---|
+| 1 | `phase2-baseline` | Baseline: recording → transcript → structured summary | Establishes the core automation |
+| 2 | `phase2-context` | Meeting context injected into the summarizer | More accurate, specific summaries |
+| 3 | `phase3-checklist` | Checklist-based coverage check | Confidence that nothing important was missed |
+| 4 | `phase3-assistant` | An AI assistant present in the meeting itself | A live note-taker that recaps, checks coverage, and closes the meeting with a spoken summary |
+| 5 | `phase4-history` | A 5-meeting story with a running history carried forward | Tests whether context helps across time, not just within one meeting — with a real, evidenced answer: yes and no (see below) |
+
+See [ROADMAP.md](ROADMAP.md) for how these five stages map onto the product roadmap's Phases 1-4.
 
 Each stage was tested end-to-end and its output verified for accuracy before moving to the next — including a deliberate check that the checklist correctly reports both what *was* and *wasn't* discussed, not just a generic "all good."
 
@@ -47,7 +49,7 @@ An evaluation suite (`eval/`) scores every stage on:
 Two honest, evidenced findings came out of building this measurement layer, worth knowing before trusting any single number from it:
 
 1. **A small local model is an unreliable judge of its own nuanced output.** Wherever this project used the same small local LLM to grade something subjective (faithfulness scores, checklist coverage by LLM, cross-meeting continuity, yes/no fact probes), that judge was caught giving a wrong answer on manual spot-checking — including on cases it was specifically built to catch. Deterministic checks (keyword matching, word-overlap, Word Error Rate) were used wherever possible instead, and are the more trustworthy numbers in every report this project produces.
-2. **Giving the summarizer more context is not an unconditional improvement.** Across the 5-meeting story, a summarizer with a running history correctly avoided a factual mix-up that an isolated summarizer made in one week — but in a later week, that same running history caused it to present an already-finished task as if still pending. Context measurably helps in some cases and measurably hurts in others; the honest answer is "it depends," not "context is always better." See [`story/README.md`](story/README.md) for the specific evidence.
+2. **Giving the summarizer more context is not an unconditional improvement.** Across the 5-meeting story, a summarizer with a running history correctly avoided a factual mix-up that an isolated summarizer made in one week — but in a later week, that same running history caused it to present an already-finished task as if still pending. Context measurably helps in some cases and measurably hurts in others; the honest answer is "it depends," not "context is always better." See [`phase4-history/README.md`](phase4-history/README.md) for the specific evidence.
 
 ## Use cases
 
@@ -69,4 +71,4 @@ Two honest, evidenced findings came out of building this measurement layer, wort
 - **Web UI (`webapp/`):** framework-free HTML/CSS/JS, served by a stdlib-only Python `http.server` subclass — no new runtime dependency
 - **Dependencies:** `torch`, `accelerate`, `transformers`, `openai-whisper`, `pydub`, `pyttsx3` — versions pinned in `requirements.txt`
 - **Infrastructure:** runs entirely offline/on-device after initial one-time model downloads (~3GB total); no external API keys or network calls required at runtime
-- **Containerized deployment:** `Dockerfile` + `docker-compose.yml` at the project root — `docker compose up --build` runs the same webapp and pipelines in a container (CPU-only, since Docker Desktop doesn't pass GPU/MPS through to Linux containers). Per-scenario output, custom audio, evaluation history, and logs are bind-mounted from the project directory, so the container and a local `python vN/src/main.py` run share one history instead of two disconnected copies; only the downloaded models sit in a separate named Docker volume, since that's pure binary cache. A `/healthz` endpoint supports container health checks.
+- **Containerized deployment:** `Dockerfile` + `docker-compose.yml` at the project root — `docker compose up --build` runs the same webapp and pipelines in a container (CPU-only, since Docker Desktop doesn't pass GPU/MPS through to Linux containers). Per-scenario output, custom audio, evaluation history, and logs are bind-mounted from the project directory, so the container and a local `python <scenario>/src/main.py` run share one history instead of two disconnected copies; only the downloaded models sit in a separate named Docker volume, since that's pure binary cache. A `/healthz` endpoint supports container health checks.

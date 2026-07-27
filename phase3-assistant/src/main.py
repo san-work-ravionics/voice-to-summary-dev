@@ -42,7 +42,7 @@ def run_pipeline(regenerate=False, provider=None, judge_provider=None, on_stage=
     print(transcript)
 
     on_stage("summarizing")
-    print("\nSummarizing (context + checklist)...")
+    print("\nSummarizing (context + checklist, 3-actor transcript)...")
     summary = summarize(transcript, provider=provider)
     with open(SUMMARY_PATH, "w") as f:
         f.write(summary)
@@ -53,13 +53,13 @@ def run_pipeline(regenerate=False, provider=None, judge_provider=None, on_stage=
         on_stage("judging")
         print("\nJudging...")
         evaluation = evaluate_variant(transcript, summary, provider=judge_provider)
-        append_run("v3", "context_checklist", provider, judge_provider, transcript, summary, evaluation)
+        append_run("phase3-assistant", "context_checklist_assistant", provider, judge_provider, transcript, summary, evaluation)
 
     on_stage("done")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Voice -> transcript -> checklist-aware summary demo pipeline")
+    parser = argparse.ArgumentParser(description="Voice (3-actor, incl. AI assistant) -> transcript -> checklist-aware summary demo pipeline")
     parser.add_argument(
         "--regenerate", action="store_true",
         help="Regenerate the dummy recording even if one already exists",

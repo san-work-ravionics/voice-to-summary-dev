@@ -1,43 +1,43 @@
 const SCENARIOS = [
   {
-    id: "v1",
-    title: "v1 — Baseline pipeline",
+    id: "phase2-baseline",
+    title: "Phase 2 — Baseline summary",
     description: "Transcript in, structured summary out. No extra grounding.",
-    audio: "/v1/output/recording.wav",
-    transcript: "/v1/output/transcript.txt",
+    audio: "/phase2-baseline/output/recording.wav",
+    transcript: "/phase2-baseline/output/transcript.txt",
     variants: [
-      { key: "baseline", label: "Summary", path: "/v1/output/summary.txt" },
+      { key: "baseline", label: "Summary", path: "/phase2-baseline/output/summary.txt" },
     ],
   },
   {
-    id: "v2",
-    title: "v2 — Context-aware summarization",
+    id: "phase2-context",
+    title: "Phase 2 — Context-aware summarization",
     description: "Meeting context injected into the prompt before the transcript — baseline and context-aware summaries side by side.",
-    audio: "/v2/output/recording.wav",
-    transcript: "/v2/output/transcript.txt",
+    audio: "/phase2-context/output/recording.wav",
+    transcript: "/phase2-context/output/transcript.txt",
     variants: [
-      { key: "baseline", label: "Baseline (no context)", path: "/v2/output/summary_baseline.txt" },
-      { key: "with_context", label: "With context", path: "/v2/output/summary_with_context.txt" },
+      { key: "baseline", label: "Baseline (no context)", path: "/phase2-context/output/summary_baseline.txt" },
+      { key: "with_context", label: "With context", path: "/phase2-context/output/summary_with_context.txt" },
     ],
   },
   {
-    id: "v3",
-    title: "v3 — Checklist coverage check",
-    description: "Same context-aware summarizer as v2, plus a deterministic checklist coverage section.",
-    audio: "/v3/output/recording.wav",
-    transcript: "/v3/output/transcript.txt",
+    id: "phase3-checklist",
+    title: "Phase 3 — Checklist coverage check",
+    description: "Same context-aware summarizer as Phase 2, plus a deterministic checklist coverage section.",
+    audio: "/phase3-checklist/output/recording.wav",
+    transcript: "/phase3-checklist/output/transcript.txt",
     variants: [
-      { key: "context_checklist", label: "Summary + Checklist", path: "/v3/output/summary.txt" },
+      { key: "context_checklist", label: "Summary + Checklist", path: "/phase3-checklist/output/summary.txt" },
     ],
   },
   {
-    id: "v4",
-    title: "v4 — AI Assistant as third actor",
+    id: "phase3-assistant",
+    title: "Phase 3 — AI Assistant as third actor",
     description: "A third voice (AI Assistant) joins the recording itself and takes notes live.",
-    audio: "/v4/output/recording.wav",
-    transcript: "/v4/output/transcript.txt",
+    audio: "/phase3-assistant/output/recording.wav",
+    transcript: "/phase3-assistant/output/transcript.txt",
     variants: [
-      { key: "context_checklist_assistant", label: "Summary + Checklist", path: "/v4/output/summary.txt" },
+      { key: "context_checklist_assistant", label: "Summary + Checklist", path: "/phase3-assistant/output/summary.txt" },
     ],
   },
 ];
@@ -45,10 +45,10 @@ const SCENARIOS = [
 const STORY_MEETINGS = [1, 2, 3, 4, 5].map((week) => ({
   week,
   label: `Week ${week}`,
-  audio: `/story/output/meeting-${week}/recording.wav`,
-  transcript: `/story/output/meeting-${week}/transcript.txt`,
-  baseline: `/story/output/meeting-${week}/summary_baseline.txt`,
-  context: `/story/output/meeting-${week}/summary_with_context.txt`,
+  audio: `/phase4-history/output/meeting-${week}/recording.wav`,
+  transcript: `/phase4-history/output/meeting-${week}/transcript.txt`,
+  baseline: `/phase4-history/output/meeting-${week}/summary_baseline.txt`,
+  context: `/phase4-history/output/meeting-${week}/summary_with_context.txt`,
 }));
 
 // Findings from reading the actual generated text, not something the
@@ -243,7 +243,7 @@ async function renderEvalSummaryTable() {
   }
 
   // scenario_id -> provider -> variantKey -> latest record for that exact
-  // triple. variantKey folds in the meeting number for story/ (each of its
+  // triple. variantKey folds in the meeting number for phase4-history/ (each of its
   // 5 meetings has its own "baseline"/"with_context" pair) so aggregating
   // "all of this provider's records for this scenario" below correctly
   // covers all 5 meetings instead of just whichever was judged last.
@@ -324,8 +324,8 @@ async function renderEvalSummaryTable() {
   }
 
   function scenarioWer(id) {
-    if (id !== "story") return werById[id] !== undefined ? labelForWer(werById[id]) : { label: "—", cls: "neutral" };
-    const storyWerValues = [1, 2, 3, 4, 5].map((w) => werById[`story-week-${w}`]).filter((v) => v !== undefined);
+    if (id !== "phase4-history") return werById[id] !== undefined ? labelForWer(werById[id]) : { label: "—", cls: "neutral" };
+    const storyWerValues = [1, 2, 3, 4, 5].map((w) => werById[`phase4-history-week-${w}`]).filter((v) => v !== undefined);
     return storyWerValues.length
       ? labelForWer(storyWerValues.reduce((a, b) => a + b, 0) / storyWerValues.length)
       : { label: "—", cls: "neutral" };
@@ -352,8 +352,8 @@ async function renderEvalSummaryTable() {
     }
     // No judged runs at all for this scenario — one fallback row from the
     // bulk eval/judge.py snapshot (results.json) + the file's mtime.
-    const scenario = id === "story" ? null : (results ? results.scenarios.find((s) => s.id === id) : null);
-    const scenarioResults = id === "story" ? storyResults : null;
+    const scenario = id === "phase4-history" ? null : (results ? results.scenarios.find((s) => s.id === id) : null);
+    const scenarioResults = id === "phase4-history" ? storyResults : null;
     let records = [];
     if (scenario) records = scenario.variants;
     else if (scenarioResults) records = scenarioResults.meetings.flatMap((m) => [m.baseline, m.with_context]);
@@ -368,11 +368,11 @@ async function renderEvalSummaryTable() {
   }
 
   const rows = [
-    ...scenarioRows("v1", "v1 — Baseline", "—"),
-    ...scenarioRows("v2", "v2 — Context-aware", "Mixed — sharper wording, but captured fewer real action items than the plain version in this test."),
-    ...scenarioRows("v3", "v3 — Checklist coverage", "—"),
-    ...scenarioRows("v4", "v4 — AI Assistant", "—"),
-    ...scenarioRows("story", "Story (5 meetings)", "Mixed — correctly kept two topics separate in one week that the plain version confused, but repeated an earlier week's finished tasks as if still pending in another. See the Story page for details."),
+    ...scenarioRows("phase2-baseline", "Phase 2 — Baseline", "—"),
+    ...scenarioRows("phase2-context", "Phase 2 — Context-aware", "Mixed — sharper wording, but captured fewer real action items than the plain version in this test."),
+    ...scenarioRows("phase3-checklist", "Phase 3 — Checklist coverage", "—"),
+    ...scenarioRows("phase3-assistant", "Phase 3 — AI Assistant", "—"),
+    ...scenarioRows("phase4-history", "Phase 4 (5 meetings)", "Mixed — correctly kept two topics separate in one week that the plain version confused, but repeated an earlier week's finished tasks as if still pending in another. See the Story page for details."),
   ];
 
   root.innerHTML = `
@@ -974,7 +974,7 @@ async function renderCustomItemOutputs(container, file) {
 
 function renderCustomAudioList(data) {
   const root = document.getElementById("custom-root");
-  root.innerHTML = `<p class="custom-intro">Files dropped into <code>custom/audio/</code> show up here automatically. Click "Run pipeline" to transcribe and summarize a new one (runs the plain v1 baseline pipeline — no scripted meeting context/checklist applies to real audio).</p>`;
+  root.innerHTML = `<p class="custom-intro">Files dropped into <code>custom/audio/</code> show up here automatically. Click "Run pipeline" to transcribe and summarize a new one (runs the plain Phase 2 baseline pipeline — no scripted meeting context/checklist applies to real audio).</p>`;
 
   if (!data.files.length) {
     root.innerHTML += `<div class="custom-empty">No audio files found yet. Copy a .wav/.mp3/.m4a/.ogg/.flac file into <code>custom/audio/</code> and it'll appear here within a few seconds.</div>`;
@@ -1063,11 +1063,11 @@ function stopCustomPagePolling() {
 
 // ---------- Pipeline page ----------
 const PIPELINE_META = {
-  v1: { desc: "Transcript in, structured summary out. No extra grounding." },
-  v2: { desc: "Meeting context injected into the prompt — baseline and context-aware summaries side by side." },
-  v3: { desc: "Context-aware summarizer plus a deterministic checklist coverage section." },
-  v4: { desc: "A third voice (AI Assistant) joins the recording and takes notes live." },
-  story: { desc: "5 weekly meetings — a summarizer with no memory of prior weeks vs. one given a running history." },
+  "phase2-baseline": { desc: "Transcript in, structured summary out. No extra grounding." },
+  "phase2-context": { desc: "Meeting context injected into the prompt — baseline and context-aware summaries side by side." },
+  "phase3-checklist": { desc: "Context-aware summarizer plus a deterministic checklist coverage section." },
+  "phase3-assistant": { desc: "A third voice (AI Assistant) joins the recording and takes notes live." },
+  "phase4-history": { desc: "5 weekly meetings — a summarizer with no memory of prior weeks vs. one given a running history." },
 };
 
 const PIPELINE_STAGE_LABELS = {
@@ -1467,7 +1467,7 @@ async function renderStoryPage() {
     }
 
     let html = `
-      <p class="custom-intro">Five weekly status syncs about the same Mobile App Redesign project, told as one continuous story instead of a single snapshot (see <a href="/story/README.md">story/README.md</a>). Each meeting is summarized two ways: <strong>Baseline</strong> (transcript only, no memory of prior weeks) and <strong>With Context + History</strong> (project background plus a running history built from every prior week's own generated summary). Each meeting also opens with a few lines of unrelated small talk (weather, a show, a game, coffee, traffic) to test whether it leaks into the summary.</p>
+      <p class="custom-intro">Five weekly status syncs about the same Mobile App Redesign project, told as one continuous story instead of a single snapshot (see <a href="/phase4-history/README.md">phase4-history/README.md</a>). Each meeting is summarized two ways: <strong>Baseline</strong> (transcript only, no memory of prior weeks) and <strong>With Context + History</strong> (project background plus a running history built from every prior week's own generated summary). Each meeting also opens with a few lines of unrelated small talk (weather, a show, a game, coffee, traffic) to test whether it leaks into the summary.</p>
       <div class="story-verdict">
         <strong>Verdict:</strong> the holistic 1-5 judge scores are nearly identical between baseline and context-aware across all 5 meetings — on numbers alone, context looks like it made no difference. Targeted checks tell a clearer story: a <strong>deterministic</strong> check (not an LLM judgment) shows baseline conflates the Week 3 dark-mode and legal/privacy workstreams into one, while context-aware keeps them correctly separate — and the same deterministic check shows context-aware's Week 5 summary repeating Week 4's already-completed actions as if still pending, while baseline (with no history to leak) does not. Two of the original LLM-judge probes were swapped for these deterministic checks after the judge itself got both wrong on manual verification — see the human review notes and per-meeting "Targeted checks" below.
       </div>
@@ -1502,8 +1502,248 @@ async function renderStoryPage() {
       });
     });
   } catch (err) {
-    root.innerHTML = `<p>Could not load story data (${escapeHtml(err.message)}). Run <code>python story/src/main.py</code> from the project root first.</p>`;
+    root.innerHTML = `<p>Could not load story data (${escapeHtml(err.message)}). Run <code>python phase4-history/src/main.py</code> from the project root first.</p>`;
   }
+}
+
+// ---------- Roadmap page ----------
+function avg(nums) {
+  const vals = nums.filter((n) => n !== null && n !== undefined && !Number.isNaN(n));
+  return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+}
+
+function fmtScore(n) {
+  return n === null || n === undefined ? "—" : `${n.toFixed(1)}/5`;
+}
+
+function findVariant(results, scenarioId, variantName) {
+  if (!results) return null;
+  const scenario = results.scenarios.find((s) => s.id === scenarioId);
+  if (!scenario) return null;
+  return scenario.variants.find((v) => v.variant === variantName) || null;
+}
+
+function gapPill(label) {
+  return `<span class="status-pill"><span class="status-dot critical"></span>${escapeHtml(label)}</span>`;
+}
+
+function renderPhase1(transcriptionData) {
+  let html = `
+    <div class="roadmap-foundation">
+      <div class="roadmap-foundation-badge">Foundation — feeds into every phase below</div>
+      <h3 class="eval-section-header" style="margin-top:0;padding-top:0;border-top:none;">Phase 1 — Core Voice-to-Transcript</h3>
+      <p class="eval-note"><strong>Goal:</strong> convert raw spoken audio into a clean transcript, fast. <strong>Built by:</strong> the shared Whisper step (<code>transcription.py</code>), identical across every scenario folder — every phase below summarizes whatever transcript this step produced, so its accuracy is a ceiling on all of them, not just another parallel metric.</p>
+  `;
+  if (transcriptionData) {
+    const avgWer = (tier) => avg(transcriptionData.scenarios.map((s) => s.tiers[tier]?.wer));
+    html += `
+      <div class="stat-row">
+        <div class="stat-tile"><div class="stat-value">${fmtPct(avgWer("clean"))}</div><div class="stat-label">Avg clean WER</div></div>
+        <div class="stat-tile"><div class="stat-value">${fmtPct(avgWer("light_noise"))}</div><div class="stat-label">Avg light-noise WER</div></div>
+        <div class="stat-tile"><div class="stat-value">${fmtPct(avgWer("heavy_noise"))}</div><div class="stat-label">Avg heavy-noise WER</div></div>
+      </div>
+    `;
+    html += `<h4 class="eval-subsection-header">Per-recording detail</h4>`;
+    html += `
+      <div class="eval-table-wrap">
+        <table class="eval-table">
+          <thead><tr><th>Scenario</th><th>Clean WER</th><th>Light noise WER</th><th>Heavy noise WER</th></tr></thead>
+          <tbody>
+    `;
+    for (const s of transcriptionData.scenarios) {
+      html += `
+        <tr>
+          <td>${escapeHtml(s.id)}</td>
+          <td>${werCell(s.tiers.clean)}</td>
+          <td>${werCell(s.tiers.light_noise)}</td>
+          <td>${werCell(s.tiers.heavy_noise)}</td>
+        </tr>
+      `;
+    }
+    html += `</tbody></table></div>`;
+  } else {
+    html += `<p class="eval-note">Could not load WER data. Run <code>python eval/transcription_quality.py</code>.</p>`;
+  }
+  html += `<p class="eval-note">Real-Time Factor: ${gapPill("not measured — no timing instrumentation around the Whisper call yet")}</p>`;
+  html += `</div>`;
+  return html;
+}
+
+function renderPhase2(results) {
+  let html = `
+    <h3 class="eval-section-header">Phase 2 — Transcript Summary</h3>
+    <p class="eval-note"><strong>Goal:</strong> a meaningful paragraph + bullet summary. <strong>Built by:</strong> phase2-baseline <code>summarize_baseline</code> (zero-shot) vs phase2-context <code>summarize_with_context</code> (meeting background injected into the prompt).</p>
+  `;
+  const rows = [
+    { label: "phase2-baseline — baseline (zero-shot)", variant: findVariant(results, "phase2-baseline", "baseline") },
+    { label: "phase2-context — baseline (no context)", variant: findVariant(results, "phase2-context", "baseline") },
+    { label: "phase2-context — with context", variant: findVariant(results, "phase2-context", "with_context") },
+  ];
+  if (results) {
+    html += `
+      <div class="eval-table-wrap">
+        <table class="eval-table">
+          <thead><tr><th>Variant</th><th>Factuality (faithfulness)</th><th>Key Point coverage (completeness, proxy)</th><th>Conciseness</th><th>Unsupported claims</th></tr></thead>
+          <tbody>
+    `;
+    for (const row of rows) {
+      const v = row.variant;
+      html += `
+        <tr>
+          <td>${escapeHtml(row.label)}</td>
+          <td>${v ? scoreCell(v.layer2.faithfulness) : "—"}</td>
+          <td>${v ? scoreCell(v.layer2.completeness) : "—"}</td>
+          <td>${v ? scoreCell(v.layer2.conciseness) : "—"}</td>
+          <td>${v ? (v.layer2.unsupported_claims || []).length : "—"}</td>
+        </tr>
+      `;
+    }
+    html += `</tbody></table></div>`;
+    html += `<p class="eval-note">Judge model: ${escapeHtml(results.model)} — no separate ground-truth key-point list exists, so "Key Point Recall" is approximated by the judge's completeness score, not a literal fraction.</p>`;
+  } else {
+    html += `<p class="eval-note">Could not load judge results. Run <code>python eval/judge.py</code>.</p>`;
+  }
+  return html;
+}
+
+function renderPhase3(results, extraction) {
+  let html = `
+    <h3 class="eval-section-header">Phase 3 — Actionable Checklists &amp; Task Extraction</h3>
+    <p class="eval-note"><strong>Goal:</strong> structured, schema-conformant capture of tasks/data. <strong>Built by:</strong> phase3-checklist/phase3-assistant's deterministic <code>## Checklist Coverage</code> section and the Actions-bullet schema enforced since phase2-baseline.</p>
+  `;
+
+  html += `<h4 class="eval-subsection-header">Checklist field mapping (phase3-checklist, phase3-assistant)</h4>`;
+  if (results) {
+    html += `
+      <div class="eval-table-wrap">
+        <table class="eval-table">
+          <thead><tr><th>Scenario</th><th>Precision</th><th>Recall</th><th>Accuracy</th></tr></thead>
+          <tbody>
+    `;
+    for (const id of ["phase3-checklist", "phase3-assistant"]) {
+      const variant = results.scenarios.find((s) => s.id === id)?.variants[0];
+      const cl = variant?.checklist;
+      html += `
+        <tr>
+          <td>${id}</td>
+          <td>${cl ? fmtPct(cl.precision) : "—"}</td>
+          <td>${cl ? fmtPct(cl.recall) : "—"}</td>
+          <td>${cl ? fmtPct(cl.accuracy) : "—"}</td>
+        </tr>
+      `;
+    }
+    html += `</tbody></table></div>`;
+  } else {
+    html += `<p class="eval-note">Could not load checklist scores. Run <code>python eval/judge.py</code>.</p>`;
+  }
+
+  html += `<h4 class="eval-subsection-header">Action-item extraction (all scenarios)</h4>`;
+  if (extraction) {
+    html += `
+      <div class="eval-table-wrap">
+        <table class="eval-table">
+          <thead><tr><th>Scenario</th><th>Variant</th><th>Recall</th><th>Precision</th></tr></thead>
+          <tbody>
+    `;
+    for (const s of extraction.scenarios) {
+      for (const v of s.variants) {
+        html += `
+          <tr>
+            <td>${escapeHtml(s.id)}</td>
+            <td>${escapeHtml(v.variant)}</td>
+            <td>${fmtPct(v.recall)}</td>
+            <td>${fmtPct(v.precision)}</td>
+          </tr>
+        `;
+      }
+    }
+    html += `</tbody></table></div>`;
+  } else {
+    html += `<p class="eval-note">Could not load extraction efficiency. Run <code>python eval/extraction_efficiency.py</code>.</p>`;
+  }
+  return html;
+}
+
+function renderPhase4(storyResults, storyProbes) {
+  let html = `
+    <h3 class="eval-section-header">Phase 4 — Contextual &amp; Domain-Specific Summaries</h3>
+    <p class="eval-note"><strong>Goal:</strong> meeting-history-aware summaries (RAG over past notes). <strong>Built by:</strong> <code>phase4-history/</code> — 5 weekly syncs, comparing a summarizer with no memory of prior meetings against one given a running history built from each prior week's own summary.</p>
+  `;
+
+  if (storyResults) {
+    const baselineFaithfulness = avg(storyResults.meetings.map((m) => m.baseline.layer2.faithfulness));
+    const contextFaithfulness = avg(storyResults.meetings.map((m) => m.with_context.layer2.faithfulness));
+    const baselineContinuity = avg(storyResults.meetings.map((m) => m.baseline.continuity?.continuity));
+    const contextContinuity = avg(storyResults.meetings.map((m) => m.with_context.continuity?.continuity));
+
+    html += `
+      <div class="eval-table-wrap">
+        <table class="eval-table">
+          <thead><tr><th>Variant</th><th>Avg faithfulness (RAG faithfulness, proxy)</th><th>Avg continuity (across weeks 2-5)</th></tr></thead>
+          <tbody>
+            <tr><td>Baseline (no history)</td><td>${fmtScore(baselineFaithfulness)}</td><td>${fmtScore(baselineContinuity)}</td></tr>
+            <tr><td>With context + history</td><td>${fmtScore(contextFaithfulness)}</td><td>${fmtScore(contextContinuity)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="eval-note">Was the improvement significant? <strong>Not on these holistic scores</strong> — baseline and context-aware score nearly identically. Two deterministic checks below tell a clearer story than the holistic judge does.</p>
+    `;
+  } else {
+    html += `<p class="eval-note">Could not load story scores. Run <code>python eval/story_judge.py</code>.</p>`;
+  }
+
+  if (storyProbes) {
+    const week3 = storyProbes.weeks.find((w) => w.week === 3)?.deterministic_checks?.conflation;
+    const week5 = storyProbes.weeks.find((w) => w.week === 5)?.deterministic_checks?.stale_actions;
+    const noiseLeakCount = storyProbes.weeks.reduce((acc, w) => {
+      const leaked = (w.noise?.baseline?.leaked ? 1 : 0) + (w.noise?.with_context?.leaked ? 1 : 0);
+      return acc + leaked;
+    }, 0);
+
+    html += `<h4 class="eval-subsection-header">Deterministic checks (more trustworthy than the holistic score for these two cases)</h4>`;
+    html += `<div class="eval-card">`;
+    if (week3) {
+      html += `<div class="row"><span class="label">Week 3 conflation (dark mode vs. legal/privacy):</span> ${statusPill(
+        !week3.baseline.conflated, "baseline kept them separate", "baseline conflated the two workstreams"
+      )} · ${statusPill(!week3.with_context.conflated, "context-aware kept them separate", "context-aware conflated the two workstreams")}</div>`;
+    }
+    if (week5) {
+      html += `<div class="row"><span class="label">Week 5 stale-action carryover:</span> ${statusPill(
+        !week5.baseline.stale, "baseline: no stale actions", "baseline: stale actions found"
+      )} · ${statusPill(!week5.with_context.stale, "context-aware: no stale actions", "context-aware: repeated Week 4's completed actions as pending")}</div>`;
+    }
+    html += `<div class="row"><span class="label">Small-talk noise leakage (all 5 weeks, both variants):</span> ${statusPill(
+      noiseLeakCount === 0, "0 leaks — small talk never entered the summary", `${noiseLeakCount} leak(s) found`
+    )}</div>`;
+    html += `</div>`;
+  } else {
+    html += `<p class="eval-note">Could not load story probes. Run <code>python eval/story_probes.py</code>.</p>`;
+  }
+
+  html += `<p class="eval-note">Not yet built: meeting-type-specific templates and domain terminology handling — every <code>phase4-history/</code> meeting is still the same "project status sync" type. See <a href="/ROADMAP.md">ROADMAP.md</a> for the full write-up.</p>`;
+  return html;
+}
+
+async function renderRoadmapPage() {
+  const root = document.getElementById("roadmap-root");
+  root.innerHTML = "<p>Loading…</p>";
+
+  const [transcriptionData, results, extraction, storyResults, storyProbes] = await Promise.all([
+    fetchJsonOrNull("/eval/output/transcription_quality.json"),
+    fetchJsonOrNull("/eval/output/results.json"),
+    fetchJsonOrNull("/eval/output/extraction_efficiency.json"),
+    fetchJsonOrNull("/eval/output/story_results.json"),
+    fetchJsonOrNull("/eval/output/story_probes.json"),
+  ]);
+
+  let html = `<p class="custom-intro">Each phase below is scored from the same eval outputs shown on the Evaluation and Story pages, regrouped by roadmap phase instead of by scenario. Phases 5-6 have no code yet, so they're left out — see <a href="/ROADMAP.md">ROADMAP.md</a>.</p>`;
+  html += renderPhase1(transcriptionData);
+  html += `<div class="roadmap-connector">↓ feeds into every phase below</div>`;
+  html += renderPhase2(results);
+  html += renderPhase3(results, extraction);
+  html += renderPhase4(storyResults, storyProbes);
+
+  root.innerHTML = html;
 }
 
 // ---------- Nav ----------
@@ -1515,6 +1755,7 @@ function setupNav() {
     custom: document.getElementById("custom-page"),
     pipeline: document.getElementById("pipeline-page"),
     evaluation: document.getElementById("evaluation-page"),
+    roadmap: document.getElementById("roadmap-page"),
   };
   navItems.forEach((item) => {
     item.addEventListener("click", () => {
@@ -1525,7 +1766,7 @@ function setupNav() {
       });
 
       // Always re-render on nav click, not just the first visit — both pages
-      // can change from Pipeline-triggered runs (story/v1-v4 re-summarized,
+      // can change from Pipeline-triggered runs (phase4-history/phase2-3 scenarios re-summarized,
       // new judged runs added to history) after the first time you look.
       if (item.dataset.page === "evaluation") {
         renderEvaluationPage();
@@ -1533,6 +1774,10 @@ function setupNav() {
 
       if (item.dataset.page === "story") {
         renderStoryPage();
+      }
+
+      if (item.dataset.page === "roadmap") {
+        renderRoadmapPage();
       }
 
       if (item.dataset.page === "custom") {
@@ -1556,6 +1801,7 @@ function setupDrawer() {
   toggle.addEventListener("click", () => sidebar.classList.toggle("collapsed"));
 }
 
+renderRoadmapPage();
 renderTechSummary();
 renderEvalSummaryTable();
 renderScenarioGrid();

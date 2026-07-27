@@ -15,25 +15,26 @@ RESULTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output"
 
 WHISPER_MODEL_SIZE = "base"
 
-# v1-v3 share one recording/dialogue (see v2/v3 READMEs); each still gets its
-# own entry since each version's generate_dummy_audio.py is its own
-# self-contained copy — identical results here confirm that, not a bug.
+# phase2-baseline/phase2-context/phase3-checklist share one recording/dialogue
+# (see their READMEs); each still gets its own entry since each scenario's
+# generate_dummy_audio.py is its own self-contained copy — identical results
+# here confirm that, not a bug.
 VERSION_SCENARIOS = [
     {
-        "id": "v1", "recording": "v1/output/recording.wav", "transcript": "v1/output/transcript.txt",
-        "dialogue_module": "v1/src/generate_dummy_audio.py",
+        "id": "phase2-baseline", "recording": "phase2-baseline/output/recording.wav", "transcript": "phase2-baseline/output/transcript.txt",
+        "dialogue_module": "phase2-baseline/src/generate_dummy_audio.py",
     },
     {
-        "id": "v2", "recording": "v2/output/recording.wav", "transcript": "v2/output/transcript.txt",
-        "dialogue_module": "v2/src/generate_dummy_audio.py",
+        "id": "phase2-context", "recording": "phase2-context/output/recording.wav", "transcript": "phase2-context/output/transcript.txt",
+        "dialogue_module": "phase2-context/src/generate_dummy_audio.py",
     },
     {
-        "id": "v3", "recording": "v3/output/recording.wav", "transcript": "v3/output/transcript.txt",
-        "dialogue_module": "v3/src/generate_dummy_audio.py",
+        "id": "phase3-checklist", "recording": "phase3-checklist/output/recording.wav", "transcript": "phase3-checklist/output/transcript.txt",
+        "dialogue_module": "phase3-checklist/src/generate_dummy_audio.py",
     },
     {
-        "id": "v4", "recording": "v4/output/recording.wav", "transcript": "v4/output/transcript.txt",
-        "dialogue_module": "v4/src/generate_dummy_audio.py",
+        "id": "phase3-assistant", "recording": "phase3-assistant/output/recording.wav", "transcript": "phase3-assistant/output/transcript.txt",
+        "dialogue_module": "phase3-assistant/src/generate_dummy_audio.py",
     },
 ]
 
@@ -43,7 +44,7 @@ DIARIZATION_NOTE = (
     "Not implemented / not measurable here. whisper.load_model(...).transcribe() "
     "as used throughout this project returns a single undifferentiated text "
     "stream with no speaker labels at all — the 'Person A' / 'Person B' "
-    "(and 'Assistant' in v4) attribution seen in every summary is reconstructed "
+    "(and 'Assistant' in phase3-assistant) attribution seen in every summary is reconstructed "
     "entirely by the downstream LLM from conversational context, not from the "
     "ASR step. There is no diarization output to score for accuracy. A real "
     "diarization benchmark would need a diarization-capable pipeline (e.g. "
@@ -213,12 +214,12 @@ def main():
         )
         scenarios_out.append({"id": scenario["id"], "tiers": tiers})
 
-    dialogues_module = _load_module("story/src/dialogues.py", "_ref_story_dialogues")
+    dialogues_module = _load_module("phase4-history/src/dialogues.py", "_ref_story_dialogues")
     for week in STORY_WEEKS:
-        scenario_id = f"story-week-{week}"
+        scenario_id = f"phase4-history-week-{week}"
         print(f"Evaluating {scenario_id}...")
         reference = _reference_for_story_week(week, dialogues_module)
-        meeting_dir = os.path.join(PROJECT_ROOT, "story", "output", f"meeting-{week}")
+        meeting_dir = os.path.join(PROJECT_ROOT, "phase4-history", "output", f"meeting-{week}")
         with open(os.path.join(meeting_dir, "transcript.txt")) as f:
             clean_transcript = f.read()
         tiers = evaluate_recording(
