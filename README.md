@@ -88,6 +88,7 @@ Cross-cutting pieces used by every `vN/`, `story/`, and `webapp/` — factored o
 | `run_history.py` | Appends/reads `eval/output/run_history.jsonl`; also estimates and backfills per-run Claude cost (`python run_history.py` re-runs the backfill) |
 | `cost_estimate.py` | USD cost estimate for a Claude call, via Anthropic's free token-counting endpoint — local/Mistral are always free |
 | `pipeline_status.py` | Cross-process stage-progress reporting between a running pipeline subprocess and `webapp/server.py`'s polling endpoint |
+| `app_logging.py` | `webapp/server.py`'s logger factory — writes to stdout (`docker compose logs`) and a rotating file under `logs/` (`LOG_DIR` env var to override) so log history survives a container restart |
 
 ## Notes
 

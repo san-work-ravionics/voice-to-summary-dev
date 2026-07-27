@@ -16,6 +16,7 @@ webapp/.run_status/
 custom/audio/
 custom/output/
 eval/output/
+logs/
 
 .env
 .env.*

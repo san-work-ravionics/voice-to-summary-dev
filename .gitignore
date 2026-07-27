@@ -11,6 +11,7 @@ v3/output/
 v4/output/
 story/output/
 webapp/.run_status/
+logs/
 
 # Real, non-scripted audio a user drops in, plus its derived output —
 # never scripted/synthetic like the vN/story recordings, must never be

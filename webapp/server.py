@@ -13,8 +13,11 @@ CUSTOM_OUTPUT_DIR = os.path.join(PROJECT_ROOT, "custom", "output")
 AUDIO_EXTENSIONS = {".wav", ".mp3", ".m4a", ".ogg", ".flac"}
 
 sys.path.insert(0, PROJECT_ROOT)
+from app_logging import get_logger  # noqa: E402
 from pipeline_status import read_status  # noqa: E402
 from run_history import read_history  # noqa: E402
+
+logger = get_logger("webapp")
 
 # New audio dropped in custom/audio/ is arbitrary, real content — it doesn't
 # belong to the scripted "Mobile App Redesign" dummy meeting, so v2's
@@ -110,19 +113,28 @@ def _start_pipeline(scenario_id, provider=None, judge_provider=None, regenerate=
             "status_file": status_file,
             "proc": proc,
         }
+        logger.info(
+            "pipeline %s: started (provider=%s judge_provider=%s regenerate=%s)",
+            scenario_id, provider, judge_provider, regenerate,
+        )
 
     def waiter():
-        _stdout, stderr = proc.communicate()
+        stdout, stderr = proc.communicate()
         with PIPELINE_LOCK:
             job = PIPELINE_JOBS.get(scenario_id)
             if job is None or job["proc"] is not proc:
                 return  # superseded by a newer run of the same scenario
             if proc.returncode == 0:
                 job["status"] = "done"
+                logger.info("pipeline %s: done\n--- stdout ---\n%s", scenario_id, stdout)
             else:
                 job["status"] = "error"
                 lines = [l for l in (stderr or "").strip().splitlines() if l]
                 job["error"] = lines[-1] if lines else f"exited with code {proc.returncode}"
+                logger.error(
+                    "pipeline %s: failed (exit %s)\n--- stdout ---\n%s\n--- stderr ---\n%s",
+                    scenario_id, proc.returncode, stdout, stderr,
+                )
 
     threading.Thread(target=waiter, daemon=True).start()
     return True
@@ -245,7 +257,9 @@ def _run_pipeline_async(filename, provider=None):
             with JOBS_LOCK:
                 JOBS[filename] = "done"
                 JOB_STAGE.pop(filename, None)
+            logger.info("custom-audio %s: done", filename)
         except Exception as exc:  # noqa: BLE001 - surface any failure to the UI
+            logger.exception("custom-audio %s: failed", filename)
             with JOBS_LOCK:
                 JOBS[filename] = f"error:{exc}"
                 JOB_STAGE.pop(filename, None)
@@ -381,7 +395,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self._send_json({"status": "started" if started else "already_processing"})
 
     def log_message(self, fmt, *args):
-        sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % args))
+        # /healthz is polled every 30s by docker-compose's healthcheck —
+        # excluded so it doesn't drown out real request logs.
+        if getattr(self, "path", "").startswith("/healthz"):
+            return
+        logger.info("%s - %s", self.address_string(), fmt % args)
 
 
 def main():
@@ -389,8 +407,8 @@ def main():
     os.makedirs(CUSTOM_OUTPUT_DIR, exist_ok=True)
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8743
     with socketserver.ThreadingTCPServer(("", port), Handler) as httpd:
-        print(f"Serving {PROJECT_ROOT}")
-        print(f"Open http://localhost:{port}/webapp/index.html")
+        logger.info("Serving %s", PROJECT_ROOT)
+        logger.info("Open http://localhost:%s/webapp/index.html", port)
         httpd.serve_forever()
 
 
