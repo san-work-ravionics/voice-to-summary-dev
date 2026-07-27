@@ -1,0 +1,33 @@
+FROM python:3.9-slim
+
+# ffmpeg: required by pydub/whisper to decode audio.
+# espeak-ng: pyttsx3's Linux TTS backend (it uses nsss on macOS, sapi5 on
+# Windows) — needed only so the webapp's "Regenerate recording" toggle can
+# re-synthesize the scripted demo dialogue inside the container.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ffmpeg \
+        espeak-ng \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install torch from the CPU-only wheel index first. The default PyPI build
+# bundles multi-GB CUDA runtime libraries that are dead weight here — Docker
+# Desktop (Mac/Windows) never passes GPU/MPS through to a Linux container,
+# so CPU is what this image actually runs on regardless of host hardware.
+COPY requirements.txt .
+RUN pip install --no-cache-dir torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu \
+    && pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+# Model caches (Whisper + Hugging Face) live under /cache so a mounted
+# volume survives image rebuilds/restarts instead of re-downloading
+# ~3GB+ (more if --provider mistral is used) on every start.
+ENV XDG_CACHE_HOME=/cache \
+    HF_HOME=/cache/huggingface \
+    PYTHONUNBUFFERED=1
+
+EXPOSE 8743
+
+CMD ["python", "webapp/server.py"]

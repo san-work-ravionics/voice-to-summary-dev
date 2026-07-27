@@ -1,0 +1,9 @@
+pyttsx3==2.99
+pydub==0.25.1
+openai-whisper==20250625
+transformers==4.57.6
+torch==2.8.0
+accelerate==1.10.1
+anthropic==0.120.0
+sentencepiece==0.2.2
+protobuf==6.33.6

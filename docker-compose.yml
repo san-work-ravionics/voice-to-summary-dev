@@ -1,0 +1,48 @@
+services:
+  webapp:
+    build: .
+    ports:
+      - "${PORT:-8743}:8743"
+    environment:
+      - SUMMARY_PROVIDER=${SUMMARY_PROVIDER:-local}
+      - CLAUDE_MODEL=${CLAUDE_MODEL:-}
+      - MISTRAL_MODEL=${MISTRAL_MODEL:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    volumes:
+      # Per-scenario generated output — one volume each so a rebuild/restart
+      # doesn't lose prior recordings/transcripts/summaries.
+      - v1_output:/app/v1/output
+      - v2_output:/app/v2/output
+      - v3_output:/app/v3/output
+      - v4_output:/app/v4/output
+      - story_output:/app/story/output
+      # Real (non-scripted) audio dropped via the Custom Audio page, and
+      # its derived output.
+      - custom_audio:/app/custom/audio
+      - custom_output:/app/custom/output
+      # Evaluation run history (used by the Evaluation page's provider
+      # comparison) and cross-process pipeline stage-progress files.
+      - eval_output:/app/eval/output
+      - run_status:/app/webapp/.run_status
+      # Whisper + Hugging Face model downloads (~3GB+) — keeps them off the
+      # image and off the container's writable layer.
+      - model_cache:/cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8743/healthz', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+volumes:
+  v1_output:
+  v2_output:
+  v3_output:
+  v4_output:
+  story_output:
+  custom_audio:
+  custom_output:
+  eval_output:
+  run_status:
+  model_cache:

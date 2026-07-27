@@ -1,0 +1,53 @@
+# Evaluation harness
+
+Scores the existing `vN/output/summary*.txt` files against their transcripts. Scoring logic lives in `../eval_scoring.py` (shared with every pipeline's optional `--judge-provider` step, so a webapp-triggered run and a bulk `eval/judge.py` run score identically). Two layers:
+
+- **Layer 1 (deterministic):** Markdown schema compliance (all 4 sections present, `##` heading level as specified in every summarizer's system prompt), Actions-bullet prefix compliance (`Person A:` / `Person B:`), and — for v3/v4 — checklist coverage precision/recall against a hand-labeled ground truth (every topic is actually discussed in the dummy dialogue except budget/cost impact, on purpose — see [v3/README.md](../v3/README.md)).
+- **Layer 2 (LLM-as-judge):** a judge model scores each brief (Topic/Key Points/Decisions/Actions only, not the checklist section) on faithfulness, completeness, and conciseness (1-5 each), plus any unsupported claims it can spot. The judge is **provider-swappable** (`--provider local|mistral|claude`, default `local`) via `../llm_provider.py`, independent of whichever provider generated the summary being judged.
+
+Judging with the same model that generated the summary is a real limitation (self-preference bias, and the same reliability ceiling noted in v3's README for LLM-based checklist judging) — treat layer 2 scores as a rough signal to spot-check, not ground truth. This matters most for `local`, since most of this project's local-model summaries were also judged by the local model. `eval/rejudge.py --judge-provider claude` re-scores everything under one neutral judge without re-running summarization, for a cleaner comparison. Layer 1 is exact for what it checks, but only checks what it was told to check.
+
+## Run
+
+```bash
+python eval/judge.py                        # local judge (default)
+python eval/judge.py --provider claude       # judge with Claude instead
+```
+
+Writes `eval/output/results.json` (a single bulk snapshot, consumed by `webapp/`'s scenario-level fallback display) and appends one record per scored variant to `eval/output/run_history.jsonl` (summarizer attribution `"unknown"`, since this scores whatever's currently on disk without knowing which provider wrote it — see `eval/rejudge.py` below for provider-attributed re-scoring).
+
+## Re-judging without re-summarizing (`eval/rejudge.py`)
+
+Every pipeline run with `--judge-provider` set (or any webapp Pipeline run — judging is on by default there) appends a provider-attributed record to `eval/output/run_history.jsonl` via `../run_history.py`. To compare providers under one *neutral* judge without paying for new summarization calls, re-score the latest stored summary for every (scenario, variant, provider) combo already in that history:
+
+```bash
+python eval/rejudge.py --judge-provider claude    # default judge is claude
+```
+
+Each run also gets a cost estimate (`../cost_estimate.py` — free for local/Mistral, token-counted for Claude; see the root README's cost caveat) stored alongside the scores.
+
+## Transcription quality (`eval/transcription_quality.py`)
+
+Word Error Rate against the exact scripted dialogue text (the TTS ground truth), for all 9 recordings (v1-v4 + all 5 story weeks) — this project's first measurement of the ASR step itself, everything above only ever evaluated summarization against Whisper's output as if it were ground truth. Word-level Levenshtein distance (no new dependency), reporting substitutions/deletions/insertions separately.
+
+Also generates two degraded variants per recording with `pydub` (already a dependency) — `light_noise` (white noise ~20dB below speech) and `heavy_noise` (~8dB below speech + a 3kHz low-pass filter simulating a poor mic) — and re-transcribes each, so WER-vs-noise-severity is an actual measured trend rather than a documented gap.
+
+**Speaker diarization is not implemented and not measurable here** — Whisper's `transcribe()` as used everywhere in this project returns one undifferentiated text stream with no speaker labels; the closest proxy is the Actions-prefix compliance check below (does the summarizer's *own* speaker attribution stay internally consistent), which is a downstream LLM behavior, not an ASR capability.
+
+**Accent resilience is not tested** — every recording uses the same one or two macOS system TTS voices.
+
+```bash
+python eval/transcription_quality.py
+```
+
+Writes `eval/output/transcription_quality.json`.
+
+## Information extraction efficiency (`eval/extraction_efficiency.py`)
+
+Ground truth: lines in the scripted dialogue matching the same commitment heuristic ("I'll"/"I will"/"let me [do]") every summarizer's own prompt is instructed to use for Actions bullets. Matched against generated Actions bullets via word-containment (deterministic, not another LLM call) — recall/precision per scenario/variant, for v1-v4 and all 5 story weeks.
+
+```bash
+python eval/extraction_efficiency.py
+```
+
+Writes `eval/output/extraction_efficiency.json`.

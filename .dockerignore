@@ -1,0 +1,22 @@
+.git/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.claude/
+
+# Generated output and caches — never needed in the build context, only at
+# runtime via mounted volumes (see docker-compose.yml).
+v1/output/
+v2/output/
+v3/output/
+v4/output/
+story/output/
+webapp/.run_status/
+custom/audio/
+custom/output/
+eval/output/
+
+.env
+.env.*
+!.env.example
