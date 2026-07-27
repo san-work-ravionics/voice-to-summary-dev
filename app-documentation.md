@@ -61,11 +61,12 @@ Two honest, evidenced findings came out of building this measurement layer, wort
 
 - **Language:** Python 3
 - **Speech-to-text:** [OpenAI Whisper](https://github.com/openai/whisper) (local, `base` model)
-- **Summarization:** local instruction-following LLM via Hugging Face `transformers` (`Qwen/Qwen2.5-1.5B-Instruct`), run on-device (Apple Silicon MPS acceleration where available)
-- **Text-to-speech (for demo/sample recordings):** `pyttsx3`, using native OS voices
+- **Summarization:** local instruction-following LLM via Hugging Face `transformers` (`Qwen/Qwen2.5-1.5B-Instruct`), run on-device (Apple Silicon MPS acceleration where available; CPU otherwise, including in a container)
+- **Text-to-speech (for demo/sample recordings):** `pyttsx3`, using native OS voices — macOS's built-in voices normally, `espeak-ng` when run in a Linux container; the two sound different enough that Whisper's transcription accuracy on a *regenerated* demo recording varies with which backend produced it (real audio dropped in for transcription isn't affected — it never goes through TTS)
 - **Audio processing:** `pydub` (backed by `ffmpeg`)
 - **Checklist coverage check:** deterministic keyword matching against the transcript, with negation-awareness — chosen over an additional LLM call after testing showed the small local model was unreliable at that specific judgment
 - **Evaluation suite (`eval/`):** Word Error Rate + noise-robustness testing (no new dependency — plain word-level edit distance, plus `pydub`-generated noise), LLM-judged faithfulness/completeness/conciseness, and deterministic schema/checklist/extraction-efficiency checks — same "prefer deterministic over LLM judgment" principle as the checklist above, applied wherever it held up under testing
 - **Web UI (`webapp/`):** framework-free HTML/CSS/JS, served by a stdlib-only Python `http.server` subclass — no new runtime dependency
-- **Dependencies:** `torch`, `accelerate`, `transformers`, `openai-whisper`, `pydub`, `pyttsx3`
+- **Dependencies:** `torch`, `accelerate`, `transformers`, `openai-whisper`, `pydub`, `pyttsx3` — versions pinned in `requirements.txt`
 - **Infrastructure:** runs entirely offline/on-device after initial one-time model downloads (~3GB total); no external API keys or network calls required at runtime
+- **Containerized deployment:** `Dockerfile` + `docker-compose.yml` at the project root — `docker compose up --build` runs the same webapp and pipelines in a container (CPU-only, since Docker Desktop doesn't pass GPU/MPS through to Linux containers). Per-scenario output, custom audio, evaluation history, and downloaded models are each a named Docker volume, so they survive rebuilds and restarts instead of living in the image. A `/healthz` endpoint supports container health checks.
