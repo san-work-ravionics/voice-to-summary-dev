@@ -47,7 +47,7 @@ def append_run(scenario_id, variant, summarizer_provider, judge_provider,
         "timestamp": time.time(),
         "scenario_id": scenario_id,
         "variant": variant,
-        "meeting": meeting,  # week number for phase4-history/, else None
+        "meeting": meeting,  # meeting slug for phase6-history/, else None
         "summarizer_provider": summarizer_provider or "local",
         "judge_provider": judge_provider or "local",
         "transcript": transcript,

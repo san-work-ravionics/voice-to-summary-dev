@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import os
 import re
@@ -9,67 +10,73 @@ sys.path.insert(0, PROJECT_ROOT)
 
 # judge.py used to expose build_judge_generator/_parse_judge_json directly;
 # it was refactored to delegate to eval_scoring.py. Probes reuse one
-# generator across every week/probe to avoid reloading the local model
+# generator across every meeting/probe to avoid reloading the local model
 # repeatedly, so this calls llm_provider/eval_scoring directly.
 from llm_provider import build_generator, generate as llm_generate  # noqa: E402
 from eval_scoring import _parse_judge_json  # noqa: E402
 
-STORY_OUTPUT_DIR = os.path.join(PROJECT_ROOT, "phase4-history", "output")
+STORY_OUTPUT_DIR = os.path.join(PROJECT_ROOT, "phase6-history", "output")
 RESULTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", "story_probes.json")
 
-WEEKS = [1, 2, 3, 4, 5]
 
-# Distinct per-week small-talk words (see phase4-history/src/dialogues.py) that never
-# appear in the real project content — a plain substring check is exact here,
-# unlike the holistic 1-5 rubric that couldn't reliably tell variants apart.
+def _load_meetings():
+    spec = importlib.util.spec_from_file_location(
+        "_audio_generation_dialogues", os.path.join(PROJECT_ROOT, "audio-generation", "src", "dialogues.py"),
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.MEETINGS
+
+
+# One distinct small-talk marker per meeting (see audio-generation/src/dialogues.py's
+# opening lines) that never appears in the real project content — a plain
+# substring check is exact here, unlike the holistic 1-5 rubric that
+# couldn't reliably tell variants apart.
 NOISE_KEYWORDS = [
-    "weather", "rainy", "series", "episode", "game last night", "coffee",
-    "traffic", "weekend",
+    "marathon", "tarmac", "coffee blend", "hike", "plumbing", "game night",
+    "podcast", "commute", "puppy", "recipe", "concert", "new phone",
+    "elevator", "pizza party",
 ]
 
-# Specific, verifiable yes/no questions rather than a holistic quality score.
-# These are "control" probes both variants are expected to pass (the fact is
-# stated plainly in the current transcript) — used as a sanity check that
-# the judge isn't just rubber-stamping everything "yes".
-#
-# The two probes originally here for week 3 (dark-mode/legal conflation) and
-# week 5 (stale-action carryover) were REMOVED after this same small judge
-# model got both wrong on manual verification — it answered "pass" for both
-# known, reproduced defects, even reading the exact same text a human could
-# see was wrong. See check_conflation()/check_stale_actions() below: the same
-# checks, done deterministically instead, the way v3's checklist coverage
-# already does for the identical reason.
+# Specific, verifiable yes/no questions rather than a holistic quality score,
+# keyed by slug — "control" probes both variants are expected to pass (the
+# fact is stated plainly in the current transcript) — used as a sanity check
+# that the judge isn't just rubber-stamping everything "yes". Mirrors the
+# original 5-meeting story's w2_escalation/w4_resolution/w5_budget_gap
+# probes, re-anchored to the equivalent beats in the payments-vendor and
+# budget threads of this 15-meeting arc (see audio-generation/src/dialogues.py's
+# module docstring for the full thread breakdown).
 PROBES = {
-    2: [
+    "05-sprint-status-2": [
         {
-            "id": "w2_escalation",
+            "id": "payments_escalation",
             "question": (
                 "Does the summary correctly convey that the payments sandbox "
-                "instability got WORSE this week (an escalation), rather than "
-                "just describing a generic ongoing issue?"
+                "instability got WORSE this sprint (an escalation), rather "
+                "than just describing a generic ongoing issue?"
             ),
             "expected": "yes",
         },
     ],
-    4: [
+    "09-sprint-status-6": [
         {
-            "id": "w4_resolution",
+            "id": "payments_resolution",
             "question": (
                 "Does the summary correctly convey that the payments sandbox "
-                "instability, previously an ongoing problem, is now RESOLVED "
-                "(not still ongoing)?"
+                "instability, previously an ongoing problem, is now fully "
+                "RESOLVED and stable (not still ongoing)?"
             ),
             "expected": "yes",
         },
     ],
-    5: [
+    "14-go-live-readiness": [
         {
-            "id": "w5_budget_gap",
+            "id": "budget_gap",
             "question": (
-                "Does the summary correctly reflect that budget/cost impact "
-                "was raised as something that still needs to be addressed "
-                "separately, rather than already resolved or not mentioned "
-                "at all?"
+                "Does the summary correctly reflect that a budget/cost "
+                "overrun was raised as something that still needs to be "
+                "reported to finance separately, rather than already "
+                "resolved or not mentioned at all?"
             ),
             "expected": "yes",
         },
@@ -81,10 +88,14 @@ LEGAL_KEYWORDS = ("legal", "privacy")
 
 
 def check_conflation(summary_text):
-    """Week 3 check: flag any single bullet/line that mentions dark mode and
-    legal/privacy together — the exact shape of the reproduced defect (e.g.
-    "Legal review for dark mode needs attention"), which is otherwise two
-    unrelated workstreams."""
+    """Flags any single bullet/line that mentions dark mode and legal/privacy
+    together — two workstreams that run in parallel throughout this story
+    and are easy for a summarizer to conflate (e.g. "Legal review for dark
+    mode needs attention"), the exact shape of a defect the original
+    5-meeting story caught this way. Run across every meeting rather than
+    one hardcoded week, since which meeting (if any) actually shows it in
+    this longer, richer arc isn't assumed in advance — see phase6-history/README.md
+    for whichever meeting(s) this run actually found it in."""
     hits = []
     for line in summary_text.split("\n"):
         line = line.strip()
@@ -146,11 +157,13 @@ def _overlap_ratio(a, b):
 
 
 def check_stale_actions(summary_text, history_entries, threshold=0.35):
-    """Week 5 check: flag any current-meeting Actions bullet that closely
-    repeats a phrase already recorded as an action in a PRIOR meeting's
-    history — a verbatim/near-verbatim carryover suggests already-resolved
-    work is being presented as newly pending, rather than the history being
-    used only to interpret the current transcript."""
+    """Flags any current-meeting Actions bullet that closely repeats a
+    phrase already recorded as an action in a PRIOR meeting's history — a
+    verbatim/near-verbatim carryover suggests already-resolved work is being
+    presented as newly pending, rather than the history being used only to
+    interpret the current transcript. Run for every meeting from the second
+    one onward (staleness can only be checked once there's history), not
+    one hardcoded week."""
     history_action_phrases = []
     for entry in history_entries:
         m = re.search(r"Actions:\s*(.+)$", entry)
@@ -170,6 +183,7 @@ def check_stale_actions(summary_text, history_entries, threshold=0.35):
                 })
     return {"stale": bool(matches), "matches": matches}
 
+
 PROBE_JUDGE_PROMPT = (
     "You are fact-checking a meeting summary against the transcript it was "
     "generated from. You will be given the transcript, a summary, and a "
@@ -187,8 +201,8 @@ def _read(path):
         return f.read()
 
 
-def _meeting_dir(week):
-    return os.path.join(STORY_OUTPUT_DIR, f"meeting-{week}")
+def _meeting_dir(slug):
+    return os.path.join(STORY_OUTPUT_DIR, slug)
 
 
 def check_noise_leakage(summary_text):
@@ -212,39 +226,41 @@ def _answer_is_yes(parsed):
 
 def main():
     generator = build_generator()
+    meetings = _load_meetings()
 
-    weeks_out = []
-    history_entries = []  # built the same way phase4-history/src/main.py does, week by week
+    meetings_out = []
+    history_entries = []  # built the same way phase6-history/src/main.py does, meeting by meeting
 
-    for week in WEEKS:
-        meeting_dir = _meeting_dir(week)
+    for meeting in meetings:
+        slug = meeting["slug"]
+        meeting_dir = _meeting_dir(slug)
         transcript = _read(os.path.join(meeting_dir, "transcript.txt"))
         baseline_text = _read(os.path.join(meeting_dir, "summary_baseline.txt"))
         context_text = _read(os.path.join(meeting_dir, "summary_with_context.txt"))
 
-        print(f"Week {week}: checking noise leakage...")
+        print(f"{meeting['label']}: checking noise leakage...")
         noise = {
             "baseline": check_noise_leakage(baseline_text),
             "with_context": check_noise_leakage(context_text),
         }
 
-        deterministic_checks = {}
-        if week == 3:
-            print(f"Week {week}: checking dark-mode/legal conflation (deterministic)...")
-            deterministic_checks["conflation"] = {
+        print(f"{meeting['label']}: checking dark-mode/legal conflation (deterministic)...")
+        deterministic_checks = {
+            "conflation": {
                 "baseline": check_conflation(baseline_text),
                 "with_context": check_conflation(context_text),
-            }
-        if week == 5:
-            print(f"Week {week}: checking stale-action carryover (deterministic)...")
+            },
+        }
+        if history_entries:
+            print(f"{meeting['label']}: checking stale-action carryover (deterministic)...")
             deterministic_checks["stale_actions"] = {
                 "baseline": check_stale_actions(baseline_text, history_entries),
                 "with_context": check_stale_actions(context_text, history_entries),
             }
 
         probes_out = []
-        for probe in PROBES.get(week, []):
-            print(f"Week {week}: probe {probe['id']}...")
+        for probe in PROBES.get(slug, []):
+            print(f"{meeting['label']}: probe {probe['id']}...")
             baseline_answer = run_probe(generator, transcript, baseline_text, probe["question"])
             context_answer = run_probe(generator, transcript, context_text, probe["question"])
 
@@ -260,21 +276,21 @@ def main():
                 "with_context": {**context_answer, "pass": context_pass},
             })
 
-        weeks_out.append({
-            "week": week,
-            "label": f"Week {week}",
+        meetings_out.append({
+            "slug": slug,
+            "label": meeting["label"],
             "noise": noise,
             "deterministic_checks": deterministic_checks,
             "probes": probes_out,
         })
 
-        history_entries.append(f"Week {week}: " + _extract_decisions_and_actions(context_text))
+        history_entries.append(f"{meeting['label']}: " + _extract_decisions_and_actions(context_text))
 
     results = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "model": generator.model_name,
         "noise_keywords": NOISE_KEYWORDS,
-        "weeks": weeks_out,
+        "meetings": meetings_out,
     }
 
     os.makedirs(os.path.dirname(RESULTS_PATH), exist_ok=True)

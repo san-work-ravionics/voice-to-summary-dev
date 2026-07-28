@@ -22,17 +22,17 @@ Given a meeting recording, the system:
 
 ## How it was built and proven out
 
-The project was developed as four progressively richer capability stages, each one demonstrating a specific improvement in isolation, plus a fifth stage that tests the same "context helps" idea across a series of meetings instead of one:
+The project was developed as four progressively richer capability stages against one shared input recording, each one demonstrating a specific improvement in isolation, plus a fifth stage that tests the same "context helps" idea across a realistic 15-meeting project lifecycle instead of one meeting:
 
-| Stage | Scenario | Capability added | Business value |
+| Phase | Scenario | Capability added | Business value |
 |---|---|---|---|
-| 1 | `phase2-baseline` | Baseline: recording → transcript → structured summary | Establishes the core automation |
-| 2 | `phase2-context` | Meeting context injected into the summarizer | More accurate, specific summaries |
-| 3 | `phase3-checklist` | Checklist-based coverage check | Confidence that nothing important was missed |
-| 4 | `phase3-assistant` | An AI assistant present in the meeting itself | A live note-taker that recaps, checks coverage, and closes the meeting with a spoken summary |
-| 5 | `phase4-history` | A 5-meeting story with a running history carried forward | Tests whether context helps across time, not just within one meeting — with a real, evidenced answer: yes and no (see below) |
+| 1 | `phase1-baseline` | Baseline: recording → transcript → structured summary | Establishes the core automation |
+| 2 | `phase2-checklist` | Checklist-based coverage check | Confidence that nothing important was missed |
+| 3 | `phase3-context` | Meeting context injected into the summarizer | More accurate, specific summaries |
+| 4 | `phase4-assistant` | An AI assistant present in the meeting itself | A live note-taker that recaps, checks coverage, and closes the meeting with a spoken summary |
+| 6 | `phase6-history` | A 15-meeting story (kickoff through launch retro) with a running history carried forward | Tests whether context helps across time, not just within one meeting — with a real, evidenced answer: mostly yes, with a real cost (see below) |
 
-See [ROADMAP.md](ROADMAP.md) for how these five stages map onto the product roadmap's Phases 1-4.
+Phase 5 (an agentic Office/on-device assistant) and Phase 7 (a voice query interface over everything above) round out the full build — see [ROADMAP.md](ROADMAP.md) for how all seven phases fit together and what each one measures.
 
 Each stage was tested end-to-end and its output verified for accuracy before moving to the next — including a deliberate check that the checklist correctly reports both what *was* and *wasn't* discussed, not just a generic "all good."
 
@@ -49,7 +49,7 @@ An evaluation suite (`eval/`) scores every stage on:
 Two honest, evidenced findings came out of building this measurement layer, worth knowing before trusting any single number from it:
 
 1. **A small local model is an unreliable judge of its own nuanced output.** Wherever this project used the same small local LLM to grade something subjective (faithfulness scores, checklist coverage by LLM, cross-meeting continuity, yes/no fact probes), that judge was caught giving a wrong answer on manual spot-checking — including on cases it was specifically built to catch. Deterministic checks (keyword matching, word-overlap, Word Error Rate) were used wherever possible instead, and are the more trustworthy numbers in every report this project produces.
-2. **Giving the summarizer more context is not an unconditional improvement.** Across the 5-meeting story, a summarizer with a running history correctly avoided a factual mix-up that an isolated summarizer made in one week — but in a later week, that same running history caused it to present an already-finished task as if still pending. Context measurably helps in some cases and measurably hurts in others; the honest answer is "it depends," not "context is always better." See [`phase4-history/README.md`](phase4-history/README.md) for the specific evidence.
+2. **Giving the summarizer more context is not an unconditional improvement.** Across a 15-meeting project story, a summarizer with a running history scored a bit higher on faithfulness/completeness and never leaked small talk into the summary (an isolated summarizer did, 3 times) — but in 2 of the 15 meetings, that same running history caused it to present an already-finished task as if still pending. Context measurably helps in most respects and measurably hurts in a specific, real way; the honest answer is "mostly yes, with a real cost," not "context is always better." See [`phase6-history/README.md`](phase6-history/README.md) for the specific evidence.
 
 ## Use cases
 

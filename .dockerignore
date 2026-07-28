@@ -7,11 +7,14 @@ __pycache__/
 
 # Generated output and caches — never needed in the build context, only at
 # runtime via mounted volumes (see docker-compose.yml).
-phase2-baseline/output/
-phase2-context/output/
-phase3-checklist/output/
-phase3-assistant/output/
-phase4-history/output/
+audio-generation/output/
+phase1-baseline/output/
+phase2-checklist/output/
+phase3-context/output/
+phase4-assistant/output/
+phase5-office-agent/output/
+phase6-history/output/
+phase7-voice-query/output/
 webapp/.run_status/
 custom/audio/
 custom/output/

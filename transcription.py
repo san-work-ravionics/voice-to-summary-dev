@@ -1,4 +1,4 @@
-"""Shared Whisper transcription, used by every phaseN-*/, phase4-history/, and webapp/."""
+"""Shared Whisper transcription, used by every phaseN-*/, phase6-history/, and webapp/."""
 
 DEFAULT_MODEL_SIZE = "base"
 

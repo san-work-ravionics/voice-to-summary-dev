@@ -1,63 +1,73 @@
 const SCENARIOS = [
   {
-    id: "phase2-baseline",
-    title: "Phase 2 — Baseline summary",
+    id: "phase1-baseline",
+    title: "Phase 1 — Basic summary",
     description: "Transcript in, structured summary out. No extra grounding.",
-    audio: "/phase2-baseline/output/recording.wav",
-    transcript: "/phase2-baseline/output/transcript.txt",
+    audio: "/audio-generation/output/01-kickoff/recording.wav",
+    transcript: "/phase1-baseline/output/transcript.txt",
     variants: [
-      { key: "baseline", label: "Summary", path: "/phase2-baseline/output/summary.txt" },
+      { key: "baseline", label: "Summary", path: "/phase1-baseline/output/summary.txt" },
     ],
   },
   {
-    id: "phase2-context",
-    title: "Phase 2 — Context-aware summarization",
+    id: "phase2-checklist",
+    title: "Phase 2 — Checklist coverage check",
+    description: "Same kickoff recording, plus a deterministic checklist coverage section and context-aware prompting.",
+    audio: "/audio-generation/output/01-kickoff/recording.wav",
+    transcript: "/phase2-checklist/output/transcript.txt",
+    variants: [
+      { key: "context_checklist", label: "Summary + Checklist", path: "/phase2-checklist/output/summary.txt" },
+    ],
+  },
+  {
+    id: "phase3-context",
+    title: "Phase 3 — Context-aware summarization",
     description: "Meeting context injected into the prompt before the transcript — baseline and context-aware summaries side by side.",
-    audio: "/phase2-context/output/recording.wav",
-    transcript: "/phase2-context/output/transcript.txt",
+    audio: "/audio-generation/output/01-kickoff/recording.wav",
+    transcript: "/phase3-context/output/transcript.txt",
     variants: [
-      { key: "baseline", label: "Baseline (no context)", path: "/phase2-context/output/summary_baseline.txt" },
-      { key: "with_context", label: "With context", path: "/phase2-context/output/summary_with_context.txt" },
+      { key: "baseline", label: "Baseline (no context)", path: "/phase3-context/output/summary_baseline.txt" },
+      { key: "with_context", label: "With context", path: "/phase3-context/output/summary_with_context.txt" },
     ],
   },
   {
-    id: "phase3-checklist",
-    title: "Phase 3 — Checklist coverage check",
-    description: "Same context-aware summarizer as Phase 2, plus a deterministic checklist coverage section.",
-    audio: "/phase3-checklist/output/recording.wav",
-    transcript: "/phase3-checklist/output/transcript.txt",
-    variants: [
-      { key: "context_checklist", label: "Summary + Checklist", path: "/phase3-checklist/output/summary.txt" },
-    ],
-  },
-  {
-    id: "phase3-assistant",
-    title: "Phase 3 — AI Assistant as third actor",
+    id: "phase4-assistant",
+    title: "Phase 4 — AI Assistant as third actor",
     description: "A third voice (AI Assistant) joins the recording itself and takes notes live.",
-    audio: "/phase3-assistant/output/recording.wav",
-    transcript: "/phase3-assistant/output/transcript.txt",
+    audio: "/phase4-assistant/output/recording.wav",
+    transcript: "/phase4-assistant/output/transcript.txt",
     variants: [
-      { key: "context_checklist_assistant", label: "Summary + Checklist", path: "/phase3-assistant/output/summary.txt" },
+      { key: "context_checklist_assistant", label: "Summary + Checklist", path: "/phase4-assistant/output/summary.txt" },
     ],
   },
 ];
 
-const STORY_MEETINGS = [1, 2, 3, 4, 5].map((week) => ({
-  week,
-  label: `Week ${week}`,
-  audio: `/phase4-history/output/meeting-${week}/recording.wav`,
-  transcript: `/phase4-history/output/meeting-${week}/transcript.txt`,
-  baseline: `/phase4-history/output/meeting-${week}/summary_baseline.txt`,
-  context: `/phase4-history/output/meeting-${week}/summary_with_context.txt`,
+const STORY_MEETINGS = [
+  ["01-kickoff", "Kickoff"], ["02-requirements-review", "Requirements Review"],
+  ["03-design-review", "Design Review"], ["04-sprint-status-1", "Sprint 1 Status"],
+  ["05-sprint-status-2", "Sprint 2 Status"], ["06-sprint-status-3", "Sprint 3 Status"],
+  ["07-sprint-status-4", "Sprint 4 Status"], ["08-sprint-status-5", "Sprint 5 Status"],
+  ["09-sprint-status-6", "Sprint 6 Status"], ["10-sprint-status-7", "Sprint 7 Status"],
+  ["11-test-plan-review", "Test Plan Review"], ["12-uat-kickoff", "UAT Kickoff"],
+  ["13-uat-results", "UAT Results / Bug Triage"], ["14-go-live-readiness", "Go-Live Readiness"],
+  ["15-launch-retro", "Launch Retro"],
+].map(([slug, label], i) => ({
+  slug,
+  label: `${i + 1}. ${label}`,
+  audio: `/audio-generation/output/${slug}/recording.wav`,
+  transcript: `/phase6-history/output/${slug}/transcript.txt`,
+  baseline: `/phase6-history/output/${slug}/summary_baseline.txt`,
+  context: `/phase6-history/output/${slug}/summary_with_context.txt`,
 }));
 
 // Findings from reading the actual generated text, not something the
 // automated eval surfaced on its own (see eval/story_judge.py) — kept here
 // as explicit, attributed human-review notes rather than folded into the
-// scored data, so the UI never implies these came from the judge.
+// scored data, so the UI never implies these came from the judge. Keyed by
+// slug — see phase6-history/README.md for the full write-up.
 const STORY_CURATOR_NOTES = {
-  3: "Baseline conflates two separate workstreams — it says things like \"Legal review for dark mode needs attention,\" mixing up dark mode (a design workstream) with the unrelated legal/privacy review. The context-aware version keeps them correctly separate. This was originally caught by manual reading only; the LLM-judge probe designed to check it got fooled (marked both variants as passing), so it was replaced with the deterministic \"Dark mode kept separate from legal/privacy review\" check below, which catches it reliably in both this run and an earlier independent regeneration.",
-  5: "The context-aware summary lists Week 4's already-completed actions (\"finish validating analytics by Friday\", \"start preparing the stakeholder deck\") as if still pending in Week 5 — but the Week 5 transcript says both are already done. This is stale history leaking into current-meeting content, exactly what the system prompt was written to prevent. Both the holistic continuity score and an LLM-judge probe built specifically to catch this scored it a pass; only the deterministic \"No stale-action carryover\" check below (word-overlap against the accumulated history) catches it reliably.",
+  "04-sprint-status-1": "The context-aware summary's Actions list \"Promote dark mode from stretch to committed P1 scope\" and \"Confirm payments sandbox access is provisioned\" as pending — but both were already decided/done in the prior meeting (03-design-review), and this meeting's own transcript doesn't restate them (dark mode is \"not started yet\", payments sandbox is already \"stood up\"). This is stale history leaking into current-meeting content. Baseline (no history to leak) doesn't show this.",
+  "12-uat-kickoff": "The context-aware summary lists \"Start recruiting testers for UAT\" as a pending action — but this meeting's own transcript says recruiting is already done (\"Eight external testers recruited... all confirmed for next week\"). The prior meeting (11-test-plan-review) is where recruiting was assigned; the summarizer carried that forward as still-pending instead of registering that this meeting resolves it. The clearest stale-action carryover found in this run.",
 };
 
 // ---------- tiny markdown-lite renderer (headings / bullets / paragraphs only) ----------
@@ -243,10 +253,10 @@ async function renderEvalSummaryTable() {
   }
 
   // scenario_id -> provider -> variantKey -> latest record for that exact
-  // triple. variantKey folds in the meeting number for phase4-history/ (each of its
-  // 5 meetings has its own "baseline"/"with_context" pair) so aggregating
+  // triple. variantKey folds in the meeting slug for phase6-history/ (each of
+  // its 15 meetings has its own "baseline"/"with_context" pair) so aggregating
   // "all of this provider's records for this scenario" below correctly
-  // covers all 5 meetings instead of just whichever was judged last.
+  // covers all 15 meetings instead of just whichever was judged last.
   const latestByScenarioProvider = {};
   if (evalHistory) {
     for (const r of evalHistory.records) {
@@ -324,8 +334,8 @@ async function renderEvalSummaryTable() {
   }
 
   function scenarioWer(id) {
-    if (id !== "phase4-history") return werById[id] !== undefined ? labelForWer(werById[id]) : { label: "—", cls: "neutral" };
-    const storyWerValues = [1, 2, 3, 4, 5].map((w) => werById[`phase4-history-week-${w}`]).filter((v) => v !== undefined);
+    if (id !== "phase6-history") return werById[id] !== undefined ? labelForWer(werById[id]) : { label: "—", cls: "neutral" };
+    const storyWerValues = STORY_MEETINGS.map((m) => werById[`phase6-history-${m.slug}`]).filter((v) => v !== undefined);
     return storyWerValues.length
       ? labelForWer(storyWerValues.reduce((a, b) => a + b, 0) / storyWerValues.length)
       : { label: "—", cls: "neutral" };
@@ -352,8 +362,8 @@ async function renderEvalSummaryTable() {
     }
     // No judged runs at all for this scenario — one fallback row from the
     // bulk eval/judge.py snapshot (results.json) + the file's mtime.
-    const scenario = id === "phase4-history" ? null : (results ? results.scenarios.find((s) => s.id === id) : null);
-    const scenarioResults = id === "phase4-history" ? storyResults : null;
+    const scenario = id === "phase6-history" ? null : (results ? results.scenarios.find((s) => s.id === id) : null);
+    const scenarioResults = id === "phase6-history" ? storyResults : null;
     let records = [];
     if (scenario) records = scenario.variants;
     else if (scenarioResults) records = scenarioResults.meetings.flatMap((m) => [m.baseline, m.with_context]);
@@ -368,11 +378,11 @@ async function renderEvalSummaryTable() {
   }
 
   const rows = [
-    ...scenarioRows("phase2-baseline", "Phase 2 — Baseline", "—"),
-    ...scenarioRows("phase2-context", "Phase 2 — Context-aware", "Mixed — sharper wording, but captured fewer real action items than the plain version in this test."),
-    ...scenarioRows("phase3-checklist", "Phase 3 — Checklist coverage", "—"),
-    ...scenarioRows("phase3-assistant", "Phase 3 — AI Assistant", "—"),
-    ...scenarioRows("phase4-history", "Phase 4 (5 meetings)", "Mixed — correctly kept two topics separate in one week that the plain version confused, but repeated an earlier week's finished tasks as if still pending in another. See the Story page for details."),
+    ...scenarioRows("phase1-baseline", "Phase 1 — Basic summary", "—"),
+    ...scenarioRows("phase2-checklist", "Phase 2 — Checklist coverage", "—"),
+    ...scenarioRows("phase3-context", "Phase 3 — Context-aware", "Mixed — sharper wording, but captured fewer real action items than the plain version in this test."),
+    ...scenarioRows("phase4-assistant", "Phase 4 — AI Assistant", "—"),
+    ...scenarioRows("phase6-history", "Phase 6 (15 meetings)", "Mostly positive — higher faithfulness/completeness and zero small-talk leakage vs. baseline, but carries stale already-done actions forward as pending in 2 of 15 meetings. See the Story page for details."),
   ];
 
   root.innerHTML = `
@@ -1063,11 +1073,11 @@ function stopCustomPagePolling() {
 
 // ---------- Pipeline page ----------
 const PIPELINE_META = {
-  "phase2-baseline": { desc: "Transcript in, structured summary out. No extra grounding." },
-  "phase2-context": { desc: "Meeting context injected into the prompt — baseline and context-aware summaries side by side." },
-  "phase3-checklist": { desc: "Context-aware summarizer plus a deterministic checklist coverage section." },
-  "phase3-assistant": { desc: "A third voice (AI Assistant) joins the recording and takes notes live." },
-  "phase4-history": { desc: "5 weekly meetings — a summarizer with no memory of prior weeks vs. one given a running history." },
+  "phase1-baseline": { desc: "Transcript in, structured summary out. No extra grounding." },
+  "phase2-checklist": { desc: "Context-aware summarizer plus a deterministic checklist coverage section." },
+  "phase3-context": { desc: "Meeting context injected into the prompt — baseline and context-aware summaries side by side." },
+  "phase4-assistant": { desc: "A third voice (AI Assistant) joins the recording and takes notes live." },
+  "phase6-history": { desc: "15 lifecycle meetings — a summarizer with no memory of prior meetings vs. one given a running history." },
 };
 
 const PIPELINE_STAGE_LABELS = {
@@ -1352,7 +1362,7 @@ function renderStoryScoreTable(results) {
       <table class="eval-table">
         <thead>
           <tr>
-            <th>Week</th>
+            <th>Meeting</th>
             <th>Faithfulness (B &rarr; C)</th>
             <th>Completeness (B &rarr; C)</th>
             <th>Conciseness (B &rarr; C)</th>
@@ -1384,7 +1394,7 @@ function renderStoryMeeting(meeting, texts, evalEntry, probeEntry) {
   const { transcriptText, baselineText, contextText } = texts;
   const baselineKP = extractKeyPoints(baselineText);
   const contextKP = extractKeyPoints(contextText);
-  const transcriptId = `story-transcript-${meeting.week}`;
+  const transcriptId = `story-transcript-${meeting.slug}`;
 
   const bl = evalEntry ? evalEntry.baseline.layer2 : null;
   const cl = evalEntry ? evalEntry.with_context.layer2 : null;
@@ -1443,7 +1453,7 @@ function renderStoryMeeting(meeting, texts, evalEntry, probeEntry) {
         </div>
       </div>
 
-      ${STORY_CURATOR_NOTES[meeting.week] ? `<div class="curator-note"><strong>Human review note:</strong> ${escapeHtml(STORY_CURATOR_NOTES[meeting.week])}</div>` : ""}
+      ${STORY_CURATOR_NOTES[meeting.slug] ? `<div class="curator-note"><strong>Human review note:</strong> ${escapeHtml(STORY_CURATOR_NOTES[meeting.slug])}</div>` : ""}
     </div>
   `;
 }
@@ -1467,9 +1477,9 @@ async function renderStoryPage() {
     }
 
     let html = `
-      <p class="custom-intro">Five weekly status syncs about the same Mobile App Redesign project, told as one continuous story instead of a single snapshot (see <a href="/phase4-history/README.md">phase4-history/README.md</a>). Each meeting is summarized two ways: <strong>Baseline</strong> (transcript only, no memory of prior weeks) and <strong>With Context + History</strong> (project background plus a running history built from every prior week's own generated summary). Each meeting also opens with a few lines of unrelated small talk (weather, a show, a game, coffee, traffic) to test whether it leaks into the summary.</p>
+      <p class="custom-intro">Fifteen meetings covering the Mobile App Redesign project's full lifecycle, kickoff through launch retro over roughly five months — a distinct meeting type each time (kickoff, requirements review, design review, seven sprint syncs, test plan review, UAT kickoff, UAT results, go-live readiness, launch retro), not a repeated weekly format (see <a href="/phase6-history/README.md">phase6-history/README.md</a>). Each meeting is summarized two ways: <strong>Baseline</strong> (transcript only, no memory of prior meetings) and <strong>With Context + History</strong> (project background plus a running history built from every prior meeting's own generated summary). Each meeting also opens with a few lines of unrelated small talk to test whether it leaks into the summary.</p>
       <div class="story-verdict">
-        <strong>Verdict:</strong> the holistic 1-5 judge scores are nearly identical between baseline and context-aware across all 5 meetings — on numbers alone, context looks like it made no difference. Targeted checks tell a clearer story: a <strong>deterministic</strong> check (not an LLM judgment) shows baseline conflates the Week 3 dark-mode and legal/privacy workstreams into one, while context-aware keeps them correctly separate — and the same deterministic check shows context-aware's Week 5 summary repeating Week 4's already-completed actions as if still pending, while baseline (with no history to leak) does not. Two of the original LLM-judge probes were swapped for these deterministic checks after the judge itself got both wrong on manual verification — see the human review notes and per-meeting "Targeted checks" below.
+        <strong>Verdict:</strong> context-aware scores a bit higher on the holistic judge (faithfulness 4.0/5 vs. baseline's 3.9/5, completeness 3.5/5 vs. 3.3/5 — continuity is identical at 4.6/5 for both, which doesn't distinguish them). Targeted <strong>deterministic</strong> checks (not LLM judgments) tell a more decisive story: baseline leaks small talk into the summary in 3 of 15 meetings, context-aware in 0 of 15 — a clean win for context. Context-aware also correctly conveys that the payments vendor issue is fully resolved by 09-sprint-status-6, where baseline's phrasing leaves it ambiguous. But context-aware has a real cost: it carries stale, already-resolved actions forward as still-pending in 2 of 15 meetings (04-sprint-status-1, 12-uat-kickoff) — baseline, having no history to leak, never does this. See the human review notes and per-meeting "Targeted checks" below.
       </div>
     `;
 
@@ -1487,8 +1497,8 @@ async function renderStoryPage() {
         fetchText(meeting.baseline),
         fetchText(meeting.context),
       ]);
-      const evalEntry = results ? results.meetings.find((m) => m.week === meeting.week) : null;
-      const probeEntry = probes ? probes.weeks.find((w) => w.week === meeting.week) : null;
+      const evalEntry = results ? results.meetings.find((m) => m.slug === meeting.slug) : null;
+      const probeEntry = probes ? probes.meetings.find((w) => w.slug === meeting.slug) : null;
       return renderStoryMeeting(meeting, { transcriptText, baselineText, contextText }, evalEntry, probeEntry);
     }));
 
@@ -1502,7 +1512,7 @@ async function renderStoryPage() {
       });
     });
   } catch (err) {
-    root.innerHTML = `<p>Could not load story data (${escapeHtml(err.message)}). Run <code>python phase4-history/src/main.py</code> from the project root first.</p>`;
+    root.innerHTML = `<p>Could not load story data (${escapeHtml(err.message)}). Run <code>python phase6-history/src/main.py</code> from the project root first.</p>`;
   }
 }
 
@@ -1527,12 +1537,12 @@ function gapPill(label) {
   return `<span class="status-pill"><span class="status-dot critical"></span>${escapeHtml(label)}</span>`;
 }
 
-function renderPhase1(transcriptionData) {
+function renderFoundation(transcriptionData) {
   let html = `
     <div class="roadmap-foundation">
       <div class="roadmap-foundation-badge">Foundation — feeds into every phase below</div>
-      <h3 class="eval-section-header" style="margin-top:0;padding-top:0;border-top:none;">Phase 1 — Core Voice-to-Transcript</h3>
-      <p class="eval-note"><strong>Goal:</strong> convert raw spoken audio into a clean transcript, fast. <strong>Built by:</strong> the shared Whisper step (<code>transcription.py</code>), identical across every scenario folder — every phase below summarizes whatever transcript this step produced, so its accuracy is a ceiling on all of them, not just another parallel metric.</p>
+      <h3 class="eval-section-header" style="margin-top:0;padding-top:0;border-top:none;">Voice-to-Transcript</h3>
+      <p class="eval-note"><strong>Goal:</strong> convert raw spoken audio into a clean transcript, fast. <strong>Built by:</strong> the shared Whisper step (<code>transcription.py</code>), identical across every scenario folder — every phase below summarizes whatever transcript this step produced, so its accuracy is a ceiling on all of them, not just another parallel metric. Not a numbered phase on its own — see <code>audio-generation/</code> for the raw recordings every phase transcribes.</p>
   `;
   if (transcriptionData) {
     const avgWer = (tier) => avg(transcriptionData.scenarios.map((s) => s.tiers[tier]?.wer));
@@ -1569,181 +1579,430 @@ function renderPhase1(transcriptionData) {
   return html;
 }
 
-function renderPhase2(results) {
+function renderPhase1(results) {
   let html = `
-    <h3 class="eval-section-header">Phase 2 — Transcript Summary</h3>
-    <p class="eval-note"><strong>Goal:</strong> a meaningful paragraph + bullet summary. <strong>Built by:</strong> phase2-baseline <code>summarize_baseline</code> (zero-shot) vs phase2-context <code>summarize_with_context</code> (meeting background injected into the prompt).</p>
+    <h3 class="eval-section-header">Phase 1 — Basic Summary</h3>
+    <p class="eval-note"><strong>Goal:</strong> a meaningful paragraph + bullet summary, no extra grounding. <strong>Built by:</strong> <code>phase1-baseline/</code> — <code>summarize()</code>, zero-shot against the transcript.</p>
   `;
-  const rows = [
-    { label: "phase2-baseline — baseline (zero-shot)", variant: findVariant(results, "phase2-baseline", "baseline") },
-    { label: "phase2-context — baseline (no context)", variant: findVariant(results, "phase2-context", "baseline") },
-    { label: "phase2-context — with context", variant: findVariant(results, "phase2-context", "with_context") },
-  ];
-  if (results) {
+  const variant = findVariant(results, "phase1-baseline", "baseline");
+  if (variant) {
     html += `
       <div class="eval-table-wrap">
         <table class="eval-table">
-          <thead><tr><th>Variant</th><th>Factuality (faithfulness)</th><th>Key Point coverage (completeness, proxy)</th><th>Conciseness</th><th>Unsupported claims</th></tr></thead>
+          <thead><tr><th>Faithfulness</th><th>Completeness (proxy)</th><th>Conciseness</th><th>Unsupported claims</th></tr></thead>
           <tbody>
+            <tr>
+              <td>${scoreCell(variant.layer2.faithfulness)}</td>
+              <td>${scoreCell(variant.layer2.completeness)}</td>
+              <td>${scoreCell(variant.layer2.conciseness)}</td>
+              <td>${(variant.layer2.unsupported_claims || []).length}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="eval-note">Judge model: ${escapeHtml(results.model)} — no separate ground-truth key-point list exists, so "Key Point Recall" is approximated by the judge's completeness score, not a literal fraction.</p>
     `;
-    for (const row of rows) {
-      const v = row.variant;
-      html += `
-        <tr>
-          <td>${escapeHtml(row.label)}</td>
-          <td>${v ? scoreCell(v.layer2.faithfulness) : "—"}</td>
-          <td>${v ? scoreCell(v.layer2.completeness) : "—"}</td>
-          <td>${v ? scoreCell(v.layer2.conciseness) : "—"}</td>
-          <td>${v ? (v.layer2.unsupported_claims || []).length : "—"}</td>
-        </tr>
-      `;
-    }
-    html += `</tbody></table></div>`;
-    html += `<p class="eval-note">Judge model: ${escapeHtml(results.model)} — no separate ground-truth key-point list exists, so "Key Point Recall" is approximated by the judge's completeness score, not a literal fraction.</p>`;
   } else {
     html += `<p class="eval-note">Could not load judge results. Run <code>python eval/judge.py</code>.</p>`;
   }
   return html;
 }
 
-function renderPhase3(results, extraction) {
+function renderPhase2(results, extraction) {
   let html = `
-    <h3 class="eval-section-header">Phase 3 — Actionable Checklists &amp; Task Extraction</h3>
-    <p class="eval-note"><strong>Goal:</strong> structured, schema-conformant capture of tasks/data. <strong>Built by:</strong> phase3-checklist/phase3-assistant's deterministic <code>## Checklist Coverage</code> section and the Actions-bullet schema enforced since phase2-baseline.</p>
+    <h3 class="eval-section-header">Phase 2 — Checklist Coverage &amp; Task Extraction</h3>
+    <p class="eval-note"><strong>Goal:</strong> structured, schema-conformant capture of tasks/topics. <strong>Built by:</strong> <code>phase2-checklist/</code>'s deterministic <code>## Checklist Coverage</code> section (keyword match against the transcript, not another LLM call) plus the Actions-bullet schema enforced since Phase 1.</p>
   `;
 
-  html += `<h4 class="eval-subsection-header">Checklist field mapping (phase3-checklist, phase3-assistant)</h4>`;
-  if (results) {
-    html += `
-      <div class="eval-table-wrap">
-        <table class="eval-table">
-          <thead><tr><th>Scenario</th><th>Precision</th><th>Recall</th><th>Accuracy</th></tr></thead>
-          <tbody>
-    `;
-    for (const id of ["phase3-checklist", "phase3-assistant"]) {
-      const variant = results.scenarios.find((s) => s.id === id)?.variants[0];
-      const cl = variant?.checklist;
-      html += `
-        <tr>
-          <td>${id}</td>
-          <td>${cl ? fmtPct(cl.precision) : "—"}</td>
-          <td>${cl ? fmtPct(cl.recall) : "—"}</td>
-          <td>${cl ? fmtPct(cl.accuracy) : "—"}</td>
-        </tr>
-      `;
-    }
-    html += `</tbody></table></div>`;
-  } else {
-    html += `<p class="eval-note">Could not load checklist scores. Run <code>python eval/judge.py</code>.</p>`;
-  }
+  const variant = results ? results.scenarios.find((s) => s.id === "phase2-checklist")?.variants[0] : null;
+  const cl = variant?.checklist;
+  html += `<h4 class="eval-subsection-header">Checklist field mapping</h4>`;
+  html += cl ? `
+    <div class="eval-table-wrap">
+      <table class="eval-table">
+        <thead><tr><th>Precision</th><th>Recall</th><th>Accuracy</th></tr></thead>
+        <tbody><tr><td>${fmtPct(cl.precision)}</td><td>${fmtPct(cl.recall)}</td><td>${fmtPct(cl.accuracy)}</td></tr></tbody>
+      </table>
+    </div>
+  ` : `<p class="eval-note">Could not load checklist scores. Run <code>python eval/judge.py</code>.</p>`;
 
-  html += `<h4 class="eval-subsection-header">Action-item extraction (all scenarios)</h4>`;
+  html += `<h4 class="eval-subsection-header">Action-item extraction</h4>`;
   if (extraction) {
+    const s = extraction.scenarios.find((sc) => sc.id === "phase2-checklist");
     html += `
       <div class="eval-table-wrap">
         <table class="eval-table">
-          <thead><tr><th>Scenario</th><th>Variant</th><th>Recall</th><th>Precision</th></tr></thead>
+          <thead><tr><th>Variant</th><th>Recall</th><th>Precision</th></tr></thead>
           <tbody>
+            ${(s?.variants || []).map((v) => `<tr><td>${escapeHtml(v.variant)}</td><td>${fmtPct(v.recall)}</td><td>${fmtPct(v.precision)}</td></tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
     `;
-    for (const s of extraction.scenarios) {
-      for (const v of s.variants) {
-        html += `
-          <tr>
-            <td>${escapeHtml(s.id)}</td>
-            <td>${escapeHtml(v.variant)}</td>
-            <td>${fmtPct(v.recall)}</td>
-            <td>${fmtPct(v.precision)}</td>
-          </tr>
-        `;
-      }
-    }
-    html += `</tbody></table></div>`;
   } else {
     html += `<p class="eval-note">Could not load extraction efficiency. Run <code>python eval/extraction_efficiency.py</code>.</p>`;
   }
   return html;
 }
 
-function renderPhase4(storyResults, storyProbes) {
+function renderPhase3(results) {
   let html = `
-    <h3 class="eval-section-header">Phase 4 — Contextual &amp; Domain-Specific Summaries</h3>
-    <p class="eval-note"><strong>Goal:</strong> meeting-history-aware summaries (RAG over past notes). <strong>Built by:</strong> <code>phase4-history/</code> — 5 weekly syncs, comparing a summarizer with no memory of prior meetings against one given a running history built from each prior week's own summary.</p>
+    <h3 class="eval-section-header">Phase 3 — Context-Aware Summarization</h3>
+    <p class="eval-note"><strong>Goal:</strong> does giving the summarizer meeting background sharpen the summary? <strong>Built by:</strong> <code>phase3-context/</code> — <code>summarize_baseline</code> (zero-shot) vs <code>summarize_with_context</code> (project background injected into the prompt), same transcript, same run.</p>
+  `;
+  const rows = [
+    { label: "Baseline (no context)", variant: findVariant(results, "phase3-context", "baseline") },
+    { label: "With context", variant: findVariant(results, "phase3-context", "with_context") },
+  ];
+  if (results) {
+    html += `
+      <div class="eval-table-wrap">
+        <table class="eval-table">
+          <thead><tr><th>Variant</th><th>Faithfulness</th><th>Completeness (proxy)</th><th>Conciseness</th><th>Unsupported claims</th></tr></thead>
+          <tbody>
+            ${rows.map((row) => {
+              const v = row.variant;
+              return `<tr><td>${escapeHtml(row.label)}</td><td>${v ? scoreCell(v.layer2.faithfulness) : "—"}</td><td>${v ? scoreCell(v.layer2.completeness) : "—"}</td><td>${v ? scoreCell(v.layer2.conciseness) : "—"}</td><td>${v ? (v.layer2.unsupported_claims || []).length : "—"}</td></tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+      <p class="eval-note">Judge model: ${escapeHtml(results.model)}.</p>
+    `;
+  } else {
+    html += `<p class="eval-note">Could not load judge results. Run <code>python eval/judge.py</code>.</p>`;
+  }
+  return html;
+}
+
+function renderPhase4(results, extraction) {
+  let html = `
+    <h3 class="eval-section-header">Phase 4 — AI Assistant as Third Actor</h3>
+    <p class="eval-note"><strong>Goal:</strong> a third voice (an AI meeting assistant) joins the recording itself, taking notes live — does the summarizer correctly exclude the assistant's own remarks from the actual meeting content? <strong>Built by:</strong> <code>phase4-assistant/</code> — same checklist + context-aware summarizer as Phases 2-3, plus an instruction that only Person A/Person B's own statements count.</p>
+  `;
+  const variant = results ? results.scenarios.find((s) => s.id === "phase4-assistant")?.variants[0] : null;
+  const cl = variant?.checklist;
+  html += cl ? `
+    <div class="eval-table-wrap">
+      <table class="eval-table">
+        <thead><tr><th>Checklist Precision</th><th>Checklist Recall</th><th>Faithfulness</th><th>Completeness</th></tr></thead>
+        <tbody><tr>
+          <td>${fmtPct(cl.precision)}</td><td>${fmtPct(cl.recall)}</td>
+          <td>${scoreCell(variant.layer2.faithfulness)}</td><td>${scoreCell(variant.layer2.completeness)}</td>
+        </tr></tbody>
+      </table>
+    </div>
+  ` : `<p class="eval-note">Could not load results. Run <code>python eval/judge.py</code>.</p>`;
+
+  if (extraction) {
+    const s = extraction.scenarios.find((sc) => sc.id === "phase4-assistant");
+    const v = s?.variants[0];
+    if (v) {
+      html += `<p class="eval-note">Action-item extraction: recall ${fmtPct(v.recall)}, precision ${fmtPct(v.precision)} — the assistant's own note-taking/closing-summary lines are never a source of a Key Point, Decision, or Action; only Person A/B's own statements are.</p>`;
+    }
+  }
+  return html;
+}
+
+function renderPhase5(historyRecords) {
+  let html = `
+    <h3 class="eval-section-header">Phase 5 — On-Device / Office Tool Processing</h3>
+    <p class="eval-note"><strong>Goal:</strong> agentic Office-document processing, validated under low-network conditions. <strong>Built by:</strong> <code>phase5-office-agent/</code> — a Claude tool-use agent standing in for Microsoft Copilot Enterprise (no license available in this repo); see its README for exactly what that substitution does and doesn't validate.</p>
+  `;
+
+  const byVariant = {};
+  for (const r of historyRecords || []) {
+    (byVariant[r.variant] = byVariant[r.variant] || []).push(r);
+  }
+  const variants = ["baseline", "agent_good", "agent_degraded", "agent_offline"].filter((v) => byVariant[v]);
+
+  if (variants.length) {
+    const rows = variants.map((v) => {
+      const records = byVariant[v];
+      const faithfulness = avg(records.map((r) => r.layer2?.faithfulness));
+      const completeness = avg(records.map((r) => r.layer2?.completeness));
+      const conciseness = avg(records.map((r) => r.layer2?.conciseness));
+      return `<tr><td>${v}</td><td>${fmtScore(faithfulness)}</td><td>${fmtScore(completeness)}</td><td>${fmtScore(conciseness)}</td></tr>`;
+    }).join("");
+    html += `
+      <div class="eval-table-wrap">
+        <table class="eval-table">
+          <thead><tr><th>Variant</th><th>Faithfulness</th><th>Completeness</th><th>Conciseness</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <p class="eval-note">Was the improvement significant? Compare "baseline" (single-shot) against "agent_good" above — see <code>phase5-office-agent/README.md</code> for the current read.</p>
+    `;
+  } else {
+    html += `<p class="eval-note">No runs yet. Run <code>python phase5-office-agent/src/main.py</code> (needs <code>ANTHROPIC_API_KEY</code>).</p>`;
+  }
+
+  html += `<p class="eval-note">Claude-only: local/Mistral have no tool-calling support in this project's <code>llm_provider.py</code>, so the agent arm requires a cloud model — on-device stays comprehension-only. Network conditions above are simulated (no real network-shaping tool in this repo), not a real network test. See <a href="/ROADMAP.md">ROADMAP.md</a> for the full write-up.</p>`;
+  return html;
+}
+
+function renderPhase6(storyResults, storyProbes) {
+  let html = `
+    <h3 class="eval-section-header">Phase 6 — RAG over Meeting History</h3>
+    <p class="eval-note"><strong>Goal:</strong> meeting-history-aware summaries (RAG over past notes) across a full 15-meeting project lifecycle. <strong>Built by:</strong> <code>phase6-history/</code> — comparing a summarizer with no memory of prior meetings against one given a running history built from each prior meeting's own summary.</p>
   `;
 
   if (storyResults) {
     const baselineFaithfulness = avg(storyResults.meetings.map((m) => m.baseline.layer2.faithfulness));
     const contextFaithfulness = avg(storyResults.meetings.map((m) => m.with_context.layer2.faithfulness));
+    const baselineCompleteness = avg(storyResults.meetings.map((m) => m.baseline.layer2.completeness));
+    const contextCompleteness = avg(storyResults.meetings.map((m) => m.with_context.layer2.completeness));
     const baselineContinuity = avg(storyResults.meetings.map((m) => m.baseline.continuity?.continuity));
     const contextContinuity = avg(storyResults.meetings.map((m) => m.with_context.continuity?.continuity));
 
     html += `
       <div class="eval-table-wrap">
         <table class="eval-table">
-          <thead><tr><th>Variant</th><th>Avg faithfulness (RAG faithfulness, proxy)</th><th>Avg continuity (across weeks 2-5)</th></tr></thead>
+          <thead><tr><th>Variant</th><th>Avg faithfulness</th><th>Avg completeness</th><th>Avg continuity (meetings 2-15)</th></tr></thead>
           <tbody>
-            <tr><td>Baseline (no history)</td><td>${fmtScore(baselineFaithfulness)}</td><td>${fmtScore(baselineContinuity)}</td></tr>
-            <tr><td>With context + history</td><td>${fmtScore(contextFaithfulness)}</td><td>${fmtScore(contextContinuity)}</td></tr>
+            <tr><td>Baseline (no history)</td><td>${fmtScore(baselineFaithfulness)}</td><td>${fmtScore(baselineCompleteness)}</td><td>${fmtScore(baselineContinuity)}</td></tr>
+            <tr><td>With context + history</td><td>${fmtScore(contextFaithfulness)}</td><td>${fmtScore(contextCompleteness)}</td><td>${fmtScore(contextContinuity)}</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="eval-note">Was the improvement significant? <strong>Not on these holistic scores</strong> — baseline and context-aware score nearly identically. Two deterministic checks below tell a clearer story than the holistic judge does.</p>
+      <p class="eval-note">Was the improvement significant? <strong>A modest edge to context</strong> on the holistic scores (faithfulness/completeness both a bit higher) — continuity is identical for both and doesn't distinguish them. Deterministic checks below tell a more decisive story.</p>
     `;
   } else {
     html += `<p class="eval-note">Could not load story scores. Run <code>python eval/story_judge.py</code>.</p>`;
   }
 
   if (storyProbes) {
-    const week3 = storyProbes.weeks.find((w) => w.week === 3)?.deterministic_checks?.conflation;
-    const week5 = storyProbes.weeks.find((w) => w.week === 5)?.deterministic_checks?.stale_actions;
-    const noiseLeakCount = storyProbes.weeks.reduce((acc, w) => {
-      const leaked = (w.noise?.baseline?.leaked ? 1 : 0) + (w.noise?.with_context?.leaked ? 1 : 0);
-      return acc + leaked;
-    }, 0);
+    const noiseLeakCount = storyProbes.meetings.reduce(
+      (acc, m) => acc + (m.noise?.baseline?.leaked ? 1 : 0) + (m.noise?.with_context?.leaked ? 1 : 0), 0,
+    );
+    let baselineStale = 0, contextStale = 0;
+    for (const m of storyProbes.meetings) {
+      const s = m.deterministic_checks?.stale_actions;
+      if (s?.baseline?.stale) baselineStale++;
+      if (s?.with_context?.stale) contextStale++;
+    }
 
-    html += `<h4 class="eval-subsection-header">Deterministic checks (more trustworthy than the holistic score for these two cases)</h4>`;
+    html += `<h4 class="eval-subsection-header">Deterministic checks (more trustworthy than the holistic score for these cases)</h4>`;
     html += `<div class="eval-card">`;
-    if (week3) {
-      html += `<div class="row"><span class="label">Week 3 conflation (dark mode vs. legal/privacy):</span> ${statusPill(
-        !week3.baseline.conflated, "baseline kept them separate", "baseline conflated the two workstreams"
-      )} · ${statusPill(!week3.with_context.conflated, "context-aware kept them separate", "context-aware conflated the two workstreams")}</div>`;
-    }
-    if (week5) {
-      html += `<div class="row"><span class="label">Week 5 stale-action carryover:</span> ${statusPill(
-        !week5.baseline.stale, "baseline: no stale actions", "baseline: stale actions found"
-      )} · ${statusPill(!week5.with_context.stale, "context-aware: no stale actions", "context-aware: repeated Week 4's completed actions as pending")}</div>`;
-    }
-    html += `<div class="row"><span class="label">Small-talk noise leakage (all 5 weeks, both variants):</span> ${statusPill(
+    html += `<div class="row"><span class="label">Small-talk noise leakage (15 meetings, both variants):</span> ${statusPill(
       noiseLeakCount === 0, "0 leaks — small talk never entered the summary", `${noiseLeakCount} leak(s) found`
     )}</div>`;
+    html += `<div class="row"><span class="label">Stale-action carryover (meetings 2-15):</span> ${statusPill(
+      baselineStale === 0, "baseline: none found", `baseline: ${baselineStale} meeting(s) found`
+    )} · ${statusPill(contextStale === 0, "context-aware: none found", `context-aware: ${contextStale} meeting(s) found`)}</div>`;
     html += `</div>`;
   } else {
     html += `<p class="eval-note">Could not load story probes. Run <code>python eval/story_probes.py</code>.</p>`;
   }
 
-  html += `<p class="eval-note">Not yet built: meeting-type-specific templates and domain terminology handling — every <code>phase4-history/</code> meeting is still the same "project status sync" type. See <a href="/ROADMAP.md">ROADMAP.md</a> for the full write-up.</p>`;
+  html += `<p class="eval-note">Not yet built: meeting-type-specific templates and domain terminology handling beyond this project's own vocabulary. See <a href="/ROADMAP.md">ROADMAP.md</a> for the full write-up.</p>`;
   return html;
+}
+
+function renderPhase7() {
+  return `
+    <h3 class="eval-section-header">Phase 7 — Voice Interface for Querying the Content</h3>
+    <p class="eval-note"><strong>Goal:</strong> ask a spoken question, get a text answer grounded in everything this project has produced. <strong>Built by:</strong> <code>phase7-voice-query/</code> — TF-IDF retrieval over stored transcripts/summaries (no vector DB, no new dependency), answered with the same provider-swappable backend every other phase uses.</p>
+    <p class="eval-note">End-to-end latency and Grounding Score are measured per query (<code>output/query-N/{timing,grounding}.json</code>), not aggregated here since queries are ad hoc rather than a fixed scripted batch like Phases 1-4. Try it on the <strong>Voice Query</strong> page, or see <a href="/phase7-voice-query/README.md">phase7-voice-query/README.md</a> for the retrieval/grounding methodology.</p>
+  `;
 }
 
 async function renderRoadmapPage() {
   const root = document.getElementById("roadmap-root");
   root.innerHTML = "<p>Loading…</p>";
 
-  const [transcriptionData, results, extraction, storyResults, storyProbes] = await Promise.all([
+  const [transcriptionData, results, extraction, storyResults, storyProbes, phase5History] = await Promise.all([
     fetchJsonOrNull("/eval/output/transcription_quality.json"),
     fetchJsonOrNull("/eval/output/results.json"),
     fetchJsonOrNull("/eval/output/extraction_efficiency.json"),
     fetchJsonOrNull("/eval/output/story_results.json"),
     fetchJsonOrNull("/eval/output/story_probes.json"),
+    fetchJsonOrNull("/api/eval/history?scenario=phase5-office-agent"),
   ]);
 
-  let html = `<p class="custom-intro">Each phase below is scored from the same eval outputs shown on the Evaluation and Story pages, regrouped by roadmap phase instead of by scenario. Phases 5-6 have no code yet, so they're left out — see <a href="/ROADMAP.md">ROADMAP.md</a>.</p>`;
-  html += renderPhase1(transcriptionData);
+  let html = `<p class="custom-intro">Each phase below is scored from the same eval outputs shown on the Evaluation and Story pages, regrouped by roadmap phase instead of by scenario — see <a href="/ROADMAP.md">ROADMAP.md</a> for the narrative version.</p>`;
+  html += renderFoundation(transcriptionData);
   html += `<div class="roadmap-connector">↓ feeds into every phase below</div>`;
-  html += renderPhase2(results);
-  html += renderPhase3(results, extraction);
-  html += renderPhase4(storyResults, storyProbes);
+  html += renderPhase1(results);
+  html += renderPhase2(results, extraction);
+  html += renderPhase3(results);
+  html += renderPhase4(results, extraction);
+  html += renderPhase5(phase5History?.records);
+  html += renderPhase6(storyResults, storyProbes);
+  html += renderPhase7();
 
   root.innerHTML = html;
+}
+
+// ---------- Voice Query page (Phase 6) ----------
+const VOICE_QUERY_STAGE_LABELS = {
+  transcribing: "Transcribing",
+  retrieving: "Retrieving",
+  answering: "Answering",
+  done: "Done",
+};
+
+let voiceQueryMediaRecorder = null;
+let voiceQueryChunks = [];
+let voiceQueryPollTimer = null;
+
+function renderVoiceQueryPage() {
+  const root = document.getElementById("voicequery-root");
+  root.innerHTML = `
+    <p class="custom-intro">Ask a spoken question about anything the project has already summarized
+      (Phases 1-6) and get a text answer grounded in the stored transcripts/summaries, with end-to-end
+      latency and a deterministic Grounding Score. See
+      <a href="/phase7-voice-query/README.md">phase7-voice-query/README.md</a>.</p>
+    <div class="voicequery-controls">
+      <select id="voicequery-provider" class="provider-select">
+        <option value="local">Local (Qwen2.5)</option>
+        <option value="mistral">Local (Mistral 7B)</option>
+        <option value="claude">Claude (Haiku 4.5)</option>
+      </select>
+      <button id="voicequery-record-btn" class="run-btn">Start recording</button>
+      <span id="voicequery-rec-status" class="voicequery-status"></span>
+    </div>
+    <div id="voicequery-progress" class="custom-processing-note"></div>
+    <div id="voicequery-result"></div>
+  `;
+
+  document.getElementById("voicequery-record-btn").addEventListener("click", () => {
+    if (voiceQueryMediaRecorder && voiceQueryMediaRecorder.state === "recording") {
+      voiceQueryMediaRecorder.stop();
+    } else {
+      startVoiceQueryRecording();
+    }
+  });
+}
+
+async function startVoiceQueryRecording() {
+  const btn = document.getElementById("voicequery-record-btn");
+  const status = document.getElementById("voicequery-rec-status");
+  document.getElementById("voicequery-result").innerHTML = "";
+  document.getElementById("voicequery-progress").textContent = "";
+
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    status.textContent = `Microphone access denied or unavailable (${err.message}).`;
+    return;
+  }
+
+  voiceQueryChunks = [];
+  voiceQueryMediaRecorder = new MediaRecorder(stream);
+  voiceQueryMediaRecorder.ondataavailable = (e) => {
+    if (e.data.size > 0) voiceQueryChunks.push(e.data);
+  };
+  voiceQueryMediaRecorder.onstop = () => {
+    stream.getTracks().forEach((t) => t.stop());
+    const blob = new Blob(voiceQueryChunks, { type: voiceQueryMediaRecorder.mimeType || "audio/webm" });
+    submitVoiceQuery(blob);
+  };
+  voiceQueryMediaRecorder.start();
+  btn.textContent = "Stop recording";
+  status.textContent = "Recording… click again to stop.";
+}
+
+async function submitVoiceQuery(blob) {
+  const btn = document.getElementById("voicequery-record-btn");
+  const status = document.getElementById("voicequery-rec-status");
+  const provider = document.getElementById("voicequery-provider").value;
+  btn.disabled = true;
+  status.textContent = "Uploading…";
+
+  let job;
+  try {
+    const res = await fetch(`/api/voice-query?provider=${encodeURIComponent(provider)}`, {
+      method: "POST",
+      headers: { "Content-Type": blob.type || "audio/webm" },
+      body: blob,
+    });
+    if (!res.ok) throw new Error(`upload failed: ${res.status}`);
+    job = (await res.json()).job;
+  } catch (err) {
+    status.textContent = `Upload failed (${err.message}).`;
+    btn.disabled = false;
+    btn.textContent = "Start recording";
+    return;
+  }
+
+  status.textContent = "Processing…";
+  pollVoiceQuery(job);
+}
+
+function pollVoiceQuery(job) {
+  const btn = document.getElementById("voicequery-record-btn");
+  const status = document.getElementById("voicequery-rec-status");
+  const progress = document.getElementById("voicequery-progress");
+
+  clearInterval(voiceQueryPollTimer);
+  voiceQueryPollTimer = setInterval(async () => {
+    let data;
+    try {
+      const res = await fetch(`/api/voice-query/status?job=${encodeURIComponent(job)}`);
+      data = await res.json();
+    } catch {
+      return;
+    }
+
+    if (data.stage) {
+      progress.textContent = `Stage: ${VOICE_QUERY_STAGE_LABELS[data.stage] || data.stage}`;
+    }
+
+    if (data.status === "done") {
+      clearInterval(voiceQueryPollTimer);
+      status.textContent = "";
+      progress.textContent = "";
+      btn.disabled = false;
+      btn.textContent = "Start recording";
+      renderVoiceQueryResult(data.result);
+    } else if (data.status === "error") {
+      clearInterval(voiceQueryPollTimer);
+      status.textContent = `Error: ${data.error || "unknown"}`;
+      btn.disabled = false;
+      btn.textContent = "Start recording";
+    }
+  }, 1500);
+}
+
+function renderVoiceQueryResult(result) {
+  const root = document.getElementById("voicequery-result");
+  if (!result) {
+    root.innerHTML = `<p>No result returned — check <code>docker compose logs</code> / server output.</p>`;
+    return;
+  }
+  const grounding = result.grounding || {};
+  const groundingPct = grounding.score != null ? `${Math.round(grounding.score * 100)}%` : "n/a";
+  const timing = result.timing || {};
+  const sources = (result.retrieved || []).map((c) => {
+    const snippet = c.text.length > 160 ? `${c.text.slice(0, 160)}…` : c.text;
+    return `<li><strong>${escapeHtml(c.source)}</strong> (score ${c.score.toFixed(2)}) — ${escapeHtml(snippet)}</li>`;
+  }).join("");
+
+  root.innerHTML = `
+    <div class="voicequery-qa">
+      <div class="voicequery-question"><strong>You asked:</strong> ${escapeHtml(result.question)}</div>
+      <div class="voicequery-answer"><strong>Answer:</strong> ${escapeHtml(result.answer)}</div>
+    </div>
+    <div class="voicequery-metrics">
+      <div><strong>End-to-end latency:</strong> ${(timing.total_s || 0).toFixed(2)}s
+        (transcribe ${(timing.transcribe_s || 0).toFixed(2)}s, retrieve ${(timing.retrieve_s || 0).toFixed(2)}s,
+        answer ${(timing.answer_s || 0).toFixed(2)}s)</div>
+      <div><strong>Grounding Score:</strong> ${groundingPct}${grounding.abstained ? " (model abstained — low score expected)" : ""}</div>
+    </div>
+    <div class="voicequery-sources">
+      <h4>Retrieved sources</h4>
+      <ul>${sources || "<li>(none matched)</li>"}</ul>
+    </div>
+  `;
+}
+
+function stopVoiceQueryPolling() {
+  if (voiceQueryPollTimer) {
+    clearInterval(voiceQueryPollTimer);
+    voiceQueryPollTimer = null;
+  }
 }
 
 // ---------- Nav ----------
@@ -1754,6 +2013,7 @@ function setupNav() {
     story: document.getElementById("story-page"),
     custom: document.getElementById("custom-page"),
     pipeline: document.getElementById("pipeline-page"),
+    voicequery: document.getElementById("voicequery-page"),
     evaluation: document.getElementById("evaluation-page"),
     roadmap: document.getElementById("roadmap-page"),
   };
@@ -1766,7 +2026,7 @@ function setupNav() {
       });
 
       // Always re-render on nav click, not just the first visit — both pages
-      // can change from Pipeline-triggered runs (phase4-history/phase2-3 scenarios re-summarized,
+      // can change from Pipeline-triggered runs (phase6-history/phase1-4 scenarios re-summarized,
       // new judged runs added to history) after the first time you look.
       if (item.dataset.page === "evaluation") {
         renderEvaluationPage();
@@ -1790,6 +2050,12 @@ function setupNav() {
         startPipelinePagePolling();
       } else {
         stopPipelinePagePolling();
+      }
+
+      if (item.dataset.page === "voicequery") {
+        renderVoiceQueryPage();
+      } else {
+        stopVoiceQueryPolling();
       }
     });
   });

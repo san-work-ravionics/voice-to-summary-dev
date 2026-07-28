@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import os
 import sys
@@ -9,7 +10,7 @@ sys.path.insert(0, PROJECT_ROOT)
 # judge.py used to expose build_judge_generator/run_judge/etc. directly; it
 # was refactored to delegate to eval_scoring.py's evaluate_variant, which
 # builds its own generator per call. Story scoring reuses one generator
-# across ~20 judge calls (5 weeks x 2 variants x layer2 + continuity) to
+# across ~60 judge calls (15 meetings x 2 variants x layer2 + continuity) to
 # avoid reloading the local model that many times, so it calls
 # llm_provider/eval_scoring directly instead of going through judge.py.
 from llm_provider import build_generator, generate as llm_generate  # noqa: E402
@@ -18,10 +19,21 @@ from eval_scoring import (  # noqa: E402
     JUDGE_SYSTEM_PROMPT, _parse_judge_json,
 )
 
-STORY_OUTPUT_DIR = os.path.join(PROJECT_ROOT, "phase4-history", "output")
+STORY_OUTPUT_DIR = os.path.join(PROJECT_ROOT, "phase6-history", "output")
 RESULTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", "story_results.json")
 
-WEEKS = [1, 2, 3, 4, 5]
+
+def _load_meetings():
+    # audio-generation/ isn't a valid Python package name (hyphen), so it's
+    # loaded by file path — see phase6-history/src/main.py for the same
+    # technique.
+    spec = importlib.util.spec_from_file_location(
+        "_audio_generation_dialogues", os.path.join(PROJECT_ROOT, "audio-generation", "src", "dialogues.py"),
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.MEETINGS
+
 
 # Layer 2 (faithfulness/completeness/conciseness) reused unchanged from
 # judge.py grades a summary against its own transcript in isolation — it
@@ -53,8 +65,8 @@ def _read(path):
         return f.read()
 
 
-def _meeting_dir(week):
-    return os.path.join(STORY_OUTPUT_DIR, f"meeting-{week}")
+def _meeting_dir(slug):
+    return os.path.join(STORY_OUTPUT_DIR, slug)
 
 
 def _extract_decisions_and_actions(summary_text):
@@ -69,9 +81,9 @@ def _extract_decisions_and_actions(summary_text):
 
 
 def judge_extract_section(text, heading_name):
-    # Mirrors phase4-history/src/summarize.py's extract_section — reimplemented here
+    # Mirrors phase6-history/src/summarize.py's extract_section — reimplemented here
     # (rather than imported) so this eval script only depends on eval/judge.py,
-    # not on phase4-history/src, keeping the two independently runnable.
+    # not on phase6-history/src, keeping the two independently runnable.
     import re
     lines = text.split("\n")
     heading_re = re.compile(rf"^#{{1,6}}\s*{heading_name}\s*$", re.IGNORECASE)
@@ -123,17 +135,19 @@ def score_layer1(summary_text):
 
 def main():
     generator = build_generator()
+    meetings = _load_meetings()
 
     meetings_out = []
-    # Built from each week's own actual context-aware summary, in order —
+    # Built from each meeting's own actual context-aware summary, in order —
     # the same construction main.py used when generating, so the "ground
     # truth" history handed to the continuity judge matches what the
     # context-aware summarizer itself was actually given.
     history_entries = []
 
-    for week in WEEKS:
-        meeting_dir = _meeting_dir(week)
-        label = f"Week {week}"
+    for meeting in meetings:
+        slug = meeting["slug"]
+        meeting_dir = _meeting_dir(slug)
+        label = meeting["label"]
         transcript = _read(os.path.join(meeting_dir, "transcript.txt"))
         baseline_text = _read(os.path.join(meeting_dir, "summary_baseline.txt"))
         context_text = _read(os.path.join(meeting_dir, "summary_with_context.txt"))
@@ -157,7 +171,7 @@ def main():
             context_continuity = None
 
         meetings_out.append({
-            "week": week,
+            "slug": slug,
             "label": label,
             "baseline": {
                 "layer1": score_layer1(baseline_text),

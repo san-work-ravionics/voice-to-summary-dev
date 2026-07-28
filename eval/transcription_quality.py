@@ -15,36 +15,32 @@ RESULTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output"
 
 WHISPER_MODEL_SIZE = "base"
 
-# phase2-baseline/phase2-context/phase3-checklist share one recording/dialogue
-# (see their READMEs); each still gets its own entry since each scenario's
-# generate_dummy_audio.py is its own self-contained copy — identical results
-# here confirm that, not a bug.
+# phase1-baseline/phase2-checklist/phase3-context/phase5-office-agent all
+# transcribe the exact same shared recording (audio-generation/output/01-kickoff/) —
+# one entry for it, rather than four near-duplicate entries, since it's
+# genuinely one recording now, not four independent copies. phase4-assistant
+# still synthesizes its own (3-voice) recording, so it keeps a normal entry.
+SHARED_KICKOFF_RECORDING = "audio-generation/output/01-kickoff/recording.wav"
 VERSION_SCENARIOS = [
     {
-        "id": "phase2-baseline", "recording": "phase2-baseline/output/recording.wav", "transcript": "phase2-baseline/output/transcript.txt",
-        "dialogue_module": "phase2-baseline/src/generate_dummy_audio.py",
+        "id": "audio-generation-01-kickoff",
+        "recording": SHARED_KICKOFF_RECORDING,
+        "transcript": "phase1-baseline/output/transcript.txt",
+        "meeting_slug": "01-kickoff",
     },
     {
-        "id": "phase2-context", "recording": "phase2-context/output/recording.wav", "transcript": "phase2-context/output/transcript.txt",
-        "dialogue_module": "phase2-context/src/generate_dummy_audio.py",
-    },
-    {
-        "id": "phase3-checklist", "recording": "phase3-checklist/output/recording.wav", "transcript": "phase3-checklist/output/transcript.txt",
-        "dialogue_module": "phase3-checklist/src/generate_dummy_audio.py",
-    },
-    {
-        "id": "phase3-assistant", "recording": "phase3-assistant/output/recording.wav", "transcript": "phase3-assistant/output/transcript.txt",
-        "dialogue_module": "phase3-assistant/src/generate_dummy_audio.py",
+        "id": "phase4-assistant",
+        "recording": "phase4-assistant/output/recording.wav",
+        "transcript": "phase4-assistant/output/transcript.txt",
+        "dialogue_module": "phase4-assistant/src/generate_dummy_audio.py",
     },
 ]
-
-STORY_WEEKS = [1, 2, 3, 4, 5]
 
 DIARIZATION_NOTE = (
     "Not implemented / not measurable here. whisper.load_model(...).transcribe() "
     "as used throughout this project returns a single undifferentiated text "
     "stream with no speaker labels at all — the 'Person A' / 'Person B' "
-    "(and 'Assistant' in phase3-assistant) attribution seen in every summary is reconstructed "
+    "(and 'Assistant' in phase4-assistant) attribution seen in every summary is reconstructed "
     "entirely by the downstream LLM from conversational context, not from the "
     "ASR step. There is no diarization output to score for accuracy. A real "
     "diarization benchmark would need a diarization-capable pipeline (e.g. "
@@ -82,8 +78,8 @@ def _reference_for_version(scenario):
     return " ".join(parts)
 
 
-def _reference_for_story_week(week, dialogues_module):
-    meeting = next(m for m in dialogues_module.MEETINGS if m["week"] == week)
+def _reference_for_meeting(slug, dialogues_module):
+    meeting = next(m for m in dialogues_module.MEETINGS if m["slug"] == slug)
     parts = [meeting["intro"]] + [line for _, line in meeting["dialogue"]]
     return " ".join(parts)
 
@@ -200,10 +196,14 @@ def main():
     model = whisper.load_model(WHISPER_MODEL_SIZE)
 
     scenarios_out = []
+    dialogues_module = _load_module("audio-generation/src/dialogues.py", "_ref_audio_generation_dialogues")
 
     for scenario in VERSION_SCENARIOS:
         print(f"Evaluating {scenario['id']}...")
-        reference = _reference_for_version(scenario)
+        if "meeting_slug" in scenario:
+            reference = _reference_for_meeting(scenario["meeting_slug"], dialogues_module)
+        else:
+            reference = _reference_for_version(scenario)
         with open(os.path.join(PROJECT_ROOT, scenario["transcript"])) as f:
             clean_transcript = f.read()
         tiers = evaluate_recording(
@@ -214,17 +214,17 @@ def main():
         )
         scenarios_out.append({"id": scenario["id"], "tiers": tiers})
 
-    dialogues_module = _load_module("phase4-history/src/dialogues.py", "_ref_story_dialogues")
-    for week in STORY_WEEKS:
-        scenario_id = f"phase4-history-week-{week}"
+    for meeting in dialogues_module.MEETINGS:
+        slug = meeting["slug"]
+        scenario_id = f"phase6-history-{slug}"
         print(f"Evaluating {scenario_id}...")
-        reference = _reference_for_story_week(week, dialogues_module)
-        meeting_dir = os.path.join(PROJECT_ROOT, "phase4-history", "output", f"meeting-{week}")
+        reference = _reference_for_meeting(slug, dialogues_module)
+        meeting_dir = os.path.join(PROJECT_ROOT, "phase6-history", "output", slug)
         with open(os.path.join(meeting_dir, "transcript.txt")) as f:
             clean_transcript = f.read()
         tiers = evaluate_recording(
             model,
-            os.path.join(meeting_dir, "recording.wav"),
+            os.path.join(PROJECT_ROOT, "audio-generation", "output", slug, "recording.wav"),
             reference,
             clean_transcript,
         )

@@ -2,10 +2,10 @@
 
 Scores the existing `<scenario>/output/summary*.txt` files against their transcripts. Scoring logic lives in `../eval_scoring.py` (shared with every pipeline's optional `--judge-provider` step, so a webapp-triggered run and a bulk `eval/judge.py` run score identically). Two layers:
 
-- **Layer 1 (deterministic):** Markdown schema compliance (all 4 sections present, `##` heading level as specified in every summarizer's system prompt), Actions-bullet prefix compliance (`Person A:` / `Person B:`), and — for phase3-checklist/phase3-assistant — checklist coverage precision/recall against a hand-labeled ground truth (every topic is actually discussed in the dummy dialogue except budget/cost impact, on purpose — see [phase3-checklist/README.md](../phase3-checklist/README.md)).
+- **Layer 1 (deterministic):** Markdown schema compliance (all 4 sections present, `##` heading level as specified in every summarizer's system prompt), Actions-bullet prefix compliance (`Person A:` / `Person B:`), and — for phase2-checklist/phase4-assistant — checklist coverage precision/recall against a hand-labeled ground truth (every topic is actually discussed in the kickoff dialogue except budget/cost impact, on purpose — see [phase2-checklist/README.md](../phase2-checklist/README.md)).
 - **Layer 2 (LLM-as-judge):** a judge model scores each brief (Topic/Key Points/Decisions/Actions only, not the checklist section) on faithfulness, completeness, and conciseness (1-5 each), plus any unsupported claims it can spot. The judge is **provider-swappable** (`--provider local|mistral|claude`, default `local`) via `../llm_provider.py`, independent of whichever provider generated the summary being judged.
 
-Judging with the same model that generated the summary is a real limitation (self-preference bias, and the same reliability ceiling noted in phase3-checklist's README for LLM-based checklist judging) — treat layer 2 scores as a rough signal to spot-check, not ground truth. This matters most for `local`, since most of this project's local-model summaries were also judged by the local model. `eval/rejudge.py --judge-provider claude` re-scores everything under one neutral judge without re-running summarization. Layer 1 is exact for what it checks, but only checks what it was told to check.
+Judging with the same model that generated the summary is a real limitation (self-preference bias, and the same reliability ceiling noted in phase2-checklist's README for LLM-based checklist judging) — treat layer 2 scores as a rough signal to spot-check, not ground truth. This matters most for `local`, since most of this project's local-model summaries were also judged by the local model. `eval/rejudge.py --judge-provider claude` re-scores everything under one neutral judge without re-running summarization. Layer 1 is exact for what it checks, but only checks what it was told to check.
 
 ## Run
 
@@ -28,7 +28,7 @@ Each run also gets a cost estimate (`../cost_estimate.py` — free for local/Mis
 
 ## Transcription quality (`eval/transcription_quality.py`)
 
-Word Error Rate against the exact scripted dialogue text (the TTS ground truth), for all 9 recordings (phase2-baseline, phase2-context, phase3-checklist, phase3-assistant + all 5 phase4-history weeks) — this project's first measurement of the ASR step itself, everything above only ever evaluated summarization against Whisper's output as if it were ground truth. Word-level Levenshtein distance (no new dependency), reporting substitutions/deletions/insertions separately.
+Word Error Rate against the exact scripted dialogue text (the TTS ground truth), for the shared kickoff recording (transcribed identically by phase1-baseline/phase2-checklist/phase3-context/phase5-office-agent), phase4-assistant's own 3-voice recording, and all 15 phase6-history meetings — this project's first measurement of the ASR step itself, everything above only ever evaluated summarization against Whisper's output as if it were ground truth. Word-level Levenshtein distance (no new dependency), reporting substitutions/deletions/insertions separately.
 
 Also generates two degraded variants per recording with `pydub` (already a dependency) — `light_noise` (white noise ~20dB below speech) and `heavy_noise` (~8dB below speech + a 3kHz low-pass filter simulating a poor mic) — and re-transcribes each, so WER-vs-noise-severity is an actual measured trend rather than a documented gap.
 
@@ -44,7 +44,7 @@ Writes `eval/output/transcription_quality.json`.
 
 ## Information extraction efficiency (`eval/extraction_efficiency.py`)
 
-Ground truth: lines in the scripted dialogue matching the same commitment heuristic ("I'll"/"I will"/"let me [do]") every summarizer's own prompt is instructed to use for Actions bullets. Matched against generated Actions bullets via word-containment (deterministic, not another LLM call) — recall/precision per scenario/variant, for phase2-baseline through phase3-assistant and all 5 phase4-history weeks.
+Ground truth: lines in the scripted dialogue matching the same commitment heuristic ("I'll"/"I will"/"let me [do]") every summarizer's own prompt is instructed to use for Actions bullets. Matched against generated Actions bullets via word-containment (deterministic, not another LLM call) — recall/precision per scenario/variant, for phase1-baseline through phase4-assistant and all 15 phase6-history meetings.
 
 ```bash
 python eval/extraction_efficiency.py

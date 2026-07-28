@@ -15,11 +15,16 @@ services:
       # made a container-only run "lose" all pre-Docker history: a named
       # volume starts empty and .dockerignore keeps these dirs out of the
       # build context, so there was nothing to seed it from.
-      - ./phase2-baseline/output:/app/phase2-baseline/output
-      - ./phase2-context/output:/app/phase2-context/output
-      - ./phase3-checklist/output:/app/phase3-checklist/output
-      - ./phase3-assistant/output:/app/phase3-assistant/output
-      - ./phase4-history/output:/app/phase4-history/output
+      # Raw input recordings every phase below transcribes — see
+      # audio-generation/README.md.
+      - ./audio-generation/output:/app/audio-generation/output
+      - ./phase1-baseline/output:/app/phase1-baseline/output
+      - ./phase2-checklist/output:/app/phase2-checklist/output
+      - ./phase3-context/output:/app/phase3-context/output
+      - ./phase4-assistant/output:/app/phase4-assistant/output
+      - ./phase5-office-agent/output:/app/phase5-office-agent/output
+      - ./phase6-history/output:/app/phase6-history/output
+      - ./phase7-voice-query/output:/app/phase7-voice-query/output
       # Real (non-scripted) audio dropped via the Custom Audio page, and
       # its derived output.
       - ./custom/audio:/app/custom/audio

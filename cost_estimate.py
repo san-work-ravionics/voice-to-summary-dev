@@ -6,7 +6,7 @@ transcript and summary text via Anthropic's token-counting endpoint (free
 to call, same tokenizer billing uses) rather than read back from an actual
 bill — the project never captured real `response.usage` at call time, so
 this is a same-tokenizer re-count, not an exact reconciliation. It also
-excludes the system prompt and (for phase2-context/phase3-checklist/phase3-assistant/phase4-history's context variant) the
+excludes the system prompt and (for phase3-context/phase2-checklist/phase4-assistant/phase6-history's context variant) the
 injected context/history text, which for these short transcripts adds at
 most a few hundred tokens — well under $0.001 at current Haiku pricing, so
 the estimate undercounts slightly rather than being wrong in kind.

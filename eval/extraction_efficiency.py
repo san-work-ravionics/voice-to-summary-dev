@@ -18,27 +18,22 @@ COMMITMENT_PATTERN = re.compile(r"\bi'll\b|\bi will\b|\blet me\b(?!\s+(know|see)
 
 VERSION_SCENARIOS = [
     {
-        "id": "phase2-baseline", "dialogue_module": "phase2-baseline/src/generate_dummy_audio.py",
-        "variants": [{"key": "baseline", "summary": "phase2-baseline/output/summary.txt"}],
-    },
-    {
-        "id": "phase2-context", "dialogue_module": "phase2-context/src/generate_dummy_audio.py",
-        "variants": [
-            {"key": "baseline", "summary": "phase2-context/output/summary_baseline.txt"},
-            {"key": "with_context", "summary": "phase2-context/output/summary_with_context.txt"},
-        ],
-    },
-    {
-        "id": "phase3-checklist", "dialogue_module": "phase3-checklist/src/generate_dummy_audio.py",
-        "variants": [{"key": "context_checklist", "summary": "phase3-checklist/output/summary.txt"}],
-    },
-    {
-        "id": "phase3-assistant", "dialogue_module": "phase3-assistant/src/generate_dummy_audio.py",
-        "variants": [{"key": "context_checklist_assistant", "summary": "phase3-assistant/output/summary.txt"}],
+        "id": "phase4-assistant", "dialogue_module": "phase4-assistant/src/generate_dummy_audio.py",
+        "variants": [{"key": "context_checklist_assistant", "summary": "phase4-assistant/output/summary.txt"}],
     },
 ]
 
-STORY_WEEKS = [1, 2, 3, 4, 5]
+# phase1-baseline/phase2-checklist/phase3-context all summarize the exact
+# same shared transcript (audio-generation/output/01-kickoff/) — one
+# ground-truth commitment list computed once, reused for all three variants.
+SHARED_KICKOFF_SCENARIOS = [
+    {"id": "phase1-baseline", "variants": [{"key": "baseline", "summary": "phase1-baseline/output/summary.txt"}]},
+    {"id": "phase2-checklist", "variants": [{"key": "context_checklist", "summary": "phase2-checklist/output/summary.txt"}]},
+    {"id": "phase3-context", "variants": [
+        {"key": "baseline", "summary": "phase3-context/output/summary_baseline.txt"},
+        {"key": "with_context", "summary": "phase3-context/output/summary_with_context.txt"},
+    ]},
+]
 
 
 def _load_module(path, unique_name):
@@ -163,6 +158,18 @@ def _read(relative_path):
 
 def main():
     scenarios_out = []
+    dialogues_module = _load_module("audio-generation/src/dialogues.py", "_ee_audio_generation_dialogues")
+
+    kickoff = next(m for m in dialogues_module.MEETINGS if m["slug"] == "01-kickoff")
+    kickoff_ground_truth = ground_truth_commitments(kickoff["dialogue"])
+    for scenario in SHARED_KICKOFF_SCENARIOS:
+        variants_out = []
+        for variant in scenario["variants"]:
+            summary_text = _read(variant["summary"])
+            bullets = extract_section(summary_text, "Actions")
+            result = match_commitments(kickoff_ground_truth, bullets)
+            variants_out.append({"variant": variant["key"], **result})
+        scenarios_out.append({"id": scenario["id"], "variants": variants_out})
 
     for scenario in VERSION_SCENARIOS:
         mod = _load_module(scenario["dialogue_module"], f"_ee_{scenario['id']}")
@@ -175,18 +182,17 @@ def main():
             variants_out.append({"variant": variant["key"], **result})
         scenarios_out.append({"id": scenario["id"], "variants": variants_out})
 
-    dialogues_module = _load_module("phase4-history/src/dialogues.py", "_ee_story_dialogues")
-    for week in STORY_WEEKS:
-        meeting = next(m for m in dialogues_module.MEETINGS if m["week"] == week)
+    for meeting in dialogues_module.MEETINGS:
+        slug = meeting["slug"]
         ground_truth = ground_truth_commitments(meeting["dialogue"])
-        meeting_dir = os.path.join("phase4-history", "output", f"meeting-{week}")
+        meeting_dir = os.path.join("phase6-history", "output", slug)
         variants_out = []
         for key, filename in (("baseline", "summary_baseline.txt"), ("with_context", "summary_with_context.txt")):
             summary_text = _read(os.path.join(meeting_dir, filename))
             bullets = extract_section(summary_text, "Actions")
             result = match_commitments(ground_truth, bullets)
             variants_out.append({"variant": key, **result})
-        scenarios_out.append({"id": f"phase4-history-week-{week}", "variants": variants_out})
+        scenarios_out.append({"id": f"phase6-history-{slug}", "variants": variants_out})
 
     results = {
         "generated_at": datetime.now(timezone.utc).isoformat(),

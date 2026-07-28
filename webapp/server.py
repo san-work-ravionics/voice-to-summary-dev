@@ -6,6 +6,7 @@ import subprocess
 import sys
 import threading
 import urllib.parse
+import uuid
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CUSTOM_AUDIO_DIR = os.path.join(PROJECT_ROOT, "custom", "audio")
@@ -20,11 +21,11 @@ from run_history import read_history  # noqa: E402
 logger = get_logger("webapp")
 
 # New audio dropped in custom/audio/ is arbitrary, real content — it doesn't
-# belong to the scripted "Mobile App Redesign" dummy meeting, so
-# phase2-context's MEETING_CONTEXT and phase3-checklist/phase3-assistant's
+# belong to the scripted "Mobile App Redesign" kickoff meeting, so
+# phase3-context's MEETING_CONTEXT and phase2-checklist/phase4-assistant's
 # CHECKLIST (both hardcoded to that scenario) would not apply. Run
-# phase2-baseline's plain baseline pipeline instead.
-sys.path.insert(0, os.path.join(PROJECT_ROOT, "phase2-baseline", "src"))
+# phase1-baseline's plain baseline pipeline instead.
+sys.path.insert(0, os.path.join(PROJECT_ROOT, "phase1-baseline", "src"))
 
 # filename -> "processing" | "done" | "error:<message>"
 JOBS = {}
@@ -32,55 +33,139 @@ JOBS = {}
 JOB_STAGE = {}
 JOBS_LOCK = threading.Lock()
 
-# --- Scenario pipelines (phase2-baseline, phase2-context, phase3-checklist,
-# phase3-assistant, phase4-history): triggered + monitored from the Pipeline
+# --- Scenario pipelines (phase1-baseline, phase2-checklist, phase3-context,
+# phase4-assistant, phase6-history): triggered + monitored from the Pipeline
 # page. Each is run as a subprocess of its own main.py — the same script the
 # README tells you to run by hand — rather than imported in process, since
 # all of them define sibling modules with the same names (summarize,
 # transcribe, ...) and Python's module cache is keyed by name, not by
 # directory; importing more than one into the same process would silently
-# alias them.
+# alias them. Phase 5 (office-agent) and Phase 7 (voice-query) have their
+# own dedicated flows below, not the shared Pipeline panel.
 SCENARIOS = {
-    "phase2-baseline": {
-        "label": "Phase 2 — Baseline summary",
-        "main_path": os.path.join(PROJECT_ROOT, "phase2-baseline", "src", "main.py"),
-        "stages": ["recording", "transcribing", "summarizing", "judging", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "phase2-baseline", "output", "summary.txt"),
+    "phase1-baseline": {
+        "label": "Phase 1 — Basic summary",
+        "main_path": os.path.join(PROJECT_ROOT, "phase1-baseline", "src", "main.py"),
+        "stages": ["transcribing", "summarizing", "judging", "done"],
+        "final_output": os.path.join(PROJECT_ROOT, "phase1-baseline", "output", "summary.txt"),
     },
-    "phase2-context": {
-        "label": "Phase 2 — Context-aware summary",
-        "main_path": os.path.join(PROJECT_ROOT, "phase2-context", "src", "main.py"),
-        "stages": ["recording", "transcribing", "summarizing_baseline", "judging_baseline",
+    "phase2-checklist": {
+        "label": "Phase 2 — Checklist coverage",
+        "main_path": os.path.join(PROJECT_ROOT, "phase2-checklist", "src", "main.py"),
+        "stages": ["transcribing", "summarizing", "judging", "done"],
+        "final_output": os.path.join(PROJECT_ROOT, "phase2-checklist", "output", "summary.txt"),
+    },
+    "phase3-context": {
+        "label": "Phase 3 — Context-aware summary",
+        "main_path": os.path.join(PROJECT_ROOT, "phase3-context", "src", "main.py"),
+        "stages": ["transcribing", "summarizing_baseline", "judging_baseline",
                    "summarizing_context", "judging_context", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "phase2-context", "output", "summary_with_context.txt"),
+        "final_output": os.path.join(PROJECT_ROOT, "phase3-context", "output", "summary_with_context.txt"),
     },
-    "phase3-checklist": {
-        "label": "Phase 3 — Checklist coverage",
-        "main_path": os.path.join(PROJECT_ROOT, "phase3-checklist", "src", "main.py"),
+    "phase4-assistant": {
+        "label": "Phase 4 — AI assistant in the room",
+        "main_path": os.path.join(PROJECT_ROOT, "phase4-assistant", "src", "main.py"),
         "stages": ["recording", "transcribing", "summarizing", "judging", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "phase3-checklist", "output", "summary.txt"),
+        "final_output": os.path.join(PROJECT_ROOT, "phase4-assistant", "output", "summary.txt"),
     },
-    "phase3-assistant": {
-        "label": "Phase 3 — AI assistant in the room",
-        "main_path": os.path.join(PROJECT_ROOT, "phase3-assistant", "src", "main.py"),
-        "stages": ["recording", "transcribing", "summarizing", "judging", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "phase3-assistant", "output", "summary.txt"),
-    },
-    "phase4-history": {
-        "label": "Phase 4 — 5-meeting RAG history",
-        "main_path": os.path.join(PROJECT_ROOT, "phase4-history", "src", "main.py"),
-        "stages": ["recording", "transcribing", "summarizing_baseline", "judging_baseline",
+    "phase6-history": {
+        "label": "Phase 6 — 15-meeting RAG history",
+        "main_path": os.path.join(PROJECT_ROOT, "phase6-history", "src", "main.py"),
+        "stages": ["transcribing", "summarizing_baseline", "judging_baseline",
                    "summarizing_context", "judging_context", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "phase4-history", "output", "meeting-5", "summary_with_context.txt"),
+        "final_output": os.path.join(PROJECT_ROOT, "phase6-history", "output", "15-launch-retro", "summary_with_context.txt"),
     },
 }
-SCENARIO_ORDER = ["phase2-baseline", "phase2-context", "phase3-checklist", "phase3-assistant", "phase4-history"]
+SCENARIO_ORDER = ["phase1-baseline", "phase2-checklist", "phase3-context", "phase4-assistant", "phase6-history"]
 RUN_STATUS_DIR = os.path.join(PROJECT_ROOT, "webapp", ".run_status")
+
+# /api/eval/history's ?scenario= filter accepts more than just the
+# Pipeline-page-triggerable SCENARIOS above — phase5-office-agent writes to
+# the same run_history.jsonl (see phase5-office-agent/src/main.py) but has
+# no subprocess-triggered Pipeline panel, so it isn't in SCENARIOS itself.
+KNOWN_EVAL_SCENARIOS = set(SCENARIOS) | {"phase5-office-agent"}
 
 # scenario id -> {"status": "running"|"done"|"error", "error": str|None,
 #                 "provider": str|None, "status_file": path, "proc": Popen}
 PIPELINE_JOBS = {}
 PIPELINE_LOCK = threading.Lock()
+
+# --- Voice Query (Phase 7): records a question with the browser mic, runs
+# phase7-voice-query/src/main.py as a subprocess (same reasoning as
+# SCENARIOS above) and polls it the same way the Pipeline page does.
+VOICE_QUERY_MAIN = os.path.join(PROJECT_ROOT, "phase7-voice-query", "src", "main.py")
+VOICE_QUERY_UPLOAD_DIR = os.path.join(PROJECT_ROOT, "phase7-voice-query", "output", "_uploads")
+VOICE_QUERY_AUDIO_EXT_BY_CONTENT_TYPE = {
+    "audio/webm": ".webm", "audio/ogg": ".ogg", "audio/mp4": ".m4a", "audio/wav": ".wav",
+}
+
+# job_id -> {"status": "running"|"done"|"error", "error": str|None,
+#            "status_file": path, "result_file": path, "proc": Popen}
+VOICE_QUERY_JOBS = {}
+VOICE_QUERY_LOCK = threading.Lock()
+
+
+def _start_voice_query(audio_path, provider=None):
+    job_id = uuid.uuid4().hex[:12]
+    os.makedirs(RUN_STATUS_DIR, exist_ok=True)
+    status_file = os.path.join(RUN_STATUS_DIR, f"voicequery-{job_id}.json")
+    result_file = os.path.join(RUN_STATUS_DIR, f"voicequery-{job_id}.result.json")
+
+    cmd = [sys.executable, VOICE_QUERY_MAIN, audio_path, "--status-file", status_file, "--result-file", result_file]
+    if provider:
+        cmd += ["--provider", provider]
+
+    proc = subprocess.Popen(
+        cmd, cwd=PROJECT_ROOT,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+    )
+    with VOICE_QUERY_LOCK:
+        VOICE_QUERY_JOBS[job_id] = {
+            "status": "running", "error": None,
+            "status_file": status_file, "result_file": result_file, "proc": proc,
+        }
+    logger.info("voice-query %s: started (provider=%s)", job_id, provider)
+
+    def waiter():
+        stdout, stderr = proc.communicate()
+        with VOICE_QUERY_LOCK:
+            job = VOICE_QUERY_JOBS.get(job_id)
+            if job is None or job["proc"] is not proc:
+                return
+            if proc.returncode == 0:
+                job["status"] = "done"
+                logger.info("voice-query %s: done\n--- stdout ---\n%s", job_id, stdout)
+            else:
+                job["status"] = "error"
+                lines = [l for l in (stderr or "").strip().splitlines() if l]
+                job["error"] = lines[-1] if lines else f"exited with code {proc.returncode}"
+                logger.error(
+                    "voice-query %s: failed (exit %s)\n--- stdout ---\n%s\n--- stderr ---\n%s",
+                    job_id, proc.returncode, stdout, stderr,
+                )
+
+    threading.Thread(target=waiter, daemon=True).start()
+    return job_id
+
+
+def _voice_query_status(job_id):
+    with VOICE_QUERY_LOCK:
+        job = VOICE_QUERY_JOBS.get(job_id)
+        job = dict(job) if job else None
+    if job is None:
+        return None
+
+    file_status = read_status(job["status_file"])
+    stage = file_status.get("stage") if file_status else None
+
+    payload = {"status": job["status"], "stage": stage, "error": job["error"], "result": None}
+    if job["status"] == "done":
+        try:
+            with open(job["result_file"]) as f:
+                payload["result"] = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            payload["result"] = None
+    return payload
 
 
 def _start_pipeline(scenario_id, provider=None, judge_provider=None, regenerate=False):
@@ -294,6 +379,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self._handle_pipeline_status()
         if parsed.path == "/api/eval/history":
             return self._handle_eval_history(urllib.parse.parse_qs(parsed.query))
+        if parsed.path == "/api/voice-query/status":
+            return self._handle_voice_query_status(urllib.parse.parse_qs(parsed.query))
         return super().do_GET()
 
     def do_POST(self):
@@ -302,6 +389,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self._handle_run_pipeline()
         if parsed.path == "/api/pipeline/run":
             return self._handle_pipeline_run()
+        if parsed.path == "/api/voice-query":
+            return self._handle_voice_query_start(urllib.parse.parse_qs(parsed.query))
         self.send_error(404)
 
     def _handle_list_audio(self):
@@ -371,7 +460,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def _handle_eval_history(self, query):
         scenario_id = (query.get("scenario") or [None])[0]
-        if scenario_id is not None and scenario_id not in SCENARIOS:
+        if scenario_id is not None and scenario_id not in KNOWN_EVAL_SCENARIOS:
             return self._send_json({"error": "unknown pipeline"}, status=404)
         records = read_history(scenario_id)
         records.sort(key=lambda r: r.get("timestamp", 0))
@@ -395,6 +484,34 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
         started = _run_pipeline_async(filename, provider=provider)
         self._send_json({"status": "started" if started else "already_processing"})
+
+    def _handle_voice_query_start(self, query):
+        content_type = (self.headers.get("Content-Type") or "audio/webm").split(";")[0].strip()
+        ext = VOICE_QUERY_AUDIO_EXT_BY_CONTENT_TYPE.get(content_type, ".webm")
+
+        length = int(self.headers.get("Content-Length") or 0)
+        if not length:
+            return self._send_json({"error": "empty request body"}, status=400)
+        audio_bytes = self.rfile.read(length)
+
+        provider = (query.get("provider") or [None])[0]
+        if provider not in (None, "local", "mistral", "claude"):
+            return self._send_json({"error": "invalid provider"}, status=400)
+
+        os.makedirs(VOICE_QUERY_UPLOAD_DIR, exist_ok=True)
+        audio_path = os.path.join(VOICE_QUERY_UPLOAD_DIR, f"{uuid.uuid4().hex[:12]}{ext}")
+        with open(audio_path, "wb") as f:
+            f.write(audio_bytes)
+
+        job_id = _start_voice_query(audio_path, provider=provider)
+        self._send_json({"job": job_id})
+
+    def _handle_voice_query_status(self, query):
+        job_id = (query.get("job") or [None])[0]
+        status = _voice_query_status(job_id) if job_id else None
+        if status is None:
+            return self._send_json({"error": "unknown job"}, status=404)
+        self._send_json(status)
 
     def log_message(self, fmt, *args):
         # /healthz is polled every 30s by docker-compose's healthcheck —

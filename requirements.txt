@@ -7,3 +7,5 @@ accelerate==1.10.1
 anthropic==0.120.0
 sentencepiece==0.2.2
 protobuf==6.33.6
+python-docx==1.1.2
+openpyxl==3.1.5
