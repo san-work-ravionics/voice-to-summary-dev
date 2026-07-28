@@ -81,6 +81,13 @@ def _get_claude_client():
                 "The 'anthropic' package is required for provider='claude'. "
                 "Install it with: pip install anthropic"
             ) from exc
+        # docker-compose always sets ANTHROPIC_API_KEY (as "" when .env
+        # leaves it blank) rather than omitting it — but the SDK only falls
+        # back to a mounted `ant auth login` profile on disk when the env
+        # var is genuinely absent (os.environ.get(...) is None), not merely
+        # empty. Normalize "" to unset so that fallback actually triggers.
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            os.environ.pop("ANTHROPIC_API_KEY", None)
         _claude_client_instance = anthropic.Anthropic()
     return _claude_client_instance
 

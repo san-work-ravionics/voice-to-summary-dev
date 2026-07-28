@@ -26,6 +26,8 @@ logger = get_logger("webapp")
 # CHECKLIST (both hardcoded to that scenario) would not apply. Run
 # phase1-baseline's plain baseline pipeline instead.
 sys.path.insert(0, os.path.join(PROJECT_ROOT, "phase1-baseline", "src"))
+sys.path.insert(0, os.path.join(PROJECT_ROOT, "phase8-voice-query", "src"))
+from query_history import read_history as read_voice_query_history  # noqa: E402
 
 # filename -> "processing" | "done" | "error:<message>"
 JOBS = {}
@@ -40,7 +42,7 @@ JOBS_LOCK = threading.Lock()
 # all of them define sibling modules with the same names (summarize,
 # transcribe, ...) and Python's module cache is keyed by name, not by
 # directory; importing more than one into the same process would silently
-# alias them. Phase 5 (office-agent) and Phase 7 (voice-query) have their
+# alias them. Phase 5 (office-agent) and Phase 8 (voice-query) have their
 # own dedicated flows below, not the shared Pipeline panel.
 SCENARIOS = {
     "phase1-baseline": {
@@ -75,8 +77,18 @@ SCENARIOS = {
                    "summarizing_context", "judging_context", "done"],
         "final_output": os.path.join(PROJECT_ROOT, "phase6-history", "output", "15-launch-retro", "summary_with_context.txt"),
     },
+    "phase7-reference-rag": {
+        "label": "Phase 7 — Reference-document RAG",
+        "main_path": os.path.join(PROJECT_ROOT, "phase7-reference-rag", "src", "main.py"),
+        "stages": ["transcribing", "retrieving", "summarizing_baseline", "judging_baseline",
+                   "summarizing_with_references", "judging_with_references", "done"],
+        "final_output": os.path.join(PROJECT_ROOT, "phase7-reference-rag", "output", "summary_with_references.txt"),
+    },
 }
-SCENARIO_ORDER = ["phase1-baseline", "phase2-checklist", "phase3-context", "phase4-assistant", "phase6-history"]
+SCENARIO_ORDER = [
+    "phase1-baseline", "phase2-checklist", "phase3-context", "phase4-assistant",
+    "phase6-history", "phase7-reference-rag",
+]
 RUN_STATUS_DIR = os.path.join(PROJECT_ROOT, "webapp", ".run_status")
 
 # /api/eval/history's ?scenario= filter accepts more than just the
@@ -85,16 +97,20 @@ RUN_STATUS_DIR = os.path.join(PROJECT_ROOT, "webapp", ".run_status")
 # no subprocess-triggered Pipeline panel, so it isn't in SCENARIOS itself.
 KNOWN_EVAL_SCENARIOS = set(SCENARIOS) | {"phase5-office-agent"}
 
+# Scenarios whose main.py accepts --retrieval tfidf|faiss (see
+# faiss_retrieval.py) — only phase7-reference-rag so far.
+RETRIEVAL_CAPABLE_SCENARIOS = {"phase7-reference-rag"}
+
 # scenario id -> {"status": "running"|"done"|"error", "error": str|None,
 #                 "provider": str|None, "status_file": path, "proc": Popen}
 PIPELINE_JOBS = {}
 PIPELINE_LOCK = threading.Lock()
 
-# --- Voice Query (Phase 7): records a question with the browser mic, runs
-# phase7-voice-query/src/main.py as a subprocess (same reasoning as
+# --- Voice Query (Phase 8): records a question with the browser mic, runs
+# phase8-voice-query/src/main.py as a subprocess (same reasoning as
 # SCENARIOS above) and polls it the same way the Pipeline page does.
-VOICE_QUERY_MAIN = os.path.join(PROJECT_ROOT, "phase7-voice-query", "src", "main.py")
-VOICE_QUERY_UPLOAD_DIR = os.path.join(PROJECT_ROOT, "phase7-voice-query", "output", "_uploads")
+VOICE_QUERY_MAIN = os.path.join(PROJECT_ROOT, "phase8-voice-query", "src", "main.py")
+VOICE_QUERY_UPLOAD_DIR = os.path.join(PROJECT_ROOT, "phase8-voice-query", "output", "_uploads")
 VOICE_QUERY_AUDIO_EXT_BY_CONTENT_TYPE = {
     "audio/webm": ".webm", "audio/ogg": ".ogg", "audio/mp4": ".m4a", "audio/wav": ".wav",
 }
@@ -105,7 +121,7 @@ VOICE_QUERY_JOBS = {}
 VOICE_QUERY_LOCK = threading.Lock()
 
 
-def _start_voice_query(audio_path, provider=None):
+def _start_voice_query(audio_path, provider=None, retrieval=None):
     job_id = uuid.uuid4().hex[:12]
     os.makedirs(RUN_STATUS_DIR, exist_ok=True)
     status_file = os.path.join(RUN_STATUS_DIR, f"voicequery-{job_id}.json")
@@ -114,6 +130,8 @@ def _start_voice_query(audio_path, provider=None):
     cmd = [sys.executable, VOICE_QUERY_MAIN, audio_path, "--status-file", status_file, "--result-file", result_file]
     if provider:
         cmd += ["--provider", provider]
+    if retrieval:
+        cmd += ["--retrieval", retrieval]
 
     proc = subprocess.Popen(
         cmd, cwd=PROJECT_ROOT,
@@ -124,7 +142,7 @@ def _start_voice_query(audio_path, provider=None):
             "status": "running", "error": None,
             "status_file": status_file, "result_file": result_file, "proc": proc,
         }
-    logger.info("voice-query %s: started (provider=%s)", job_id, provider)
+    logger.info("voice-query %s: started (provider=%s retrieval=%s)", job_id, provider, retrieval)
 
     def waiter():
         stdout, stderr = proc.communicate()
@@ -168,7 +186,7 @@ def _voice_query_status(job_id):
     return payload
 
 
-def _start_pipeline(scenario_id, provider=None, judge_provider=None, regenerate=False):
+def _start_pipeline(scenario_id, provider=None, judge_provider=None, regenerate=False, retrieval=None):
     scenario = SCENARIOS[scenario_id]
     with PIPELINE_LOCK:
         job = PIPELINE_JOBS.get(scenario_id)
@@ -187,6 +205,10 @@ def _start_pipeline(scenario_id, provider=None, judge_provider=None, regenerate=
             cmd += ["--judge-provider", judge_provider]
         if regenerate:
             cmd.append("--regenerate")
+        # Only phase7-reference-rag's main.py declares --retrieval; passing
+        # it to any other scenario's argparse would error out.
+        if retrieval and scenario_id in RETRIEVAL_CAPABLE_SCENARIOS:
+            cmd += ["--retrieval", retrieval]
 
         proc = subprocess.Popen(
             cmd, cwd=PROJECT_ROOT,
@@ -381,6 +403,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self._handle_eval_history(urllib.parse.parse_qs(parsed.query))
         if parsed.path == "/api/voice-query/status":
             return self._handle_voice_query_status(urllib.parse.parse_qs(parsed.query))
+        if parsed.path == "/api/voice-query/history":
+            return self._handle_voice_query_history()
         return super().do_GET()
 
     def do_POST(self):
@@ -453,8 +477,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
         regenerate = bool(data.get("regenerate"))
 
+        retrieval = data.get("retrieval")
+        if retrieval not in (None, "tfidf", "faiss"):
+            return self._send_json({"error": "invalid retrieval"}, status=400)
+
         started = _start_pipeline(
-            scenario_id, provider=provider, judge_provider=judge_provider, regenerate=regenerate,
+            scenario_id, provider=provider, judge_provider=judge_provider,
+            regenerate=regenerate, retrieval=retrieval,
         )
         self._send_json({"status": "started" if started else "already_running"})
 
@@ -498,12 +527,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if provider not in (None, "local", "mistral", "claude"):
             return self._send_json({"error": "invalid provider"}, status=400)
 
+        retrieval = (query.get("retrieval") or [None])[0]
+        if retrieval not in (None, "tfidf", "faiss"):
+            return self._send_json({"error": "invalid retrieval"}, status=400)
+
         os.makedirs(VOICE_QUERY_UPLOAD_DIR, exist_ok=True)
         audio_path = os.path.join(VOICE_QUERY_UPLOAD_DIR, f"{uuid.uuid4().hex[:12]}{ext}")
         with open(audio_path, "wb") as f:
             f.write(audio_bytes)
 
-        job_id = _start_voice_query(audio_path, provider=provider)
+        job_id = _start_voice_query(audio_path, provider=provider, retrieval=retrieval)
         self._send_json({"job": job_id})
 
     def _handle_voice_query_status(self, query):
@@ -512,6 +545,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if status is None:
             return self._send_json({"error": "unknown job"}, status=404)
         self._send_json(status)
+
+    def _handle_voice_query_history(self):
+        records = read_voice_query_history()
+        records.sort(key=lambda r: r.get("timestamp", 0), reverse=True)
+        self._send_json({"records": records})
 
     def log_message(self, fmt, *args):
         # /healthz is polled every 30s by docker-compose's healthcheck —

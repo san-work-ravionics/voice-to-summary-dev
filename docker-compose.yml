@@ -24,7 +24,8 @@ services:
       - ./phase4-assistant/output:/app/phase4-assistant/output
       - ./phase5-office-agent/output:/app/phase5-office-agent/output
       - ./phase6-history/output:/app/phase6-history/output
-      - ./phase7-voice-query/output:/app/phase7-voice-query/output
+      - ./phase7-reference-rag/output:/app/phase7-reference-rag/output
+      - ./phase8-voice-query/output:/app/phase8-voice-query/output
       # Real (non-scripted) audio dropped via the Custom Audio page, and
       # its derived output.
       - ./custom/audio:/app/custom/audio
@@ -39,6 +40,13 @@ services:
       # (not bind-mounted) since this is pure binary cache, not something
       # to keep alongside the source tree.
       - model_cache:/cache
+      # `ant auth login`'s browser-based session, read-only — lets
+      # provider=claude authenticate the same way a host-side `python
+      # main.py --provider claude` run does, without an API key in .env/
+      # the repo. The anthropic SDK auto-discovers credentials from
+      # ~/.config/anthropic (see anthropic/lib/credentials/_constants.py);
+      # the container runs as root, so its home is /root.
+      - ${HOME}/.config/anthropic:/root/.config/anthropic:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8743/healthz', timeout=3)"]

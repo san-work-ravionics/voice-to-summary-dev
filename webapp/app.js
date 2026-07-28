@@ -40,6 +40,17 @@ const SCENARIOS = [
       { key: "context_checklist_assistant", label: "Summary + Checklist", path: "/phase4-assistant/output/summary.txt" },
     ],
   },
+  {
+    id: "phase7-reference-rag",
+    title: "Phase 7 — Reference-document RAG",
+    description: "Same kickoff recording, plus TF-IDF retrieval over the project's own reference documents (PRD, design spec, payments vendor doc) — baseline and reference-grounded summaries side by side.",
+    audio: "/audio-generation/output/01-kickoff/recording.wav",
+    transcript: "/phase7-reference-rag/output/transcript.txt",
+    variants: [
+      { key: "baseline", label: "Baseline (transcript only)", path: "/phase7-reference-rag/output/summary_baseline.txt" },
+      { key: "with_references", label: "With references", path: "/phase7-reference-rag/output/summary_with_references.txt" },
+    ],
+  },
 ];
 
 const STORY_MEETINGS = [
@@ -1078,17 +1089,25 @@ const PIPELINE_META = {
   "phase3-context": { desc: "Meeting context injected into the prompt — baseline and context-aware summaries side by side." },
   "phase4-assistant": { desc: "A third voice (AI Assistant) joins the recording and takes notes live." },
   "phase6-history": { desc: "15 lifecycle meetings — a summarizer with no memory of prior meetings vs. one given a running history." },
+  "phase7-reference-rag": { desc: "Same kickoff recording, plus TF-IDF retrieval over the project's reference documents (PRD, design spec, vendor doc) to enrich the summary." },
 };
+
+// Pipelines whose main.py accepts --retrieval tfidf|faiss (see
+// faiss_retrieval.py) — only phase7-reference-rag so far.
+const RETRIEVAL_CAPABLE_PIPELINES = new Set(["phase7-reference-rag"]);
 
 const PIPELINE_STAGE_LABELS = {
   recording: "Recording",
   transcribing: "Transcribing",
+  retrieving: "Retrieving references",
   summarizing: "Summarizing",
   summarizing_baseline: "Summarizing (baseline)",
   summarizing_context: "Summarizing (context)",
+  summarizing_with_references: "Summarizing (with references)",
   judging: "Judging",
   judging_baseline: "Judging (baseline)",
   judging_context: "Judging (context)",
+  judging_with_references: "Judging (with references)",
   done: "Done",
 };
 
@@ -1100,7 +1119,7 @@ const PIPELINE_STATUS_LABELS = {
 // pipeline id, so a poll tick mid-decision doesn't reset the user's pick.
 const PIPELINE_UI_STATE = {};
 function pipelineUiState(id) {
-  if (!PIPELINE_UI_STATE[id]) PIPELINE_UI_STATE[id] = { provider: "local", judgeProvider: "local", regenerate: false };
+  if (!PIPELINE_UI_STATE[id]) PIPELINE_UI_STATE[id] = { provider: "local", judgeProvider: "local", regenerate: false, retrieval: "tfidf" };
   return PIPELINE_UI_STATE[id];
 }
 
@@ -1194,6 +1213,15 @@ function renderPipelinePanel(pipeline) {
             <option value="claude" ${ui.judgeProvider === "claude" ? "selected" : ""}>Claude (Haiku 4.5)</option>
           </select>
         </label>
+        ${RETRIEVAL_CAPABLE_PIPELINES.has(pipeline.id) ? `
+        <label class="control-label">
+          Retrieval
+          <select class="retrieval-select" ${running ? "disabled" : ""}>
+            <option value="tfidf" ${ui.retrieval === "tfidf" ? "selected" : ""}>TF-IDF</option>
+            <option value="faiss" ${ui.retrieval === "faiss" ? "selected" : ""}>FAISS (embeddings)</option>
+          </select>
+        </label>
+        ` : ""}
         <label class="regenerate-label">
           <input type="checkbox" class="regenerate-check" ${ui.regenerate ? "checked" : ""} ${running ? "disabled" : ""}>
           Regenerate recording
@@ -1225,6 +1253,7 @@ async function triggerPipelineRun(pipelineId, panel) {
       body: JSON.stringify({
         pipeline: pipelineId, provider: ui.provider,
         judge_provider: ui.judgeProvider, regenerate: ui.regenerate,
+        retrieval: RETRIEVAL_CAPABLE_PIPELINES.has(pipelineId) ? ui.retrieval : undefined,
       }),
     });
   } finally {
@@ -1240,7 +1269,7 @@ async function refreshPipelinePage() {
   try {
     const data = await fetchPipelineStatus();
     root.innerHTML = `
-      <p class="pipeline-intro">Trigger any of the five pipelines and watch it move through recording, transcription, summarization, and judging. Transcription always runs locally (Whisper); pick a summarization and judge provider per run. Every judged run is added to the run history on the <button class="inline-link" id="pipeline-eval-link" type="button">Evaluation page</button>.</p>
+      <p class="pipeline-intro">Trigger any of the six pipelines and watch it move through recording, transcription, summarization, and judging. Transcription always runs locally (Whisper); pick a summarization and judge provider per run. Every judged run is added to the run history on the <button class="inline-link" id="pipeline-eval-link" type="button">Evaluation page</button>.</p>
       ${renderPipelineStats(data.pipelines)}
       <div class="pipeline-grid">${data.pipelines.map(renderPipelinePanel).join("")}</div>
     `;
@@ -1249,9 +1278,13 @@ async function refreshPipelinePage() {
       const select = panel.querySelector(".provider-select");
       const judgeSelect = panel.querySelector(".judge-provider-select");
       const checkbox = panel.querySelector(".regenerate-check");
+      const retrievalSelect = panel.querySelector(".retrieval-select");
       select.addEventListener("change", () => { pipelineUiState(id).provider = select.value; });
       judgeSelect.addEventListener("change", () => { pipelineUiState(id).judgeProvider = judgeSelect.value; });
       checkbox.addEventListener("change", () => { pipelineUiState(id).regenerate = checkbox.checked; });
+      if (retrievalSelect) {
+        retrievalSelect.addEventListener("change", () => { pipelineUiState(id).retrieval = retrievalSelect.value; });
+      }
       const btn = panel.querySelector(".run-btn");
       if (!btn.disabled) {
         btn.addEventListener("click", () => triggerPipelineRun(id, panel));
@@ -1537,111 +1570,379 @@ function gapPill(label) {
   return `<span class="status-pill"><span class="status-dot critical"></span>${escapeHtml(label)}</span>`;
 }
 
+function statTile(value, label) {
+  return `<div class="stat-tile"><div class="stat-value">${value}</div><div class="stat-label">${escapeHtml(label)}</div></div>`;
+}
+
+function statRow(tiles) {
+  return `<div class="stat-row">${tiles.join("")}</div>`;
+}
+
+function roadmapVerdict(text) {
+  return `<p class="roadmap-verdict">${text}</p>`;
+}
+
+function roadmapDetails(summaryText, innerHtml) {
+  return `<details class="roadmap-details"><summary>${escapeHtml(summaryText)}</summary>${innerHtml}</details>`;
+}
+
 function renderFoundation(transcriptionData) {
   let html = `
     <div class="roadmap-foundation">
-      <div class="roadmap-foundation-badge">Foundation — feeds into every phase below</div>
-      <h3 class="eval-section-header" style="margin-top:0;padding-top:0;border-top:none;">Voice-to-Transcript</h3>
-      <p class="eval-note"><strong>Goal:</strong> convert raw spoken audio into a clean transcript, fast. <strong>Built by:</strong> the shared Whisper step (<code>transcription.py</code>), identical across every scenario folder — every phase below summarizes whatever transcript this step produced, so its accuracy is a ceiling on all of them, not just another parallel metric. Not a numbered phase on its own — see <code>audio-generation/</code> for the raw recordings every phase transcribes.</p>
+      <div class="roadmap-foundation-badge">Foundation — the shared input every phase builds on</div>
+      <h3 class="eval-section-header" style="margin-top:0;padding-top:0;border-top:none;">Voice-to-Transcript — how accurately &amp; fast is speech turned into text?</h3>
+      <p class="eval-note">The input is one project's <strong>15 meetings</strong> (kickoff → launch retro), recorded as audio. This step only does one thing: turn each recording into a text transcript. Everything measured here is per recording — the numbered Phases are a separate axis (added capabilities) that all read from these same transcripts.</p>
   `;
-  if (transcriptionData) {
-    const avgWer = (tier) => avg(transcriptionData.scenarios.map((s) => s.tiers[tier]?.wer));
-    html += `
-      <div class="stat-row">
-        <div class="stat-tile"><div class="stat-value">${fmtPct(avgWer("clean"))}</div><div class="stat-label">Avg clean WER</div></div>
-        <div class="stat-tile"><div class="stat-value">${fmtPct(avgWer("light_noise"))}</div><div class="stat-label">Avg light-noise WER</div></div>
-        <div class="stat-tile"><div class="stat-value">${fmtPct(avgWer("heavy_noise"))}</div><div class="stat-label">Avg heavy-noise WER</div></div>
-      </div>
-    `;
-    html += `<h4 class="eval-subsection-header">Per-recording detail</h4>`;
-    html += `
-      <div class="eval-table-wrap">
-        <table class="eval-table">
-          <thead><tr><th>Scenario</th><th>Clean WER</th><th>Light noise WER</th><th>Heavy noise WER</th></tr></thead>
-          <tbody>
-    `;
-    for (const s of transcriptionData.scenarios) {
-      html += `
-        <tr>
-          <td>${escapeHtml(s.id)}</td>
-          <td>${werCell(s.tiers.clean)}</td>
-          <td>${werCell(s.tiers.light_noise)}</td>
-          <td>${werCell(s.tiers.heavy_noise)}</td>
-        </tr>
-      `;
-    }
-    html += `</tbody></table></div>`;
-  } else {
-    html += `<p class="eval-note">Could not load WER data. Run <code>python eval/transcription_quality.py</code>.</p>`;
+
+  if (!transcriptionData) {
+    html += `<p class="eval-note">Could not load WER data. Run <code>python eval/transcription_quality.py</code>.</p></div>`;
+    return html;
   }
-  html += `<p class="eval-note">Real-Time Factor: ${gapPill("not measured — no timing instrumentation around the Whisper call yet")}</p>`;
+
+  const scenarios = transcriptionData.scenarios;
+  const avgWer = (tier) => avg(scenarios.map((s) => s.tiers[tier]?.wer));
+  const avgClean = avgWer("clean");
+  const avgHeavy = avgWer("heavy_noise");
+  const avgRtf = avg(scenarios.map((s) => s.tiers.clean?.rtf));
+  const avgSecs = avg(scenarios.map((s) => s.tiers.clean?.seconds));
+  const speedup = avgRtf ? Math.round(1 / avgRtf) : null;
+
+  // Worst heavy-noise recording — the one actually worth investigating.
+  const worst = scenarios.reduce((w, s) =>
+    (s.tiers.heavy_noise?.wer ?? 0) > (w.tiers.heavy_noise?.wer ?? 0) ? s : w, scenarios[0]);
+
+  // Plain-English verdict, derived from the data so it stays honest if the
+  // numbers change. Benchmark target (5–8% for domain audio) comes from the
+  // eval's own wer_benchmark_note.
+  const cleanVerdict = avgClean <= 0.08
+    ? `<strong>${fmtPct(avgClean)} average error on clean audio</strong> — inside the commonly-cited 5–8% target for domain-specific speech`
+    : `<strong>${fmtPct(avgClean)} average error on clean audio</strong> — above the 5–8% target for domain-specific speech`;
+  html += roadmapVerdict(
+    `${cleanVerdict}, and fast: ~${speedup}× quicker than real time on CPU. ` +
+    `Accuracy holds up under mild noise but degrades under heavy noise ` +
+    `(worst case: <strong>${escapeHtml(worst.id)}</strong> at ${fmtPct(worst.tiers.heavy_noise.wer)}). ` +
+    `Since every phase reads these transcripts, this accuracy is the ceiling on all of them.`
+  );
+
+  html += statRow([
+    statTile(fmtPct(avgClean), "Avg clean WER"),
+    statTile(fmtPct(avgWer("light_noise")), "Avg light-noise WER"),
+    statTile(fmtPct(avgHeavy), "Avg heavy-noise WER"),
+    statTile(speedup ? `${speedup}×` : "—", "Faster than real time"),
+  ]);
+
+  // The three tiers explained inline — the reader shouldn't have to dig for
+  // what "light"/"heavy" mean.
+  html += `
+    <p class="eval-legend">Each recording is transcribed under three audio conditions to stress-test robustness:
+    <strong>Clean</strong> = original audio (best case) ·
+    <strong>Light noise</strong> = mild background hiss ·
+    <strong>Heavy noise</strong> = loud noise + muffled-mic filter (worst case).
+    <strong>WER</strong> (word error rate) = % of words transcribed wrong; lower is better.
+    <strong>Time</strong> = seconds Whisper took on the clean audio (this machine, CPU).</p>
+    <p class="eval-legend eval-legend-note">Only the <strong>Clean</strong> transcript is real input to the rest of the system — each recording is transcribed once, from its original audio. Light/Heavy noise are synthesized here purely to stress-test robustness and then discarded; nothing downstream ever picks "the best of the three."</p>
+  `;
+
+  html += `<h4 class="eval-subsection-header">Per-recording detail — all ${scenarios.length} meetings</h4>`;
+  html += `
+    <div class="eval-table-wrap">
+      <table class="eval-table">
+        <thead><tr><th>Recording</th><th>Length</th><th>Time to transcribe</th><th>Clean WER</th><th>Light noise WER</th><th>Heavy noise WER</th></tr></thead>
+        <tbody>
+  `;
+  for (const s of scenarios) {
+    const len = s.audio_seconds != null ? `${s.audio_seconds.toFixed(0)}s` : "—";
+    const secs = s.tiers.clean?.seconds != null ? `${s.tiers.clean.seconds.toFixed(1)}s` : "—";
+    html += `
+      <tr>
+        <td>${escapeHtml(s.id)}</td>
+        <td>${len}</td>
+        <td>${secs}</td>
+        <td>${werCell(s.tiers.clean)}</td>
+        <td>${werCell(s.tiers.light_noise)}</td>
+        <td>${werCell(s.tiers.heavy_noise)}</td>
+      </tr>
+    `;
+  }
+  html += `</tbody></table></div>`;
+
+  // Full methodology + honesty caveats, available but collapsed so they
+  // don't bury the numbers above.
+  let caveats = `<p class="eval-note"><strong>Goal:</strong> convert raw spoken audio into a clean transcript, fast. <strong>Built by:</strong> one shared Whisper (<code>${escapeHtml(transcriptionData.whisper_model || "base")}</code>) step (<code>transcription.py</code>) run on each of the 15 recordings in <code>audio-generation/output/</code>. Nothing here is phase-specific — the phases are separate capabilities layered on top of these transcripts.</p>`;
+  for (const key of ["wer_benchmark_note", "noise_tiers_note", "timing_note", "diarization_note"]) {
+    if (transcriptionData[key]) caveats += `<p class="eval-note">${escapeHtml(transcriptionData[key])}</p>`;
+  }
+  caveats += `<p class="eval-note">Avg transcription time: ${avgSecs ? avgSecs.toFixed(1) : "—"}s per recording (real-time factor ${avgRtf ? avgRtf.toFixed(3) : "—"}). Speaker diarization: ${gapPill("not implemented — Whisper returns one undifferentiated text stream")}</p>`;
+  html += roadmapDetails("Methodology, benchmarks & caveats", caveats);
+
   html += `</div>`;
   return html;
 }
 
-function renderPhase1(results) {
-  let html = `
-    <h3 class="eval-section-header">Phase 1 — Basic Summary</h3>
-    <p class="eval-note"><strong>Goal:</strong> a meaningful paragraph + bullet summary, no extra grounding. <strong>Built by:</strong> <code>phase1-baseline/</code> — <code>summarize()</code>, zero-shot against the transcript.</p>
-  `;
-  const variant = findVariant(results, "phase1-baseline", "baseline");
-  if (variant) {
-    html += `
-      <div class="eval-table-wrap">
-        <table class="eval-table">
-          <thead><tr><th>Faithfulness</th><th>Completeness (proxy)</th><th>Conciseness</th><th>Unsupported claims</th></tr></thead>
-          <tbody>
-            <tr>
-              <td>${scoreCell(variant.layer2.faithfulness)}</td>
-              <td>${scoreCell(variant.layer2.completeness)}</td>
-              <td>${scoreCell(variant.layer2.conciseness)}</td>
-              <td>${(variant.layer2.unsupported_claims || []).length}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="eval-note">Judge model: ${escapeHtml(results.model)} — no separate ground-truth key-point list exists, so "Key Point Recall" is approximated by the judge's completeness score, not a literal fraction.</p>
-    `;
-  } else {
-    html += `<p class="eval-note">Could not load judge results. Run <code>python eval/judge.py</code>.</p>`;
+const PHASE1_PROVIDERS = [
+  { id: "local", label: "Local (Qwen2.5-1.5B)" },
+  { id: "mistral", label: "Mistral 7B" },
+  { id: "claude", label: "Claude (Haiku)" },
+];
+
+function fmtCost(usd) {
+  if (usd == null) return "—";
+  if (usd === 0) return "free";
+  return usd < 0.01 ? `$${usd.toFixed(4)}` : `$${usd.toFixed(2)}`;
+}
+
+function fmtSeconds(s) {
+  if (s == null) return "—";
+  return s < 10 ? `${s.toFixed(1)}s` : `${s.toFixed(0)}s`;
+}
+
+const schemaOkOf = (r) => !!(r.layer1?.schema?.all_sections_present && r.layer1?.schema?.heading_level_matches_spec);
+const actionsOkOf = (r) => r.layer1?.actions?.compliant !== false;
+const phase1Label = (id) => (PHASE1_PROVIDERS.find((p) => p.id === id) || { label: id }).label;
+
+// meeting is null on the old kickoff runs (main.py never set it) — treat those
+// as the kickoff so every run maps to one of the 15 recordings.
+const recKeyOf = (r) => r.meeting || "01-kickoff";
+
+// recording -> provider -> latest run for that (recording, provider) pair.
+function phase1LatestGrid(records) {
+  const grid = {};
+  for (const r of records || []) {
+    const rk = recKeyOf(r);
+    const p = r.summarizer_provider;
+    (grid[rk] = grid[rk] || {});
+    if (!grid[rk][p] || (r.timestamp || 0) > (grid[rk][p].timestamp || 0)) grid[rk][p] = r;
   }
+  return grid;
+}
+
+function renderPhase1(historyRecords) {
+  let html = `
+    <h3 class="eval-section-header">Phase 1 — Basic Summary: which model summarizes best?</h3>
+    <p class="eval-note"><strong>Goal:</strong> a faithful paragraph + bullet summary, no extra grounding (<code>phase1-baseline/</code>, zero-shot). The <em>same</em> transcript is summarized by all three providers and scored by one judge, so the three are directly comparable per recording.</p>
+  `;
+
+  const grid = phase1LatestGrid(historyRecords);
+  const recordings = Object.keys(grid).sort();
+  if (!recordings.length) {
+    html += `<p class="eval-note">No runs yet.</p>`;
+    return html;
+  }
+
+  const judgeOfRec = (rk) => {
+    const any = PHASE1_PROVIDERS.map((p) => grid[rk][p.id]).find(Boolean);
+    return any ? any.judge_provider : null;
+  };
+
+  // Aggregate only over recordings sharing one judge, so averages stay on a
+  // single scale. Mistral judged the 14 batch recordings; the kickoff is
+  // Claude-judged and is shown in the detail table but kept out of the average.
+  const judgeCounts = {};
+  for (const rk of recordings) { const j = judgeOfRec(rk); judgeCounts[j] = (judgeCounts[j] || 0) + 1; }
+  const aggJudge = Object.entries(judgeCounts).sort((a, b) => b[1] - a[1])[0][0];
+  const aggRecs = recordings.filter((rk) => judgeOfRec(rk) === aggJudge);
+
+  const providerAgg = (pid) => {
+    const runs = aggRecs.map((rk) => grid[rk][pid]).filter(Boolean);
+    if (!runs.length) return null;
+    return {
+      n: runs.length,
+      faithfulness: avg(runs.map((r) => r.layer2?.faithfulness)),
+      completeness: avg(runs.map((r) => r.layer2?.completeness)),
+      conciseness: avg(runs.map((r) => r.layer2?.conciseness)),
+      unsupported: runs.reduce((a, r) => a + (r.layer2?.unsupported_claims || []).length, 0),
+      schemaPass: runs.filter(schemaOkOf).length,
+      actionsPass: runs.filter(actionsOkOf).length,
+      genCost: avg(runs.map((r) => r.summarizer_cost_usd)),
+      genTime: avg(runs.map((r) => r.gen_seconds)),
+    };
+  };
+
+  // Data-derived verdict over the aggregate set (n = aggRecs.length).
+  const joinList = (arr) => arr.length <= 1 ? (arr[0] || "")
+    : arr.length === 2 ? `${arr[0]} and ${arr[1]}`
+    : `${arr.slice(0, -1).join(", ")}, and ${arr[arr.length - 1]}`;
+  const aggs = PHASE1_PROVIDERS.map((p) => ({ p, a: providerAgg(p.id) })).filter((x) => x.a);
+  if (aggs.length) {
+    const maxF = Math.max(...aggs.map((x) => x.a.faithfulness));
+    const top = aggs.filter((x) => Math.abs(x.a.faithfulness - maxF) < 0.05);
+    const allTie = top.length === aggs.length;
+    let v;
+    if (allTie) {
+      // The LLM judge isn't discriminating (everyone ~tied). Point at the
+      // deterministic schema check, which does separate them.
+      const bySchema = aggs.slice().sort((a, b) => (b.a.schemaPass / b.a.n) - (a.a.schemaPass / a.a.n));
+      const worstSchema = bySchema[bySchema.length - 1];
+      v = `Across ${aggRecs.length} recordings the ${escapeHtml(aggJudge)} judge scores every model ~${fmtScore(maxF)} on faithfulness — it doesn't separate them. The deterministic <strong>schema check</strong> does: <strong>${escapeHtml(worstSchema.p.label)}</strong> follows the required format only ${worstSchema.a.schemaPass}/${worstSchema.a.n} times, versus ${bySchema[0].a.schemaPass}/${bySchema[0].a.n} for <strong>${escapeHtml(bySchema[0].p.label)}</strong> — so format compliance, not the judge score, is what actually distinguishes them here.`;
+    } else {
+      const freeTop = top.find((x) => (x.a.genCost || 0) === 0);
+      const paidTop = top.find((x) => (x.a.genCost || 0) > 0);
+      v = `Averaged over ${aggRecs.length} recordings (judge: ${escapeHtml(aggJudge)}), <strong>${joinList(top.map((x) => escapeHtml(x.p.label)))}</strong> lead${top.length > 1 ? "" : "s"} on faithfulness (${fmtScore(maxF)})`;
+      if (freeTop && paidTop) v += ` — and <strong>${escapeHtml(freeTop.p.label)}</strong> reaches it <strong>free on-device</strong>, matching the paid model.`;
+      else v += `.`;
+      const worst = aggs.slice().sort((a, b) => a.a.faithfulness - b.a.faithfulness)[0];
+      if (worst.a.faithfulness < maxF - 0.05) v += ` <strong>${escapeHtml(worst.p.label)}</strong> trails at ${fmtScore(worst.a.faithfulness)}.`;
+    }
+    html += roadmapVerdict(v);
+  }
+
+  // ---- Aggregate table (per provider) ----
+  html += `<h4 class="eval-subsection-header">Average across ${aggRecs.length} recordings — judged by ${escapeHtml(aggJudge)}</h4>`;
+  html += `
+    <div class="eval-table-wrap">
+      <table class="eval-table">
+        <thead><tr><th>Summarizer</th><th>Faithfulness</th><th>Completeness</th><th>Conciseness</th><th>Unsupported</th><th>Schema pass</th><th>Actions pass</th><th>Avg gen time</th><th>Avg gen cost</th></tr></thead>
+        <tbody>
+  `;
+  for (const p of PHASE1_PROVIDERS) {
+    const a = providerAgg(p.id);
+    if (!a) { html += `<tr><td>${escapeHtml(p.label)}</td><td colspan="8" class="eval-muted">not run yet${p.id === "mistral" ? " (Mistral on CPU is slow — may still be running)" : ""}</td></tr>`; continue; }
+    html += `
+      <tr>
+        <td>${escapeHtml(p.label)}</td>
+        <td>${scoreCell(Number(a.faithfulness.toFixed(1)))}</td>
+        <td>${scoreCell(Number(a.completeness.toFixed(1)))}</td>
+        <td>${scoreCell(Number(a.conciseness.toFixed(1)))}</td>
+        <td>${a.unsupported}</td>
+        <td>${a.schemaPass}/${a.n}</td>
+        <td>${a.actionsPass}/${a.n}</td>
+        <td>${fmtSeconds(a.genTime)}</td>
+        <td>${fmtCost(a.genCost)}</td>
+      </tr>
+    `;
+  }
+  html += `</tbody></table></div>`;
+
+  // ---- Per-recording detail (Foundation-style) ----
+  html += `<h4 class="eval-subsection-header">Per-recording detail — ${recordings.length} recordings × 3 models</h4>`;
+  html += `
+    <div class="eval-table-wrap">
+      <table class="eval-table">
+        <thead><tr>
+          <th>Recording</th><th>Summarizer</th><th>Faithful</th><th>Complete</th><th>Concise</th>
+          <th>Unsupp.</th><th>Schema</th><th>Actions</th><th>Gen time</th><th>Summary $</th><th>Judge $</th><th>Total $</th>
+        </tr></thead>
+        <tbody>
+  `;
+  for (const rk of recordings) {
+    const judge = judgeOfRec(rk);
+    PHASE1_PROVIDERS.forEach((p, idx) => {
+      const r = grid[rk][p.id];
+      const recCell = idx === 0
+        ? `<td rowspan="3">${escapeHtml(rk)}<br><span class="eval-muted" style="font-size:11px;">judge: ${escapeHtml(judge)}</span></td>`
+        : "";
+      if (!r) {
+        html += `<tr>${recCell}<td>${escapeHtml(p.label)}</td><td colspan="10" class="eval-muted">—</td></tr>`;
+        return;
+      }
+      const l2 = r.layer2 || {};
+      html += `
+        <tr>
+          ${recCell}
+          <td>${escapeHtml(p.label)}</td>
+          <td>${l2.faithfulness != null ? scoreCell(l2.faithfulness) : "—"}</td>
+          <td>${l2.completeness != null ? scoreCell(l2.completeness) : "—"}</td>
+          <td>${l2.conciseness != null ? scoreCell(l2.conciseness) : "—"}</td>
+          <td>${(l2.unsupported_claims || []).length}</td>
+          <td>${statusPill(schemaOkOf(r), "OK", "Drift")}</td>
+          <td>${statusPill(actionsOkOf(r), "OK", "Viol.")}</td>
+          <td>${fmtSeconds(r.gen_seconds)}</td>
+          <td>${fmtCost(r.summarizer_cost_usd)}</td>
+          <td>${fmtCost(r.judge_cost_usd)}</td>
+          <td>${fmtCost(r.total_cost_usd)}</td>
+        </tr>
+      `;
+    });
+  }
+  html += `</tbody></table></div>`;
+
+  html += `
+    <p class="eval-legend"><strong>Faithful</strong> = no invented facts · <strong>Complete</strong> = key points captured (judge proxy, not literal recall) · <strong>Concise</strong> = no padding · <strong>Schema/Actions</strong> = deterministic format checks · <strong>Gen time</strong> = wall-clock to produce the summary (selection criterion — on-device compute; Claude not measured as its time is API latency) · <strong>Summary $</strong> = generation cost (on-device = free) · <strong>Judge $</strong> = scoring cost · <strong>Total $</strong> = both.</p>
+  `;
+
+  let caveats = `<p class="eval-note">Judge varies by recording (shown per row): the kickoff keeps its earlier <strong>Claude</strong>-judged run; recordings 2–15 are judged by <strong>Mistral</strong> (free, on-device) to save cost. Because the judge differs, the kickoff is excluded from the average table above (Mistral-judged recordings only) — cross-judge scores aren't on the same scale.</p>`;
+  caveats += `<p class="eval-note">LLM-judge scores are non-deterministic; completeness is a proxy, not a ground-truth recall fraction. Generation cost for on-device models (local, Mistral) is $0; only Claude generation and Claude/Mistral judging incur (or, for Mistral, don't) real cost — Mistral judging is local, hence free.</p>`;
+  html += roadmapDetails("Judge, cost & caveats", caveats);
   return html;
 }
 
-function renderPhase2(results, extraction) {
+function renderPhase2(historyRecords) {
   let html = `
-    <h3 class="eval-section-header">Phase 2 — Checklist Coverage &amp; Task Extraction</h3>
-    <p class="eval-note"><strong>Goal:</strong> structured, schema-conformant capture of tasks/topics. <strong>Built by:</strong> <code>phase2-checklist/</code>'s deterministic <code>## Checklist Coverage</code> section (keyword match against the transcript, not another LLM call) plus the Actions-bullet schema enforced since Phase 1.</p>
+    <h3 class="eval-section-header">Phase 2 — Summary + Checklist + Action list: which model captures tasks best?</h3>
+    <p class="eval-note"><strong>Goal:</strong> beyond a summary, produce a <strong>checklist coverage</strong> (which required topics were discussed) and an <strong>action list</strong> (who committed to what). Two of the three outputs are scored against a known ground truth — deterministic, no judge opinion. Kickoff recording; Qwen vs Mistral.</p>
   `;
 
-  const variant = results ? results.scenarios.find((s) => s.id === "phase2-checklist")?.variants[0] : null;
-  const cl = variant?.checklist;
-  html += `<h4 class="eval-subsection-header">Checklist field mapping</h4>`;
-  html += cl ? `
+  // Qwen + Mistral only for now (per scope); Claude not part of this comparison.
+  const PHASE2_PROVIDERS = PHASE1_PROVIDERS.filter((p) => p.id !== "claude");
+  // latest run per provider (phase2 records carry checklist + action_extraction).
+  const byProv = {};
+  for (const r of historyRecords || []) {
+    const p = r.summarizer_provider;
+    if (p === "claude") continue;
+    if (!byProv[p] || (r.timestamp || 0) > (byProv[p].timestamp || 0)) byProv[p] = r;
+  }
+  const present = PHASE2_PROVIDERS.filter((p) => byProv[p.id]);
+  if (!present.length) {
+    html += `<p class="eval-note">No runs yet.</p>`;
+    return html;
+  }
+
+  // Verdict — lead with action-list correctness (the discriminating metric).
+  const labelOf = (id) => (PHASE1_PROVIDERS.find((p) => p.id === id) || { label: id }).label;
+  const withAct = present.filter((p) => byProv[p.id].action_extraction?.precision != null);
+  if (withAct.length) {
+    const best = withAct.slice().sort((a, b) => byProv[b.id].action_extraction.precision - byProv[a.id].action_extraction.precision)[0];
+    const worst = withAct.slice().sort((a, b) => byProv[a.id].action_extraction.precision - byProv[b.id].action_extraction.precision)[0];
+    const ba = byProv[best.id].action_extraction, wa = byProv[worst.id].action_extraction;
+    let v = `Both models catch the real action item, but they differ on <strong>invented</strong> tasks: <strong>${escapeHtml(labelOf(best.id))}</strong> is more precise (${fmtPct(ba.precision)} — ${ba.generated_count - (ba.extra || 0)} of ${ba.generated_count} listed actions real)`;
+    if (worst.id !== best.id) v += `, while <strong>${escapeHtml(labelOf(worst.id))}</strong> over-extracts (${fmtPct(wa.precision)} — ${wa.generated_count} listed, ${wa.extra} invented)`;
+    v += `. The checklist metric is saturated at 100% for both, so it doesn't separate them — action-list correctness does.`;
+    html += roadmapVerdict(v);
+  }
+
+  html += `
     <div class="eval-table-wrap">
       <table class="eval-table">
-        <thead><tr><th>Precision</th><th>Recall</th><th>Accuracy</th></tr></thead>
-        <tbody><tr><td>${fmtPct(cl.precision)}</td><td>${fmtPct(cl.recall)}</td><td>${fmtPct(cl.accuracy)}</td></tr></tbody>
-      </table>
-    </div>
-  ` : `<p class="eval-note">Could not load checklist scores. Run <code>python eval/judge.py</code>.</p>`;
-
-  html += `<h4 class="eval-subsection-header">Action-item extraction</h4>`;
-  if (extraction) {
-    const s = extraction.scenarios.find((sc) => sc.id === "phase2-checklist");
+        <thead><tr>
+          <th>Summarizer</th>
+          <th>Faithful</th><th>Complete</th><th>Concise</th>
+          <th>Checklist acc</th>
+          <th>Action capture</th><th>Action correctness</th>
+          <th>Gen time</th><th>Cost</th>
+        </tr></thead>
+        <tbody>
+  `;
+  for (const p of PHASE2_PROVIDERS) {
+    const r = byProv[p.id];
+    if (!r) { html += `<tr><td>${escapeHtml(p.label)}</td><td colspan="8" class="eval-muted">not run yet</td></tr>`; continue; }
+    const l2 = r.layer2 || {};
+    const cl = r.checklist || {};
+    const ax = r.action_extraction || {};
+    const corr = ax.precision != null ? `${fmtPct(ax.precision)} <span class="eval-muted" style="font-size:11px;">(${ax.generated_count - (ax.extra || 0)}/${ax.generated_count})</span>` : "—";
+    const cap = ax.recall != null ? `${fmtPct(ax.recall)} <span class="eval-muted" style="font-size:11px;">(${ax.ground_truth_count - (ax.missed || 0)}/${ax.ground_truth_count})</span>` : "—";
     html += `
-      <div class="eval-table-wrap">
-        <table class="eval-table">
-          <thead><tr><th>Variant</th><th>Recall</th><th>Precision</th></tr></thead>
-          <tbody>
-            ${(s?.variants || []).map((v) => `<tr><td>${escapeHtml(v.variant)}</td><td>${fmtPct(v.recall)}</td><td>${fmtPct(v.precision)}</td></tr>`).join("")}
-          </tbody>
-        </table>
-      </div>
+      <tr>
+        <td>${escapeHtml(p.label)}</td>
+        <td>${l2.faithfulness != null ? scoreCell(l2.faithfulness) : "—"}</td>
+        <td>${l2.completeness != null ? scoreCell(l2.completeness) : "—"}</td>
+        <td>${l2.conciseness != null ? scoreCell(l2.conciseness) : "—"}</td>
+        <td>${cl.accuracy != null ? fmtPct(cl.accuracy) : "—"}</td>
+        <td>${cap}</td>
+        <td>${corr}</td>
+        <td>${fmtSeconds(r.gen_seconds)}</td>
+        <td>${fmtCost(r.summarizer_cost_usd)}</td>
+      </tr>
     `;
-  } else {
-    html += `<p class="eval-note">Could not load extraction efficiency. Run <code>python eval/extraction_efficiency.py</code>.</p>`;
   }
+  html += `</tbody></table></div>`;
+
+  html += `
+    <p class="eval-legend"><strong>Faithful / Complete / Concise</strong> = summary quality (judged) · <strong>Checklist acc</strong> = of the required topics, how many were correctly marked discussed-or-not (deterministic) · <strong>Action capture</strong> = of the real action items, how many were caught (recall) · <strong>Action correctness</strong> = of the listed actions, how many are real vs invented (precision) · <strong>Gen time / Cost</strong> = on-device compute (free).</p>
+  `;
+
+  let caveats = `<p class="eval-note">Checklist accuracy and action metrics are <strong>deterministic</strong> — scored against a hardcoded ground truth for the kickoff (topics in <code>checklist.py</code>; commitments via the "I'll / I will" heuristic), not an LLM opinion. Summary quality is judge-scored (judge: Mistral, free — lenient, hence the identical 5/4/4 across models).</p>`;
+  caveats += `<p class="eval-note">Small sample: the kickoff has only ${withAct.length ? byProv[withAct[0].id].action_extraction.ground_truth_count : "a few"} ground-truth action commitment(s) by the line-based heuristic (multiple "I'll" clauses on one dialogue line count once), so action precision is a coarse signal here, not a large-n rate. Checklist coverage is saturated at 100% — kept for completeness but not a discriminator.</p>`;
+  html += roadmapDetails("How these are scored & caveats", caveats);
   return html;
 }
 
@@ -1799,42 +2100,123 @@ function renderPhase6(storyResults, storyProbes) {
   return html;
 }
 
-function renderPhase7() {
-  return `
-    <h3 class="eval-section-header">Phase 7 — Voice Interface for Querying the Content</h3>
-    <p class="eval-note"><strong>Goal:</strong> ask a spoken question, get a text answer grounded in everything this project has produced. <strong>Built by:</strong> <code>phase7-voice-query/</code> — TF-IDF retrieval over stored transcripts/summaries (no vector DB, no new dependency), answered with the same provider-swappable backend every other phase uses.</p>
-    <p class="eval-note">End-to-end latency and Grounding Score are measured per query (<code>output/query-N/{timing,grounding}.json</code>), not aggregated here since queries are ad hoc rather than a fixed scripted batch like Phases 1-4. Try it on the <strong>Voice Query</strong> page, or see <a href="/phase7-voice-query/README.md">phase7-voice-query/README.md</a> for the retrieval/grounding methodology.</p>
+function renderPhase7(historyRecords) {
+  let html = `
+    <h3 class="eval-section-header">Phase 7 — Reference-Document RAG</h3>
+    <p class="eval-note"><strong>Goal:</strong> improve summary accuracy by retrieving relevant excerpts from the project's own reference documents (PRD, design spec, payments vendor doc) and grounding the summary in them, in addition to the transcript. <strong>Built by:</strong> <code>phase7-reference-rag/</code> — same TF-IDF, no-vector-DB retrieval approach as Phase 8's voice query, applied to summarization instead of Q&A.</p>
   `;
+
+  // Grouped by (variant, retrieval_method) rather than just variant — a
+  // "with_references" row run with FAISS and one run with TF-IDF aren't the
+  // same thing to average together, and the point of keeping both backends
+  // is to compare them, not blend them.
+  const groups = {};
+  for (const r of historyRecords || []) {
+    const method = r.variant === "with_references" ? (r.retrieval_method || "tfidf") : "—";
+    const key = `${r.variant}|${method}`;
+    (groups[key] = groups[key] || { variant: r.variant, method, records: [] }).records.push(r);
+  }
+  const order = ["baseline|—", "with_references|tfidf", "with_references|faiss"];
+  const keys = order.filter((k) => groups[k]);
+
+  if (keys.length) {
+    const rows = keys.map((key) => {
+      const { variant, method, records } = groups[key];
+      const faithfulness = avg(records.map((r) => r.layer2?.faithfulness));
+      const completeness = avg(records.map((r) => r.layer2?.completeness));
+      const conciseness = avg(records.map((r) => r.layer2?.conciseness));
+      const groundingScores = records.map((r) => r.reference_grounding?.score).filter((s) => s != null);
+      const grounding = variant === "with_references"
+        ? (groundingScores.length ? fmtPct(avg(groundingScores)) : "n/a")
+        : "—";
+      return `<tr><td>${variant}</td><td>${method}</td><td>${fmtScore(faithfulness)}</td><td>${fmtScore(completeness)}</td><td>${fmtScore(conciseness)}</td><td>${grounding}</td></tr>`;
+    }).join("");
+    html += `
+      <div class="eval-table-wrap">
+        <table class="eval-table">
+          <thead><tr><th>Variant</th><th>Retrieval</th><th>Faithfulness</th><th>Completeness</th><th>Conciseness</th><th>Reference Grounding</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <p class="eval-note">Reference Grounding: of the words present in the reference-grounded summary but not the baseline (i.e. what the reference material added), the % that also appear in the retrieved excerpts — a proxy for "did the addition come from the reference docs," not a semantic fact-check. Baseline has nothing to compare against, so it's shown as —. TF-IDF and FAISS (real sentence embeddings, see <code>../faiss_retrieval.py</code>) are kept as separate rows since they can retrieve different excerpts for the same transcript.</p>
+    `;
+  } else {
+    html += `<p class="eval-note">Not run yet — trigger it from the Pipeline page with a judge provider set to populate this table.</p>`;
+  }
+  return html;
+}
+
+function renderPhase8() {
+  return `
+    <h3 class="eval-section-header">Phase 8 — Voice Interface for Querying the Content</h3>
+    <p class="eval-note"><strong>Goal:</strong> ask a spoken question, get a text answer grounded in everything this project has produced. <strong>Built by:</strong> <code>phase8-voice-query/</code> — TF-IDF retrieval over stored transcripts/summaries (no vector DB, no new dependency), answered with the same provider-swappable backend every other phase uses.</p>
+    <p class="eval-note">End-to-end latency and Grounding Score are measured per query (<code>output/query-N/{timing,grounding}.json</code>), not aggregated here since queries are ad hoc rather than a fixed scripted batch like Phases 1-4. Try it on the <strong>Voice Query</strong> page, or see <a href="/phase8-voice-query/README.md">phase8-voice-query/README.md</a> for the retrieval/grounding methodology.</p>
+  `;
+}
+
+const ROADMAP_TABS = [
+  { id: "foundation", label: "Foundation" },
+  { id: "phase1", label: "Phase 1" },
+  { id: "phase2", label: "Phase 2" },
+  { id: "phase3", label: "Phase 3" },
+  { id: "phase4", label: "Phase 4" },
+  { id: "phase5", label: "Phase 5" },
+  { id: "phase6", label: "Phase 6" },
+  { id: "phase7", label: "Phase 7" },
+  { id: "phase8", label: "Phase 8" },
+];
+
+function wireRoadmapTabs(root) {
+  const tabs = root.querySelectorAll(".roadmap-tab");
+  const panels = root.querySelectorAll(".roadmap-tab-panel");
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      tabs.forEach((t) => t.setAttribute("aria-pressed", "false"));
+      tab.setAttribute("aria-pressed", "true");
+      panels.forEach((p) => p.classList.toggle("hidden", p.dataset.tabPanel !== tab.dataset.tab));
+    });
+  });
 }
 
 async function renderRoadmapPage() {
   const root = document.getElementById("roadmap-root");
   root.innerHTML = "<p>Loading…</p>";
 
-  const [transcriptionData, results, extraction, storyResults, storyProbes, phase5History] = await Promise.all([
+  const [transcriptionData, results, extraction, storyResults, storyProbes, phase1History, phase2History, phase5History, phase7History] = await Promise.all([
     fetchJsonOrNull("/eval/output/transcription_quality.json"),
     fetchJsonOrNull("/eval/output/results.json"),
     fetchJsonOrNull("/eval/output/extraction_efficiency.json"),
     fetchJsonOrNull("/eval/output/story_results.json"),
     fetchJsonOrNull("/eval/output/story_probes.json"),
+    fetchJsonOrNull("/api/eval/history?scenario=phase1-baseline"),
+    fetchJsonOrNull("/api/eval/history?scenario=phase2-checklist"),
     fetchJsonOrNull("/api/eval/history?scenario=phase5-office-agent"),
+    fetchJsonOrNull("/api/eval/history?scenario=phase7-reference-rag"),
   ]);
 
-  let html = `<p class="custom-intro">Each phase below is scored from the same eval outputs shown on the Evaluation and Story pages, regrouped by roadmap phase instead of by scenario — see <a href="/ROADMAP.md">ROADMAP.md</a> for the narrative version.</p>`;
-  html += renderFoundation(transcriptionData);
-  html += `<div class="roadmap-connector">↓ feeds into every phase below</div>`;
-  html += renderPhase1(results);
-  html += renderPhase2(results, extraction);
-  html += renderPhase3(results);
-  html += renderPhase4(results, extraction);
-  html += renderPhase5(phase5History?.records);
-  html += renderPhase6(storyResults, storyProbes);
-  html += renderPhase7();
+  const panelContent = {
+    foundation: renderFoundation(transcriptionData),
+    phase1: renderPhase1(phase1History?.records),
+    phase2: renderPhase2(phase2History?.records),
+    phase3: renderPhase3(results),
+    phase4: renderPhase4(results, extraction),
+    phase5: renderPhase5(phase5History?.records),
+    phase6: renderPhase6(storyResults, storyProbes),
+    phase7: renderPhase7(phase7History?.records),
+    phase8: renderPhase8(),
+  };
+
+  let html = `<p class="custom-intro">Each tab below is scored from the same eval outputs shown on the Evaluation and Story pages, regrouped by roadmap phase instead of by scenario — see <a href="/ROADMAP.md">ROADMAP.md</a> for the narrative version.</p>`;
+  html += `<div class="roadmap-tabs" role="tablist">`;
+  html += ROADMAP_TABS.map((t, i) => `<button class="roadmap-tab" data-tab="${t.id}" aria-pressed="${i === 0}">${t.label}</button>`).join("");
+  html += `</div>`;
+  html += ROADMAP_TABS.map((t, i) => `<div class="roadmap-tab-panel${i === 0 ? "" : " hidden"}" data-tab-panel="${t.id}">${panelContent[t.id]}</div>`).join("");
 
   root.innerHTML = html;
+  wireRoadmapTabs(root);
 }
 
-// ---------- Voice Query page (Phase 6) ----------
+// ---------- Voice Query page (Phase 8) ----------
 const VOICE_QUERY_STAGE_LABELS = {
   transcribing: "Transcribing",
   retrieving: "Retrieving",
@@ -1850,20 +2232,26 @@ function renderVoiceQueryPage() {
   const root = document.getElementById("voicequery-root");
   root.innerHTML = `
     <p class="custom-intro">Ask a spoken question about anything the project has already summarized
-      (Phases 1-6) and get a text answer grounded in the stored transcripts/summaries, with end-to-end
+      (Phases 1-7) and get a text answer grounded in the stored transcripts/summaries, with end-to-end
       latency and a deterministic Grounding Score. See
-      <a href="/phase7-voice-query/README.md">phase7-voice-query/README.md</a>.</p>
+      <a href="/phase8-voice-query/README.md">phase8-voice-query/README.md</a>.</p>
     <div class="voicequery-controls">
       <select id="voicequery-provider" class="provider-select">
         <option value="local">Local (Qwen2.5)</option>
         <option value="mistral">Local (Mistral 7B)</option>
         <option value="claude">Claude (Haiku 4.5)</option>
       </select>
+      <select id="voicequery-retrieval" class="provider-select">
+        <option value="tfidf">Retrieval: TF-IDF</option>
+        <option value="faiss">Retrieval: FAISS (embeddings)</option>
+      </select>
       <button id="voicequery-record-btn" class="run-btn">Start recording</button>
       <span id="voicequery-rec-status" class="voicequery-status"></span>
     </div>
     <div id="voicequery-progress" class="custom-processing-note"></div>
     <div id="voicequery-result"></div>
+    <div class="block-label">Progress across providers</div>
+    <div id="voicequery-history">Loading…</div>
   `;
 
   document.getElementById("voicequery-record-btn").addEventListener("click", () => {
@@ -1873,6 +2261,70 @@ function renderVoiceQueryPage() {
       startVoiceQueryRecording();
     }
   });
+
+  renderVoiceQueryHistory();
+}
+
+async function renderVoiceQueryHistory() {
+  const root = document.getElementById("voicequery-history");
+  if (!root) return;
+
+  let records;
+  try {
+    const res = await fetch("/api/voice-query/history");
+    records = (await res.json()).records || [];
+  } catch {
+    root.innerHTML = `<p class="tech-intro">Couldn't load run history.</p>`;
+    return;
+  }
+
+  if (!records.length) {
+    root.innerHTML = `<p class="tech-intro">No queries logged yet — ask a question above to start building a comparison across providers.</p>`;
+    return;
+  }
+
+  let html = `
+    <div class="eval-table-wrap">
+      <table class="eval-table">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Provider</th>
+            <th>Retrieval</th>
+            <th>Question</th>
+            <th>Grounding</th>
+            <th>Time taken</th>
+            <th>Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+  for (const r of records) {
+    const grounding = r.grounding || {};
+    const groundingPct = grounding.score != null ? `${Math.round(grounding.score * 100)}%` : "n/a";
+    const groundingLabel = grounding.abstained ? `${groundingPct} (abstained)` : groundingPct;
+    const when = r.timestamp ? new Date(r.timestamp * 1000).toLocaleString() : "—";
+    const question = r.question && r.question.length > 70 ? `${r.question.slice(0, 67)}...` : (r.question || "");
+    const timing = r.timing || {};
+    const latency = timing.total_s != null ? `${timing.total_s.toFixed(2)}s` : "—";
+    const breakdown = timing.total_s != null
+      ? `transcribe ${(timing.transcribe_s || 0).toFixed(2)}s, retrieve ${(timing.retrieve_s || 0).toFixed(2)}s, answer ${(timing.answer_s || 0).toFixed(2)}s`
+      : "";
+    const cost = r.cost_usd ? `$${r.cost_usd.toFixed(4)}` : (r.cost_usd === 0 ? "free" : "—");
+    html += `
+      <tr>
+        <td>${when}</td>
+        <td>${escapeHtml(r.provider || "")}<br><span class="voicequery-status">${escapeHtml(r.model_name || "")}</span></td>
+        <td>${escapeHtml(r.retrieval_method || "tfidf")}</td>
+        <td>${escapeHtml(question)}</td>
+        <td>${groundingLabel}</td>
+        <td>${latency}<br><span class="voicequery-status">${breakdown}</span></td>
+        <td>${cost}</td>
+      </tr>
+    `;
+  }
+  html += `</tbody></table></div>`;
+  root.innerHTML = html;
 }
 
 async function startVoiceQueryRecording() {
@@ -1908,12 +2360,13 @@ async function submitVoiceQuery(blob) {
   const btn = document.getElementById("voicequery-record-btn");
   const status = document.getElementById("voicequery-rec-status");
   const provider = document.getElementById("voicequery-provider").value;
+  const retrieval = document.getElementById("voicequery-retrieval").value;
   btn.disabled = true;
   status.textContent = "Uploading…";
 
   let job;
   try {
-    const res = await fetch(`/api/voice-query?provider=${encodeURIComponent(provider)}`, {
+    const res = await fetch(`/api/voice-query?provider=${encodeURIComponent(provider)}&retrieval=${encodeURIComponent(retrieval)}`, {
       method: "POST",
       headers: { "Content-Type": blob.type || "audio/webm" },
       body: blob,
@@ -1957,6 +2410,7 @@ function pollVoiceQuery(job) {
       btn.disabled = false;
       btn.textContent = "Start recording";
       renderVoiceQueryResult(data.result);
+      renderVoiceQueryHistory();
     } else if (data.status === "error") {
       clearInterval(voiceQueryPollTimer);
       status.textContent = `Error: ${data.error || "unknown"}`;

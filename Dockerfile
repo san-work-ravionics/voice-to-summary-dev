@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM python:3.9-slim
 
 # ffmpeg: required by pydub/whisper to decode audio.
@@ -15,9 +16,15 @@ WORKDIR /app
 # bundles multi-GB CUDA runtime libraries that are dead weight here — Docker
 # Desktop (Mac/Windows) never passes GPU/MPS through to a Linux container,
 # so CPU is what this image actually runs on regardless of host hardware.
+#
+# The pip cache is a BuildKit cache mount, not a layer: it survives even
+# when requirements.txt changes and invalidates this RUN (e.g. adding
+# faiss-cpu/sentence-transformers), so only new/changed packages hit the
+# network on rebuild instead of every wheel (torch et al) downloading again.
 COPY requirements.txt .
-RUN pip install --no-cache-dir torch==2.8.0 --extra-index-url https://download.pytorch.org/whl/cpu \
-    && pip install --no-cache-dir -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install torch==2.8.0 --extra-index-url https://download.pytorch.org/whl/cpu \
+    && pip install -r requirements.txt
 
 COPY . .
 

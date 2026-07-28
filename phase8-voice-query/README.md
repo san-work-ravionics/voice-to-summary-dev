@@ -1,14 +1,14 @@
-# phase7-voice-query — voice interface for querying stored content (Phase 7)
+# phase8-voice-query — voice interface for querying stored content (Phase 8)
 
 Part of the [voice-to-summary](../README.md) project: **Voice interface for querying the content**. Ask a spoken question, get a text answer grounded in every transcript and summary this project has already produced.
 
 ## How it works
 
 1. **Transcribe** the question audio with the same shared Whisper wrapper (`../transcription.py`) every other scenario uses.
-2. **Retrieve** the most relevant chunks from a corpus built over everything currently on disk under `phase1-baseline/`, `phase2-checklist/`, `phase3-context/`, `phase4-assistant/`, `phase5-office-agent/`, all 15 `phase6-history/` meetings, and `custom/output/` ([`src/corpus.py`](src/corpus.py)). Transcripts are chunked into ~4-sentence windows; Markdown summaries are chunked per `##` section, so a query can land on e.g. just one meeting's Actions instead of a whole brief.
+2. **Retrieve** the most relevant chunks from a corpus built over everything currently on disk under `phase1-baseline/`, `phase2-checklist/`, `phase3-context/`, `phase4-assistant/`, `phase5-office-agent/`, all 15 `phase6-history/` meetings, `phase7-reference-rag/`, and `custom/output/` ([`src/corpus.py`](src/corpus.py)). Transcripts are chunked into ~4-sentence windows; Markdown summaries are chunked per `##` section, so a query can land on e.g. just one meeting's Actions instead of a whole brief.
 3. **Answer**, grounded only in the retrieved excerpts ([`src/answer.py`](src/answer.py)) — provider-swappable (`local`/`mistral`/`claude`) via the same `llm_provider.py` every other scenario uses.
 
-Because the corpus is built from files already on disk, **run the phases you want to be able to ask about first** — an empty `phase6-history/output/` means Phase 7 has nothing from that story to answer from.
+Because the corpus is built from files already on disk, **run the phases you want to be able to ask about first** — an empty `phase6-history/output/` means Phase 8 has nothing from that story to answer from.
 
 ## Retrieval: TF-IDF, not a vector DB
 
@@ -21,11 +21,11 @@ Measured deterministically, not by an LLM judge: the % of the answer's content w
 ## Run
 
 ```bash
-python phase7-voice-query/src/main.py path/to/question.wav
-python phase7-voice-query/src/main.py path/to/question.wav --provider claude
+python phase8-voice-query/src/main.py path/to/question.wav
+python phase8-voice-query/src/main.py path/to/question.wav --provider claude
 ```
 
-Writes `output/query-N/{question_transcript.txt, answer.txt, retrieved_chunks.json, timing.json, grounding.json}`.
+Writes `output/query-N/{question_transcript.txt, answer.txt, retrieved_chunks.json, timing.json, grounding.json, provider.json}`.
 
 ## Metrics
 
@@ -36,9 +36,21 @@ Writes `output/query-N/{question_transcript.txt, answer.txt, retrieved_chunks.js
 | Grounding Score | `grounding.json`: `score` (0-1), `matched`/`total` word counts, `abstained` flag — see above. |
 | Appropriate content in response | Not separately scored here — inspect `answer.txt` against `retrieved_chunks.json` for the specific query; the grounding score is the closest automated proxy but is a groundedness check, not a correctness check. |
 
+`provider.json` records which provider/model actually answered the query (`--provider` defaults to `SUMMARY_PROVIDER`/`local` the same as every other phase) plus the estimated cost — useful once you start comparing `local` vs `mistral` vs `claude` runs against each other.
+
+## Comparing runs across providers/iterations
+
+Every run is also appended to `output/query_history.jsonl` (append-only, one JSON object per run — same design as the root `run_history.py`) via `src/query_history.py`, so nothing is overwritten between runs. To see progress across providers or iterations:
+
+```bash
+python phase8-voice-query/src/history.py
+```
+
+prints a per-provider summary (run count, average Grounding Score, average latency, total cost) followed by every individual run. The webapp's Voice Query page shows the same log as a table under "Progress across providers" (see below), refreshed after each new query.
+
 ## Web UI
 
-The webapp's **Voice Query** page (`python webapp/server.py`) records a question with the browser's microphone, uploads it, and displays the answer with the same latency/grounding breakdown — see [`../webapp/README.md`](../webapp/README.md).
+The webapp's **Voice Query** page (`python webapp/server.py`) records a question with the browser's microphone, uploads it, and displays the answer with the same latency/grounding breakdown, plus a running history table comparing every past query's provider/grounding/latency/cost — see [`../webapp/README.md`](../webapp/README.md).
 
 ## What isn't built here
 

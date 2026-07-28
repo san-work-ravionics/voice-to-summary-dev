@@ -32,7 +32,7 @@ The project was developed as four progressively richer capability stages against
 | 4 | `phase4-assistant` | An AI assistant present in the meeting itself | A live note-taker that recaps, checks coverage, and closes the meeting with a spoken summary |
 | 6 | `phase6-history` | A 15-meeting story (kickoff through launch retro) with a running history carried forward | Tests whether context helps across time, not just within one meeting — with a real, evidenced answer: mostly yes, with a real cost (see below) |
 
-Phase 5 (an agentic Office/on-device assistant) and Phase 7 (a voice query interface over everything above) round out the full build — see [ROADMAP.md](ROADMAP.md) for how all seven phases fit together and what each one measures.
+Phase 5 (an agentic Office/on-device assistant), Phase 7 (retrieval over the project's own reference documents to enrich summaries), and Phase 8 (a voice query interface over everything above) round out the full build — see [ROADMAP.md](ROADMAP.md) for how all eight phases fit together and what each one measures.
 
 Each stage was tested end-to-end and its output verified for accuracy before moving to the next — including a deliberate check that the checklist correctly reports both what *was* and *wasn't* discussed, not just a generic "all good."
 

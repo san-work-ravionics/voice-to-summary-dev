@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import tempfile
+import time
 from datetime import datetime, timezone
 
 import whisper
@@ -15,26 +16,13 @@ RESULTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output"
 
 WHISPER_MODEL_SIZE = "base"
 
-# phase1-baseline/phase2-checklist/phase3-context/phase5-office-agent all
-# transcribe the exact same shared recording (audio-generation/output/01-kickoff/) —
-# one entry for it, rather than four near-duplicate entries, since it's
-# genuinely one recording now, not four independent copies. phase4-assistant
-# still synthesizes its own (3-voice) recording, so it keeps a normal entry.
-SHARED_KICKOFF_RECORDING = "audio-generation/output/01-kickoff/recording.wav"
-VERSION_SCENARIOS = [
-    {
-        "id": "audio-generation-01-kickoff",
-        "recording": SHARED_KICKOFF_RECORDING,
-        "transcript": "phase1-baseline/output/transcript.txt",
-        "meeting_slug": "01-kickoff",
-    },
-    {
-        "id": "phase4-assistant",
-        "recording": "phase4-assistant/output/recording.wav",
-        "transcript": "phase4-assistant/output/transcript.txt",
-        "dialogue_module": "phase4-assistant/src/generate_dummy_audio.py",
-    },
-]
+# The shared input is ONE project's 15 meetings, in audio-generation/output/
+# (01-kickoff .. 15-launch-retro). Transcription is measured per recording —
+# there are exactly 15 rows, named by meeting slug. No phase names appear
+# here: "Phase N" is a separate axis (pipeline capability) that all draw from
+# these same 15 recordings; it is not a property of a recording. Phase 4's own
+# 3-voice re-recording of the kickoff is a Phase-4 concern, not part of this
+# transcription dataset, so it is intentionally not scored here.
 
 DIARIZATION_NOTE = (
     "Not implemented / not measurable here. whisper.load_model(...).transcribe() "
@@ -66,16 +54,6 @@ def _load_module(path, unique_name):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
-
-
-def _reference_for_version(scenario):
-    mod = _load_module(scenario["dialogue_module"], f"_ref_{scenario['id']}")
-    parts = []
-    intro = getattr(mod, "INTRO_TEXT", None)
-    if intro:
-        parts.append(intro)
-    parts.extend(line for _, line in mod.DIALOGUE)
-    return " ".join(parts)
 
 
 def _reference_for_meeting(slug, dialogues_module):
@@ -168,27 +146,54 @@ NOISE_TIERS_NOTE = (
     "all recordings use the same one or two macOS system TTS voices."
 )
 
+TIMING_NOTE = (
+    "seconds = wall-clock time of the Whisper transcribe() call for that "
+    "tier; rtf (real-time factor) = seconds / audio length, so 0.05 means "
+    "the recording transcribed 20x faster than real time. These times are "
+    "specific to the machine that generated this file (Whisper '{model}' on "
+    "CPU) and will differ on other hardware. Note: the 'clean' tier is now "
+    "transcribed fresh here (timed) rather than read from each phase's "
+    "stored transcript, so its WER and its time describe the same run — "
+    "clean WER may therefore differ very slightly from a phase's own stored "
+    "transcript, since Whisper decoding is not bit-for-bit reproducible."
+)
+
 
 def _transcribe(model, audio_path):
+    """Transcribe and return (text, wall_clock_seconds)."""
+    t0 = time.perf_counter()
     result = model.transcribe(audio_path)
-    return result["text"].strip()
+    elapsed = time.perf_counter() - t0
+    return result["text"].strip(), elapsed
 
 
-def evaluate_recording(model, recording_path, reference, clean_transcript):
-    tiers = {"clean": word_error_rate(reference, clean_transcript)}
+def _timed_tier(reference, text, seconds, audio_seconds):
+    tier = word_error_rate(reference, text)
+    tier["seconds"] = round(seconds, 2)
+    tier["rtf"] = round(seconds / audio_seconds, 3) if audio_seconds else None
+    return tier
 
+
+def evaluate_recording(model, recording_path, reference):
     original_audio = AudioSegment.from_file(recording_path)
+    audio_seconds = round(len(original_audio) / 1000.0, 1)
+
+    # clean: transcribe the recording as-is (timed) so this tier's WER and
+    # its transcription time both describe one real operation measured here.
+    clean_text, clean_secs = _transcribe(model, recording_path)
+    tiers = {"clean": _timed_tier(reference, clean_text, clean_secs, audio_seconds)}
+
     for tier_name, transform in NOISE_TIERS.items():
         tmp_path = tempfile.mkstemp(suffix=".wav")[1]
         try:
             noisy_audio = transform(original_audio)
             noisy_audio.export(tmp_path, format="wav")
-            text = _transcribe(model, tmp_path)
-            tiers[tier_name] = word_error_rate(reference, text)
+            text, secs = _transcribe(model, tmp_path)
+            tiers[tier_name] = _timed_tier(reference, text, secs, audio_seconds)
         finally:
             os.remove(tmp_path)
 
-    return tiers
+    return tiers, audio_seconds
 
 
 def main():
@@ -198,43 +203,25 @@ def main():
     scenarios_out = []
     dialogues_module = _load_module("audio-generation/src/dialogues.py", "_ref_audio_generation_dialogues")
 
-    for scenario in VERSION_SCENARIOS:
-        print(f"Evaluating {scenario['id']}...")
-        if "meeting_slug" in scenario:
-            reference = _reference_for_meeting(scenario["meeting_slug"], dialogues_module)
-        else:
-            reference = _reference_for_version(scenario)
-        with open(os.path.join(PROJECT_ROOT, scenario["transcript"])) as f:
-            clean_transcript = f.read()
-        tiers = evaluate_recording(
-            model,
-            os.path.join(PROJECT_ROOT, scenario["recording"]),
-            reference,
-            clean_transcript,
-        )
-        scenarios_out.append({"id": scenario["id"], "tiers": tiers})
-
+    # Exactly the 15 recordings of the shared project dataset, named by
+    # meeting slug (01-kickoff .. 15-launch-retro).
     for meeting in dialogues_module.MEETINGS:
         slug = meeting["slug"]
-        scenario_id = f"phase6-history-{slug}"
-        print(f"Evaluating {scenario_id}...")
+        print(f"Evaluating {slug}...")
         reference = _reference_for_meeting(slug, dialogues_module)
-        meeting_dir = os.path.join(PROJECT_ROOT, "phase6-history", "output", slug)
-        with open(os.path.join(meeting_dir, "transcript.txt")) as f:
-            clean_transcript = f.read()
-        tiers = evaluate_recording(
+        tiers, audio_seconds = evaluate_recording(
             model,
             os.path.join(PROJECT_ROOT, "audio-generation", "output", slug, "recording.wav"),
             reference,
-            clean_transcript,
         )
-        scenarios_out.append({"id": scenario_id, "tiers": tiers})
+        scenarios_out.append({"id": slug, "audio_seconds": audio_seconds, "tiers": tiers})
 
     results = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "whisper_model": WHISPER_MODEL_SIZE,
         "wer_benchmark_note": WER_BENCHMARK_NOTE,
         "noise_tiers_note": NOISE_TIERS_NOTE,
+        "timing_note": TIMING_NOTE.format(model=WHISPER_MODEL_SIZE),
         "diarization_note": DIARIZATION_NOTE,
         "scenarios": scenarios_out,
     }

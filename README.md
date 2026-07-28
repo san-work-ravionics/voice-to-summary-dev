@@ -1,6 +1,6 @@
 # Voice to Summary
 
-A progressive demo of a local, offline voice → transcript → summary pipeline, organized around a 7-phase build-out — each phase adds one technique on top of the last, so the improvement from each layer is visible on its own. [`audio-generation/`](audio-generation/README.md) is the shared **input**: 15 scripted, synthesized recordings covering a fictional Mobile App Redesign project's full lifecycle (kickoff through launch retro, ~5 months) — every phase below transcribes and summarizes recordings from that folder rather than generating its own throwaway audio.
+A progressive demo of a local, offline voice → transcript → summary pipeline, organized around an 8-phase build-out — each phase adds one technique on top of the last, so the improvement from each layer is visible on its own. [`audio-generation/`](audio-generation/README.md) is the shared **input**: 15 scripted, synthesized recordings covering a fictional Mobile App Redesign project's full lifecycle (kickoff through launch retro, ~5 months) — every phase below transcribes and summarizes recordings from that folder rather than generating its own throwaway audio.
 
 | Scenario | Phase | Adds | Input | Summary output |
 |---|---|---|---|---|
@@ -15,7 +15,9 @@ Each scenario folder is fully self-contained: its own `src/` (transcribe with Wh
 
 [`phase6-history/`](phase6-history/README.md) (Phase 6) goes a step further than any single Phase 1-4 scenario: all 15 `audio-generation/` meetings, told as one continuous arc, comparing a summarizer with no memory of prior meetings against one given a running history built from each prior meeting's own summary — a harder, more realistic test of whether "context" actually helps than a single snapshot meeting can show.
 
-[`phase7-voice-query/`](phase7-voice-query/README.md) (Phase 7) is a voice interface over everything the project has already produced: ask a spoken question, get a text answer grounded in the stored transcripts/summaries, with end-to-end latency and a deterministic Grounding Score.
+[`phase7-reference-rag/`](phase7-reference-rag/README.md) (Phase 7) introduces the project's own reference documents (a PRD, a design spec, a payments vendor integration doc) and retrieves relevant excerpts from them via TF-IDF to enrich the summary with authoritative specifics — a vendor name, a numeric target, a compliance tier — that the shared kickoff meeting only gestures at in general terms, comparing a transcript-only baseline against a reference-grounded summary.
+
+[`phase8-voice-query/`](phase8-voice-query/README.md) (Phase 8) is a voice interface over everything the project has already produced: ask a spoken question, get a text answer grounded in the stored transcripts/summaries, with end-to-end latency and a deterministic Grounding Score.
 
 Voice-to-Transcript isn't a separate numbered phase — it's the shared Whisper step (`transcription.py`) used identically by every scenario above.
 
@@ -65,10 +67,16 @@ python phase6-history/src/main.py       # 15-meeting story: baseline vs. context
 Writes `phase6-history/output/<slug>/` for each of the 15 meetings (e.g. `01-kickoff/`, `15-launch-retro/`). Recordings come from `audio-generation/`; pass `--regenerate` to force re-transcription of every meeting.
 
 ```bash
-python phase7-voice-query/src/main.py path/to/question.wav
+python phase7-reference-rag/src/main.py    # same kickoff recording: baseline vs. reference-doc-grounded summary
 ```
 
-Writes `phase7-voice-query/output/query-N/`. Needs Phases 1-4 (and optionally 5/6/Custom Audio) to have been run at least once, since that's the corpus it answers from.
+Writes `phase7-reference-rag/output/{transcript.txt, retrieved_references.json, summary_baseline.txt, summary_with_references.txt}`. Reference documents ship with the phase at `phase7-reference-rag/reference-docs/*.md` — nothing to generate first.
+
+```bash
+python phase8-voice-query/src/main.py path/to/question.wav
+```
+
+Writes `phase8-voice-query/output/query-N/`. Needs Phases 1-4 (and optionally 5/6/7/Custom Audio) to have been run at least once, since that's the corpus it answers from.
 
 ## Run with Docker
 
@@ -95,11 +103,11 @@ python phase1-baseline/src/main.py --provider claude
 python phase1-baseline/src/main.py --provider mistral
 ```
 
-Every `main.py` (phase1-baseline through phase4-assistant, phase6-history, and phase7-voice-query) takes `--provider local|mistral|claude`; omitting it falls back to the `SUMMARY_PROVIDER` env var, then `local`. Override the specific model with `CLAUDE_MODEL` / `MISTRAL_MODEL`. `eval/judge.py --provider ...` selects the same three options for the *judge* model, independent of whichever provider generated the summary being judged — every `--judge-provider` flag on the pipelines works the same way. `phase5-office-agent/src/main.py` is the one exception — its agent arm is always Claude (tool-use isn't supported by the local/Mistral path), so it takes `--network good|degraded|offline` instead; see its README.
+Every `main.py` (phase1-baseline through phase4-assistant, phase6-history, phase7-reference-rag, and phase8-voice-query) takes `--provider local|mistral|claude`; omitting it falls back to the `SUMMARY_PROVIDER` env var, then `local`. Override the specific model with `CLAUDE_MODEL` / `MISTRAL_MODEL`. `eval/judge.py --provider ...` selects the same three options for the *judge* model, independent of whichever provider generated the summary being judged — every `--judge-provider` flag on the pipelines works the same way. `phase5-office-agent/src/main.py` is the one exception — its agent arm is always Claude (tool-use isn't supported by the local/Mistral path), so it takes `--network good|degraded|offline` instead; see its README.
 
 ## Web UI and evaluation
 
-- [`webapp/`](webapp/README.md) — a framework-free web page: browse Phases 1-4 and the 15-meeting Story, run any pipeline end-to-end from a **Pipeline** page with live per-stage progress and a provider picker for both summarizing and judging, ask a spoken question on the **Voice Query** page (Phase 7) via the browser microphone, compare local/Mistral/Claude quality (and estimated Claude cost) on an **Evaluation** page that updates as you run things, and see everything regrouped by phase on a **Roadmap** page. Run with `python webapp/server.py`.
+- [`webapp/`](webapp/README.md) — a framework-free web page: browse Phases 1-4 and 7 and the 15-meeting Story, run any pipeline end-to-end from a **Pipeline** page with live per-stage progress and a provider picker for both summarizing and judging, ask a spoken question on the **Voice Query** page (Phase 8) via the browser microphone, compare local/Mistral/Claude quality (and estimated Claude cost) on an **Evaluation** page that updates as you run things, and see everything regrouped by phase on a **Roadmap** page. Run with `python webapp/server.py`.
 - [`eval/`](eval/README.md) — the evaluation suite: summarization quality (schema compliance, checklist precision/recall, LLM-judged faithfulness/completeness/conciseness — judge model is provider-swappable, `--provider local|mistral|claude`), speech-recognition quality (Word Error Rate + noise-robustness testing), and information extraction efficiency (recall/precision on action items against the scripted ground truth). Run `python eval/judge.py`, `python eval/transcription_quality.py`, and `python eval/extraction_efficiency.py`; `eval/story_judge.py` / `eval/story_probes.py` cover the 15-meeting story specifically. `eval/rejudge.py --judge-provider claude` re-scores every already-generated summary (all providers, all scenarios) under one neutral judge, without re-running summarization.
 - Every judged run (CLI with `--judge-provider`, or any webapp Pipeline run — judging is on by default there) is appended to `eval/output/run_history.jsonl`, an append-only log the webapp's Evaluation page reads to compare providers over time — see "Shared modules" below.
 

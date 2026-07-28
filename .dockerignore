@@ -14,7 +14,8 @@ phase3-context/output/
 phase4-assistant/output/
 phase5-office-agent/output/
 phase6-history/output/
-phase7-voice-query/output/
+phase7-reference-rag/output/
+phase8-voice-query/output/
 webapp/.run_status/
 custom/audio/
 custom/output/

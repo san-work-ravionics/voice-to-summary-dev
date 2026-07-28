@@ -1,6 +1,6 @@
-# Roadmap alignment — Phases 1-7
+# Roadmap alignment — Phases 1-8
 
-Maps the built pipeline (`phase1-baseline`, `phase2-checklist`, `phase3-context`, `phase4-assistant`, `phase5-office-agent`, `phase6-history`, `phase7-voice-query`, `eval/`) to this project's 7-phase build-out — each phase adds one technique on top of the last. `audio-generation/` is the shared raw-input folder every phase transcribes from (see its README).
+Maps the built pipeline (`phase1-baseline`, `phase2-checklist`, `phase3-context`, `phase4-assistant`, `phase5-office-agent`, `phase6-history`, `phase7-reference-rag`, `phase8-voice-query`, `eval/`) to this project's 8-phase build-out — each phase adds one technique on top of the last. `audio-generation/` is the shared raw-input folder every phase transcribes from (see its README).
 
 Live metrics for these phases are also visualized in the webapp's **Roadmap** page (`python webapp/server.py`, then the "Roadmap" nav item) — this doc is the narrative version of the same mapping.
 
@@ -85,23 +85,37 @@ Also checked but not a clean generalization: a deterministic "dark mode / legal-
 
 **Meeting-type-specific** templates (project status vs. blocker discussion, etc.) and **domain terminology handling** beyond this project's own vocabulary aren't built — every meeting uses the same `STATIC_CONTEXT` shape regardless of its actual type (kickoff, design review, UAT triage, ...).
 
-## Phase 7 — Voice Interface for Querying the Content
+## Phase 7 — Reference-Document RAG
 
-**Goal:** use a voice channel to query and retrieve from stored content. **Built by:** [`phase7-voice-query/`](phase7-voice-query/README.md) — ask a spoken question, get a text answer grounded in everything the project has already produced (Phases 1-6 transcripts/summaries plus any Custom Audio), via the webapp's **Voice Query** page (browser mic recording) or the CLI.
+**Goal:** improve summary accuracy by retrieving relevant excerpts from the project's own reference documents and grounding the summary in them, in addition to the transcript. **Built by:** [`phase7-reference-rag/`](phase7-reference-rag/README.md) — three fictional but internally-consistent reference documents (a PRD, a design spec, a payments vendor integration doc, at `reference-docs/*.md`) covering the same Mobile App Redesign project, retrieved against the shared kickoff transcript and compared: a transcript-only baseline summary vs. one enriched with retrieved reference excerpts.
 
-Retrieval is a pure-Python TF-IDF scorer over paragraph/section-level chunks (`phase7-voice-query/src/corpus.py`) — no vector DB, no new dependency, consistent with this project's existing preference for deterministic, dependency-light mechanisms.
+Retrieval is the same TF-IDF, no-vector-DB approach as Phase 8's voice query (`phase7-reference-rag/src/retrieve.py`), scoped to a small fixed corpus (the reference docs) instead of everything on disk. The kickoff transcript only gestures at topics generally (e.g. "a new payments vendor," "dark mode") — the reference docs carry the specifics (vendor name, numeric targets, compliance tier) a transcript-only summary structurally cannot know.
 
 | Metric | Status | Source |
 |---|---|---|
-| Response to user query | **Measured** — text answer only in this pass (no spoken reply; see the scenario README for why that's a deliberate, easy-to-add-later scope cut, not a gap). | `phase7-voice-query/output/query-N/answer.txt` |
+| Comparison with baseline (faithfulness/completeness/conciseness) | **Measured** — same LLM-judge infrastructure as Phase 3's baseline-vs-context comparison, via `--judge-provider`. | `eval/output/run_history.jsonl` (`scenario_id: "phase7-reference-rag"`) |
+| Retrieval relevance (are the right reference sections surfaced for the topic) | **Not separately measured** — inspect `retrieved_references.json` against the transcript for a given run; no deterministic or judged relevance score is computed. | — |
+| Reference Grounding (does every word added by the reference-grounded summary, vs. the baseline, trace back to a retrieved excerpt) | **Measured deterministically**, not by an LLM judge — same word-overlap technique as Phase 8's Grounding Score and Phase 6's stale-action check, applied to the diff between the two summaries rather than a single answer. It's a proxy for "did the addition come from the reference docs," not a semantic fact-check — it can't catch a hallucination that happens to reuse a word already present in the baseline. | `output/reference_grounding.json`; also folded into the judged run's `reference_grounding` field in `run_history.jsonl` |
+
+## Phase 8 — Voice Interface for Querying the Content
+
+**Goal:** use a voice channel to query and retrieve from stored content. **Built by:** [`phase8-voice-query/`](phase8-voice-query/README.md) — ask a spoken question, get a text answer grounded in everything the project has already produced (Phases 1-7 transcripts/summaries plus any Custom Audio), via the webapp's **Voice Query** page (browser mic recording) or the CLI.
+
+Retrieval is a pure-Python TF-IDF scorer over paragraph/section-level chunks (`phase8-voice-query/src/corpus.py`) — no vector DB, no new dependency, consistent with this project's existing preference for deterministic, dependency-light mechanisms.
+
+| Metric | Status | Source |
+|---|---|---|
+| Response to user query | **Measured** — text answer only in this pass (no spoken reply; see the scenario README for why that's a deliberate, easy-to-add-later scope cut, not a gap). | `phase8-voice-query/output/query-N/answer.txt` |
 | End-to-end latency | **Measured** — per-stage (transcribe/retrieve/answer) and total wall-clock time. | `output/query-N/timing.json` |
 | Grounding Score (% of response backed by content) | **Measured deterministically**, not by an LLM judge — % of the answer's content words that appear in the retrieved excerpts actually used, the same word-overlap technique as Phase 6's stale-action-carryover check above. An `abstained` flag distinguishes "the model correctly said it couldn't find an answer" (legitimately low score) from an actual grounding failure. | `output/query-N/grounding.json` |
 | Appropriate content in response | **Not separately scored** — the Grounding Score is the closest automated proxy (it's a groundedness check, not a correctness check); spot-check `answer.txt` against `retrieved_chunks.json` for a given query. | — |
+| Comparing providers/iterations over time | **Measured** — every run appends to `output/query_history.jsonl` (provider, model, timing, grounding, cost); `python phase8-voice-query/src/history.py` or the webapp's "Progress across providers" table summarizes it. | `output/query_history.jsonl` |
 
-## Gaps to close before calling Phases 1-7 "done"
+## Gaps to close before calling Phases 1-8 "done"
 
 1. Real-Time Factor isn't measured (Voice-to-Transcript).
 2. Key Point Recall has no ground-truth-backed numeric metric, only a judge's subjective completeness score (Phase 1/3).
 3. Meeting-type-specific templates and domain terminology handling aren't built (Phase 6).
 4. Phase 5 evaluates a Claude tool-use agent, not Microsoft Copilot Enterprise — nothing here speaks to Copilot's actual UX, real network resilience, or pricing (see `phase5-office-agent/README.md`). Network conditions are simulated, not real network-shaped.
-5. Phase 7 has no spoken (TTS) reply and no automated correctness scoring, only groundedness (see table above).
+5. Phase 7 has no retrieval-relevance metric (are the *right* reference sections being surfaced) — Reference Grounding checks whether added content traces back to *some* retrieved excerpt, not whether the excerpts retrieved were the best ones for the topic.
+6. Phase 8 has no spoken (TTS) reply and no automated correctness scoring, only groundedness (see table above).

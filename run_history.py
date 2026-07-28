@@ -38,7 +38,8 @@ def _compute_costs(summarizer_provider, judge_provider, transcript, summary, lay
 
 
 def append_run(scenario_id, variant, summarizer_provider, judge_provider,
-                transcript, summary, evaluation, meeting=None):
+                transcript, summary, evaluation, meeting=None,
+                gen_seconds=None, judge_seconds=None):
     costs = _compute_costs(
         summarizer_provider, judge_provider, transcript, summary, evaluation.get("layer2"),
     )
@@ -50,6 +51,11 @@ def append_run(scenario_id, variant, summarizer_provider, judge_provider,
         "meeting": meeting,  # meeting slug for phase6-history/, else None
         "summarizer_provider": summarizer_provider or "local",
         "judge_provider": judge_provider or "local",
+        # Wall-clock seconds for the generate / judge calls (None if not
+        # measured). Generation time is a model-selection criterion — a fast
+        # on-device model vs a slow one vs a cloud round-trip.
+        "gen_seconds": gen_seconds,
+        "judge_seconds": judge_seconds,
         "transcript": transcript,
         "summary": summary,
         **costs,

@@ -1,15 +1,24 @@
 """Indexes every transcript/summary this project has already produced into
-retrievable chunks, for phase7-voice-query's voice Q&A. No vector DB, no new
-dependency (e.g. sentence-transformers) — retrieval is pure-Python TF-IDF
-scoring, consistent with this project's existing preference for
-deterministic, dependency-light mechanisms over adding heavier ML infra for
-something a small local computation already answers well enough.
+retrievable chunks, for phase8-voice-query's voice Q&A.
+
+Two retrieval backends, selected via `method`:
+  - "tfidf" (default): pure-Python TF-IDF scoring, no vector DB, consistent
+    with this project's original preference for deterministic,
+    dependency-light mechanisms over heavier ML infra.
+  - "faiss": real sentence embeddings + a FAISS index, via the shared
+    ../../faiss_retrieval.py — kept as a second, comparable option rather
+    than a replacement (see phase7-reference-rag/README.md for a worked
+    example of where the two backends actually disagree).
 """
 import glob
 import math
 import os
 import re
+import sys
 from collections import Counter
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import faiss_retrieval
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -32,6 +41,9 @@ SOURCE_GLOBS = [
     ("phase6-history/output/*/transcript.txt", "phase6-history {basename} transcript"),
     ("phase6-history/output/*/summary_baseline.txt", "phase6-history {basename} summary (no history)"),
     ("phase6-history/output/*/summary_with_context.txt", "phase6-history {basename} summary (with history)"),
+    ("phase7-reference-rag/output/transcript.txt", "phase7-reference-rag transcript"),
+    ("phase7-reference-rag/output/summary_baseline.txt", "phase7-reference-rag summary (no references)"),
+    ("phase7-reference-rag/output/summary_with_references.txt", "phase7-reference-rag summary (with references)"),
     ("custom/output/*/transcript.txt", "custom audio {basename} transcript"),
     ("custom/output/*/summary.txt", "custom audio {basename} summary"),
 ]
@@ -113,7 +125,7 @@ def _tokenize(text):
     return [t for t in _WORD_RE.findall(text.lower()) if len(t) > 1 and t not in STOPWORDS]
 
 
-def build_index(chunks):
+def build_index_tfidf(chunks):
     """Precomputes per-chunk token counts and corpus-wide IDF weights so
     query() is cheap to call repeatedly."""
     token_lists = [_tokenize(c["text"]) for c in chunks]
@@ -130,7 +142,7 @@ def build_index(chunks):
     return {"chunks": indexed, "idf": idf}
 
 
-def query(index, question, top_k=5):
+def query_tfidf(index, question, top_k=5):
     """TF-IDF-ish scoring: sum of (term count in chunk * corpus IDF) over
     the question's terms, length-normalized so short, on-point chunks don't
     lose to long ones that merely happen to contain a query word once."""
@@ -148,3 +160,15 @@ def query(index, question, top_k=5):
         {"id": c["id"], "source": c["source"], "path": c["path"], "text": c["text"], "score": s}
         for s, c in scored[:top_k]
     ]
+
+
+def build_index(chunks, method="tfidf"):
+    if method == "faiss":
+        return faiss_retrieval.build_index(chunks)
+    return build_index_tfidf(chunks)
+
+
+def query(index, question, top_k=5, method="tfidf"):
+    if method == "faiss":
+        return faiss_retrieval.query(index, question, top_k=top_k)
+    return query_tfidf(index, question, top_k=top_k)
