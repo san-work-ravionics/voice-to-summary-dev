@@ -29,8 +29,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 COPY . .
 
 # Model caches (Whisper + Hugging Face) live under /cache so a mounted
-# volume survives image rebuilds/restarts instead of re-downloading
-# ~3GB+ (more if --provider mistral is used) on every start.
+# volume survives image rebuilds/restarts instead of re-downloading on every
+# start — more if --provider mistral (local 7B) or TRANSCRIBE_ENGINE=voxtral
+# (Voxtral-Mini-3B, ~9GB) is used.
 ENV XDG_CACHE_HOME=/cache \
     HF_HOME=/cache/huggingface \
     PYTHONUNBUFFERED=1

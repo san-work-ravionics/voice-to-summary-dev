@@ -1,6 +1,12 @@
 pyttsx3==2.99
 pydub==0.25.1
 openai-whisper==20250625
+# mistral-common[audio] supplies Voxtral's audio processor/tokenizer (pulls
+# in soundfile); transformers>=4.54 already ships VoxtralForConditionalGeneration.
+# librosa is what transformers' Voxtral audio loader (load_audio_as) uses to
+# decode the recording before the processor builds the transcription request.
+mistral-common[audio]==1.8.5
+librosa==0.11.0
 transformers==4.57.6
 torch==2.8.0
 accelerate==1.10.1

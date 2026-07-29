@@ -37,10 +37,11 @@ Also generates two degraded variants per recording with `pydub` (already a depen
 **Accent resilience is not tested** — every recording uses the same one or two macOS system TTS voices.
 
 ```bash
-python eval/transcription_quality.py
+python eval/transcription_quality.py                      # whisper only (default, fast)
+python eval/transcription_quality.py --engines whisper,voxtral   # add the Voxtral comparison
 ```
 
-Writes `eval/output/transcription_quality.json`.
+Transcription runs through the shared engine layer (`transcription.py`), so this benchmarks the exact code path the pipelines use. By default it measures Whisper only; `--engines whisper,voxtral` also benchmarks Mistral Voxtral Mini 3B over the same recordings (much slower on CPU — opt in). When more than one engine is present, each scenario carries per-engine tiers under `engines`, and the webapp's Foundation scorecard renders a Whisper-vs-Voxtral WER + speed table. Writes `eval/output/transcription_quality.json`.
 
 ## Information extraction efficiency (`eval/extraction_efficiency.py`)
 

@@ -1,3 +1,4 @@
+import argparse
 import importlib.util
 import json
 import os
@@ -7,14 +8,25 @@ import tempfile
 import time
 from datetime import datetime, timezone
 
-import whisper
 from pydub import AudioSegment
 from pydub.generators import WhiteNoise
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", "transcription_quality.json")
 
+# Transcription now goes through the shared engine layer (transcription.py) so
+# this benchmark measures the exact same code path the pipelines run.
+sys.path.insert(0, PROJECT_ROOT)
+from transcription import VOXTRAL_MODEL, transcribe as shared_transcribe  # noqa: E402
+
 WHISPER_MODEL_SIZE = "base"
+
+# Default to whisper only — fast, and unchanged from this file's prior
+# behavior. Add voxtral explicitly (`--engines whisper,voxtral`) to produce
+# the Whisper-vs-Voxtral comparison; the 3B model over 15 recordings x 3
+# noise tiers on CPU is slow, so it is opt-in rather than the default.
+DEFAULT_ENGINES = ("whisper",)
+ALL_ENGINES = ("whisper", "voxtral")
 
 # The shared input is ONE project's 15 meetings, in audio-generation/output/
 # (01-kickoff .. 15-launch-retro). Transcription is measured per recording —
@@ -159,12 +171,12 @@ TIMING_NOTE = (
 )
 
 
-def _transcribe(model, audio_path):
-    """Transcribe and return (text, wall_clock_seconds)."""
+def _transcribe(engine, audio_path):
+    """Transcribe via the shared engine layer and return (text, wall_clock_seconds)."""
     t0 = time.perf_counter()
-    result = model.transcribe(audio_path)
+    text = shared_transcribe(audio_path, engine=engine)
     elapsed = time.perf_counter() - t0
-    return result["text"].strip(), elapsed
+    return text.strip(), elapsed
 
 
 def _timed_tier(reference, text, seconds, audio_seconds):
@@ -174,13 +186,13 @@ def _timed_tier(reference, text, seconds, audio_seconds):
     return tier
 
 
-def evaluate_recording(model, recording_path, reference):
+def evaluate_recording(engine, recording_path, reference):
     original_audio = AudioSegment.from_file(recording_path)
     audio_seconds = round(len(original_audio) / 1000.0, 1)
 
     # clean: transcribe the recording as-is (timed) so this tier's WER and
     # its transcription time both describe one real operation measured here.
-    clean_text, clean_secs = _transcribe(model, recording_path)
+    clean_text, clean_secs = _transcribe(engine, recording_path)
     tiers = {"clean": _timed_tier(reference, clean_text, clean_secs, audio_seconds)}
 
     for tier_name, transform in NOISE_TIERS.items():
@@ -188,7 +200,7 @@ def evaluate_recording(model, recording_path, reference):
         try:
             noisy_audio = transform(original_audio)
             noisy_audio.export(tmp_path, format="wav")
-            text, secs = _transcribe(model, tmp_path)
+            text, secs = _transcribe(engine, tmp_path)
             tiers[tier_name] = _timed_tier(reference, text, secs, audio_seconds)
         finally:
             os.remove(tmp_path)
@@ -196,29 +208,61 @@ def evaluate_recording(model, recording_path, reference):
     return tiers, audio_seconds
 
 
-def main():
-    print("Loading Whisper model...")
-    model = whisper.load_model(WHISPER_MODEL_SIZE)
+def _parse_engines(raw):
+    engines = [e.strip() for e in raw.split(",") if e.strip()]
+    unknown = [e for e in engines if e not in ALL_ENGINES]
+    if unknown:
+        raise SystemExit(f"Unknown engine(s) {unknown}; expected a subset of {list(ALL_ENGINES)}")
+    return engines
 
-    scenarios_out = []
+
+def main():
+    parser = argparse.ArgumentParser(description="Transcription WER + speed benchmark over the 15 shared recordings.")
+    parser.add_argument(
+        "--engines",
+        default=",".join(DEFAULT_ENGINES),
+        help="Comma-separated engines to benchmark (whisper,voxtral). Default: whisper only.",
+    )
+    args = parser.parse_args()
+    engines = _parse_engines(args.engines)
+
+    # The scorecard's single WER-per-recording column reads scenario["tiers"];
+    # keep it pointed at whisper when present (unchanged view), else the first
+    # engine requested.
+    primary_engine = "whisper" if "whisper" in engines else engines[0]
+
     dialogues_module = _load_module("audio-generation/src/dialogues.py", "_ref_audio_generation_dialogues")
 
+    scenarios_out = []
     # Exactly the 15 recordings of the shared project dataset, named by
     # meeting slug (01-kickoff .. 15-launch-retro).
     for meeting in dialogues_module.MEETINGS:
         slug = meeting["slug"]
-        print(f"Evaluating {slug}...")
         reference = _reference_for_meeting(slug, dialogues_module)
-        tiers, audio_seconds = evaluate_recording(
-            model,
-            os.path.join(PROJECT_ROOT, "audio-generation", "output", slug, "recording.wav"),
-            reference,
-        )
-        scenarios_out.append({"id": slug, "audio_seconds": audio_seconds, "tiers": tiers})
+        recording_path = os.path.join(PROJECT_ROOT, "audio-generation", "output", slug, "recording.wav")
+
+        per_engine = {}
+        audio_seconds = None
+        for engine in engines:
+            print(f"Evaluating {slug} [{engine}]...")
+            tiers, audio_seconds = evaluate_recording(engine, recording_path, reference)
+            per_engine[engine] = tiers
+
+        scenarios_out.append({
+            "id": slug,
+            "audio_seconds": audio_seconds,
+            # Back-compat: `tiers` mirrors the primary engine so existing
+            # readers keep working; `engines` carries every benchmarked engine.
+            "tiers": per_engine[primary_engine],
+            "engines": per_engine,
+        })
 
     results = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "engines": engines,
+        "primary_engine": primary_engine,
         "whisper_model": WHISPER_MODEL_SIZE,
+        "voxtral_model": VOXTRAL_MODEL if "voxtral" in engines else None,
         "wer_benchmark_note": WER_BENCHMARK_NOTE,
         "noise_tiers_note": NOISE_TIERS_NOTE,
         "timing_note": TIMING_NOTE.format(model=WHISPER_MODEL_SIZE),

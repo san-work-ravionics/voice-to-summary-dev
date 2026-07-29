@@ -19,7 +19,7 @@ Each scenario folder is fully self-contained: its own `src/` (transcribe with Wh
 
 [`phase8-voice-query/`](phase8-voice-query/README.md) (Phase 8) is a voice interface over everything the project has already produced: ask a spoken question, get a text answer grounded in the stored transcripts/summaries, with end-to-end latency and a deterministic Grounding Score.
 
-Voice-to-Transcript isn't a separate numbered phase — it's the shared Whisper step (`transcription.py`) used identically by every scenario above.
+Voice-to-Transcript isn't a separate numbered phase — it's the shared transcription step (`transcription.py`) used identically by every scenario above, with a selectable local engine (Whisper by default, or Mistral Voxtral — see "Choosing a transcription engine").
 
 ## Setup
 
@@ -89,7 +89,7 @@ Open `http://localhost:8743/webapp/index.html`. First start downloads the local 
 
 ### Choosing a summarization provider
 
-Transcription always runs locally (Whisper) — none of these providers take audio input. Summarization can run against any of three, via `llm_provider.py` (shared by every scenario):
+Transcription always runs locally — none of these providers take audio input. It has its own pluggable engine (see "Choosing a transcription engine" below). Summarization can run against any of three, via `llm_provider.py` (shared by every scenario):
 
 | Provider | Model | Notes |
 |---|---|---|
@@ -105,6 +105,24 @@ python phase1-baseline/src/main.py --provider mistral
 
 Every `main.py` (phase1-baseline through phase4-assistant, phase6-history, phase7-reference-rag, and phase8-voice-query) takes `--provider local|mistral|claude`; omitting it falls back to the `SUMMARY_PROVIDER` env var, then `local`. Override the specific model with `CLAUDE_MODEL` / `MISTRAL_MODEL`. `eval/judge.py --provider ...` selects the same three options for the *judge* model, independent of whichever provider generated the summary being judged — every `--judge-provider` flag on the pipelines works the same way. `phase5-office-agent/src/main.py` is the one exception — its agent arm is always Claude (tool-use isn't supported by the local/Mistral path), so it takes `--network good|degraded|offline` instead; see its README.
 
+### Choosing a transcription engine
+
+Speech-to-text has its own selectable engine in `transcription.py`, mirroring the summarization-provider pattern. Both engines run fully locally:
+
+| Engine | Model | Notes |
+|---|---|---|
+| `whisper` (default) | OpenAI Whisper `base` (~140MB) | Small and fast; the default everywhere |
+| `voxtral` | `mistralai/Voxtral-Mini-3B-2507` (~9GB) | Mistral Voxtral Mini, also fully local, but a 3B model — much heavier/slower on CPU |
+
+Selection precedence is `engine` argument > `TRANSCRIBE_ENGINE` env var > `whisper`, so existing runs are unchanged unless you opt in:
+
+```bash
+export TRANSCRIBE_ENGINE=voxtral   # applies to every pipeline + the webapp
+python phase1-baseline/src/main.py
+```
+
+In the webapp's **Custom Audio** page, the engine is a per-run dropdown next to the summarization-model dropdown. Override the specific Voxtral checkpoint with `VOXTRAL_MODEL`. On CPU (including any Docker container here), Voxtral is dramatically slower than Whisper `base` — opt in deliberately.
+
 ## Web UI and evaluation
 
 - [`webapp/`](webapp/README.md) — a framework-free web page: browse Phases 1-4 and 7 and the 15-meeting Story, run any pipeline end-to-end from a **Pipeline** page with live per-stage progress and a provider picker for both summarizing and judging, ask a spoken question on the **Voice Query** page (Phase 8) via the browser microphone, compare local/Mistral/Claude quality (and estimated Claude cost) on an **Evaluation** page that updates as you run things, and see everything regrouped by phase on a **Roadmap** page. Run with `python webapp/server.py`.
@@ -118,7 +136,7 @@ Cross-cutting pieces used by every scenario and `webapp/` — factored out becau
 | Module | What it does |
 |---|---|
 | `llm_provider.py` | The local/mistral/claude summarization+judging backend (see above) |
-| `transcription.py` | Shared Whisper wrapper (transcription is always local, regardless of summarization provider) |
+| `transcription.py` | Shared speech-to-text layer with a selectable local engine — Whisper (default) or Mistral Voxtral, via `TRANSCRIBE_ENGINE` (transcription is always local, regardless of summarization provider) |
 | `redaction.py` | The name-anonymization logic (Jordan/Priya/etc. → Person A/Person B) |
 | `eval_scoring.py` | Layer-1 deterministic checks + layer-2 LLM-judge scoring, used by both `eval/judge.py` and every pipeline's optional `--judge-provider` step |
 | `run_history.py` | Appends/reads `eval/output/run_history.jsonl`; also estimates and backfills per-run Claude cost (`python run_history.py` re-runs the backfill) |
@@ -129,7 +147,7 @@ Cross-cutting pieces used by every scenario and `webapp/` — factored out becau
 
 ## Notes
 
-- First run downloads models locally: Whisper `base` (~140MB) and `Qwen/Qwen2.5-1.5B-Instruct` (~3GB) — shared across every scenario since they use the same `requirements.txt`/`.venv`. Mistral (`--provider mistral`) is a separate, larger download (~14GB) the first time it's used. Expect the first run of each to take a few minutes; later runs are much faster since models are cached.
+- First run downloads models locally: Whisper `base` (~140MB) and `Qwen/Qwen2.5-1.5B-Instruct` (~3GB) — shared across every scenario since they use the same `requirements.txt`/`.venv`. Mistral summarization (`--provider mistral`) is a separate, larger download (~14GB) the first time it's used, and Voxtral transcription (`TRANSCRIBE_ENGINE=voxtral`) pulls `Voxtral-Mini-3B` (~9GB) the first time. Expect the first run of each to take a few minutes; later runs are much faster since models are cached.
 - No personal names appear anywhere in any recording, transcript, or summary — speakers are always "Person A" / "Person B" (plus "Assistant" as a role label in phase4-assistant), never real names. See each scenario's README for the specific redaction/anonymization mechanism.
 - phase2-checklist's checklist coverage check is a deterministic keyword match against the transcript, not another LLM call — a small local model turned out to be unreliable at that specific judgment across several prompt designs. Details in [phase2-checklist/README.md](phase2-checklist/README.md).
 - `custom/audio/` is a drop folder for real (non-scripted) recordings: copy a `.wav`/`.mp3`/`.m4a`/`.ogg`/`.flac` file in, and the webapp's Custom Audio page (needs `python webapp/server.py`, not a plain static server) detects it and can run the plain phase1-baseline pipeline on it — phase3-context's meeting context and phase2-checklist/phase4-assistant's checklist are hardcoded to the scripted kickoff dialogue and don't apply to arbitrary audio.

@@ -5,6 +5,8 @@ services:
       - "${PORT:-8743}:8743"
     environment:
       - SUMMARY_PROVIDER=${SUMMARY_PROVIDER:-local}
+      - TRANSCRIBE_ENGINE=${TRANSCRIBE_ENGINE:-whisper}
+      - VOXTRAL_MODEL=${VOXTRAL_MODEL:-}
       - CLAUDE_MODEL=${CLAUDE_MODEL:-}
       - MISTRAL_MODEL=${MISTRAL_MODEL:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
@@ -36,9 +38,11 @@ services:
       - ./webapp/.run_status:/app/webapp/.run_status
       # Rotating application logs (webapp requests, pipeline run output).
       - ./logs:/app/logs
-      # Whisper + Hugging Face model downloads (~3GB+) — a named volume
-      # (not bind-mounted) since this is pure binary cache, not something
-      # to keep alongside the source tree.
+      # Whisper + Hugging Face model downloads — a named volume (not
+      # bind-mounted) since this is pure binary cache, not something to keep
+      # alongside the source tree. Whisper 'base' is tiny; the local Mistral
+      # summarizer adds a few GB, and opting into TRANSCRIBE_ENGINE=voxtral
+      # pulls Voxtral-Mini-3B (~9GB) here once, then reuses it.
       - model_cache:/cache
       # `ant auth login`'s browser-based session, read-only — lets
       # provider=claude authenticate the same way a host-side `python

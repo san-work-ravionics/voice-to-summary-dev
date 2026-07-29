@@ -645,6 +645,7 @@ async function loadTranscriptionQuality() {
 }
 
 function werCell(tier) {
+  if (!tier || tier.wer == null) return "—";
   const pct = tier.wer * 100;
   const cls = tier.wer < 0.08 ? "good" : "critical";
   return `<span class="status-pill"><span class="status-dot ${cls}"></span>${pct.toFixed(1)}%</span>`;
@@ -1020,8 +1021,16 @@ function renderCustomAudioList(data) {
     const outputs = item.querySelector(".custom-outputs");
 
     if (file.status === "not_run" || file.status === "error") {
+      const engineSelect = document.createElement("select");
+      engineSelect.className = "provider-select";
+      engineSelect.title = "Speech-to-text engine";
+      engineSelect.innerHTML = `
+        <option value="whisper">Whisper (base)</option>
+        <option value="voxtral">Voxtral Mini 3B (slow)</option>
+      `;
       const select = document.createElement("select");
       select.className = "provider-select";
+      select.title = "Summarization model";
       select.innerHTML = `
         <option value="local">Local (Qwen2.5)</option>
         <option value="mistral">Local (Mistral 7B)</option>
@@ -1030,7 +1039,8 @@ function renderCustomAudioList(data) {
       const btn = document.createElement("button");
       btn.className = "run-btn";
       btn.textContent = file.status === "error" ? "Retry pipeline" : "Run pipeline";
-      btn.addEventListener("click", () => triggerRun(file.filename, btn, select.value));
+      btn.addEventListener("click", () => triggerRun(file.filename, btn, select.value, engineSelect.value));
+      actions.appendChild(engineSelect);
       actions.appendChild(select);
       actions.appendChild(btn);
       if (file.status === "error") {
@@ -1055,14 +1065,14 @@ async function refreshCustomAudioList() {
   }
 }
 
-async function triggerRun(filename, btn, provider) {
+async function triggerRun(filename, btn, provider, engine) {
   btn.disabled = true;
   btn.textContent = "Starting…";
   try {
     await fetch("/api/run-pipeline", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ filename, provider }),
+      body: JSON.stringify({ filename, provider, engine }),
     });
   } finally {
     refreshCustomAudioList();
@@ -1631,6 +1641,38 @@ function renderFoundation(transcriptionData) {
     statTile(speedup ? `${speedup}×` : "—", "Faster than real time"),
   ]);
 
+  // Engine comparison — only when more than one engine was benchmarked
+  // (i.e. someone ran `--engines whisper,voxtral`). Each row is one engine's
+  // averages over the same 15 recordings, read from s.engines[engine].
+  const benchedEngines = transcriptionData.engines || ["whisper"];
+  const ENGINE_LABELS = { whisper: `Whisper (${transcriptionData.whisper_model || "base"})`, voxtral: "Voxtral Mini 3B" };
+  const multiEngine = benchedEngines.length > 1;
+  if (multiEngine) {
+    const engineAvg = (engine, tier, field) =>
+      avg(scenarios.map((s) => s.engines?.[engine]?.[tier]?.[field]));
+    html += `<h4 class="eval-subsection-header">Engine comparison — Whisper vs Voxtral</h4>`;
+    html += `
+      <div class="eval-table-wrap">
+        <table class="eval-table">
+          <thead><tr><th>Engine</th><th>Avg clean WER</th><th>Avg light-noise WER</th><th>Avg heavy-noise WER</th><th>Avg time / recording</th></tr></thead>
+          <tbody>
+    `;
+    for (const engine of benchedEngines) {
+      const t = engineAvg(engine, "clean", "seconds");
+      html += `
+        <tr>
+          <td>${escapeHtml(ENGINE_LABELS[engine] || engine)}</td>
+          <td>${fmtPct(engineAvg(engine, "clean", "wer"))}</td>
+          <td>${fmtPct(engineAvg(engine, "light_noise", "wer"))}</td>
+          <td>${fmtPct(engineAvg(engine, "heavy_noise", "wer"))}</td>
+          <td>${t != null ? `${t.toFixed(1)}s` : "—"}</td>
+        </tr>
+      `;
+    }
+    html += `</tbody></table></div>`;
+    html += `<p class="eval-legend eval-legend-note">Both engines run fully locally. Voxtral (a 3B model) is far heavier on CPU than Whisper <code>base</code>. The stat tiles above use the primary engine (<code>${escapeHtml(transcriptionData.primary_engine || "whisper")}</code>); the per-recording table below breaks out every engine.</p>`;
+  }
+
   // The three tiers explained inline — the reader shouldn't have to dig for
   // what "light"/"heavy" mean.
   html += `
@@ -1644,25 +1686,33 @@ function renderFoundation(transcriptionData) {
   `;
 
   html += `<h4 class="eval-subsection-header">Per-recording detail — all ${scenarios.length} meetings</h4>`;
+  // Each engine is its own row so the same tier's WER for Whisper vs Voxtral
+  // lines up in one column (easy top-to-bottom comparison). With one engine
+  // the "Engine" column is dropped and it's the original flat table.
+  const fmtSecs = (t) => (t != null ? `${t.toFixed(1)}s` : "—");
+  const engineCol = multiEngine ? "<th>Engine</th>" : "";
   html += `
     <div class="eval-table-wrap">
       <table class="eval-table">
-        <thead><tr><th>Recording</th><th>Length</th><th>Time to transcribe</th><th>Clean WER</th><th>Light noise WER</th><th>Heavy noise WER</th></tr></thead>
+        <thead><tr><th>Recording</th><th>Length</th>${engineCol}<th>Time to transcribe</th><th>Clean WER</th><th>Light noise WER</th><th>Heavy noise WER</th></tr></thead>
         <tbody>
   `;
   for (const s of scenarios) {
     const len = s.audio_seconds != null ? `${s.audio_seconds.toFixed(0)}s` : "—";
-    const secs = s.tiers.clean?.seconds != null ? `${s.tiers.clean.seconds.toFixed(1)}s` : "—";
-    html += `
-      <tr>
-        <td>${escapeHtml(s.id)}</td>
-        <td>${len}</td>
-        <td>${secs}</td>
-        <td>${werCell(s.tiers.clean)}</td>
-        <td>${werCell(s.tiers.light_noise)}</td>
-        <td>${werCell(s.tiers.heavy_noise)}</td>
-      </tr>
-    `;
+    const tierCells = (t) =>
+      `<td>${fmtSecs(t?.clean?.seconds)}</td><td>${werCell(t?.clean)}</td><td>${werCell(t?.light_noise)}</td><td>${werCell(t?.heavy_noise)}</td>`;
+    if (multiEngine) {
+      // First engine row carries the recording name + length spanning all
+      // engine rows; a top border marks the start of each recording group.
+      benchedEngines.forEach((eng, i) => {
+        const lead = i === 0
+          ? `<td rowspan="${benchedEngines.length}">${escapeHtml(s.id)}</td><td rowspan="${benchedEngines.length}">${len}</td>`
+          : "";
+        html += `<tr class="${i === 0 ? "eval-group-start" : ""}">${lead}<td>${escapeHtml(ENGINE_LABELS[eng] || eng)}</td>${tierCells(s.engines?.[eng])}</tr>`;
+      });
+    } else {
+      html += `<tr><td>${escapeHtml(s.id)}</td><td>${len}</td>${tierCells(s.tiers)}</tr>`;
+    }
   }
   html += `</tbody></table></div>`;
 

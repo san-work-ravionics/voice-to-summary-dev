@@ -6,12 +6,13 @@ Live metrics for these phases are also visualized in the webapp's **Roadmap** pa
 
 ## Voice-to-Transcript (foundation, not a numbered phase)
 
-**Goal:** convert raw spoken audio into a clean transcript. **Built by:** the shared Whisper step (`transcription.py`), used identically by every scenario folder.
+**Goal:** convert raw spoken audio into a clean transcript. **Built by:** the shared transcription step (`transcription.py`), used identically by every scenario folder. The engine is selectable and fully local — **Whisper `base`** (default) or **Mistral Voxtral Mini 3B** — via `TRANSCRIBE_ENGINE` / the `engine` argument.
 
 | Metric | Status | Source |
 |---|---|---|
 | Word Error Rate | **Measured.** Clean + two noise tiers (`light_noise` ~20dB below speech, `heavy_noise` ~8dB below speech + 3kHz low-pass) across the shared kickoff recording, phase4-assistant's own 3-voice recording, and all 15 `phase6-history` meetings. | `eval/transcription_quality.py` → `eval/output/transcription_quality.json` |
-| Real-Time Factor | **Not measured.** No wall-clock timing is captured around the Whisper call anywhere in the pipeline today. | Gap — would need timing instrumentation added to `transcription.py` |
+| Engine comparison | **Measured (opt-in).** Run `eval/transcription_quality.py --engines whisper,voxtral` to benchmark both engines over the same 15 recordings; the Roadmap page's Foundation scorecard renders a Whisper-vs-Voxtral WER + speed table when both are present. Whisper-only by default (Voxtral is slow on CPU). | `eval/transcription_quality.py` |
+| Real-Time Factor | **Measured** — the eval times each transcription call and records `seconds` / `rtf` per tier. | `eval/output/transcription_quality.json` |
 
 Ground truth is the exact TTS script text, so any WER here is genuine ASR error or transcript-formatting divergence (e.g. Whisper renders "kickoff" as "Kikov" or misreads "sprints" as "sinks" — real ASR noise, not information loss for a human reader). Speaker diarization and accent resilience are explicitly not implemented/tested — see `eval/README.md`.
 
@@ -113,9 +114,8 @@ Retrieval is a pure-Python TF-IDF scorer over paragraph/section-level chunks (`p
 
 ## Gaps to close before calling Phases 1-8 "done"
 
-1. Real-Time Factor isn't measured (Voice-to-Transcript).
-2. Key Point Recall has no ground-truth-backed numeric metric, only a judge's subjective completeness score (Phase 1/3).
-3. Meeting-type-specific templates and domain terminology handling aren't built (Phase 6).
-4. Phase 5 evaluates a Claude tool-use agent, not Microsoft Copilot Enterprise — nothing here speaks to Copilot's actual UX, real network resilience, or pricing (see `phase5-office-agent/README.md`). Network conditions are simulated, not real network-shaped.
-5. Phase 7 has no retrieval-relevance metric (are the *right* reference sections being surfaced) — Reference Grounding checks whether added content traces back to *some* retrieved excerpt, not whether the excerpts retrieved were the best ones for the topic.
-6. Phase 8 has no spoken (TTS) reply and no automated correctness scoring, only groundedness (see table above).
+1. Key Point Recall has no ground-truth-backed numeric metric, only a judge's subjective completeness score (Phase 1/3).
+2. Meeting-type-specific templates and domain terminology handling aren't built (Phase 6).
+3. Phase 5 evaluates a Claude tool-use agent, not Microsoft Copilot Enterprise — nothing here speaks to Copilot's actual UX, real network resilience, or pricing (see `phase5-office-agent/README.md`). Network conditions are simulated, not real network-shaped.
+4. Phase 7 has no retrieval-relevance metric (are the *right* reference sections being surfaced) — Reference Grounding checks whether added content traces back to *some* retrieved excerpt, not whether the excerpts retrieved were the best ones for the topic.
+5. Phase 8 has no spoken (TTS) reply and no automated correctness scoring, only groundedness (see table above).

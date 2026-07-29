@@ -336,7 +336,7 @@ def _stage_for(filename):
         return JOB_STAGE.get(filename)
 
 
-def _run_pipeline_async(filename, provider=None):
+def _run_pipeline_async(filename, provider=None, engine=None):
     with JOBS_LOCK:
         if JOBS.get(filename) == "processing":
             return False
@@ -352,7 +352,7 @@ def _run_pipeline_async(filename, provider=None):
             out_dir = _output_dir(filename)
             os.makedirs(out_dir, exist_ok=True)
 
-            text = transcribe(audio_path)
+            text = transcribe(audio_path, engine=engine)
             with open(os.path.join(out_dir, "transcript.txt"), "w") as f:
                 f.write(text)
 
@@ -511,7 +511,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if provider not in (None, "local", "mistral", "claude"):
             return self._send_json({"error": "invalid provider"}, status=400)
 
-        started = _run_pipeline_async(filename, provider=provider)
+        engine = data.get("engine")
+        if engine not in (None, "whisper", "voxtral"):
+            return self._send_json({"error": "invalid engine"}, status=400)
+
+        started = _run_pipeline_async(filename, provider=provider, engine=engine)
         self._send_json({"status": "started" if started else "already_processing"})
 
     def _handle_voice_query_start(self, query):

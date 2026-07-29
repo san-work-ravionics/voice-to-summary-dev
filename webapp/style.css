@@ -288,6 +288,10 @@ table.eval-table th {
   color: var(--text-muted); font-weight: 600;
 }
 table.eval-table tr:last-child td { border-bottom: none; }
+/* Stronger divider between per-recording engine groups (Whisper/Voxtral rows
+   for the same meeting sit together, separated from the next recording). */
+table.eval-table tr.eval-group-start td { border-top: 2px solid var(--gridline); }
+table.eval-table tr.eval-group-start:first-child td { border-top: none; }
 
 .eval-muted { color: var(--text-muted); }
 .run-count { color: var(--text-muted); font-size: 11.5px; }
