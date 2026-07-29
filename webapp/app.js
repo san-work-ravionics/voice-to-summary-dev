@@ -1869,37 +1869,119 @@ function renderPhase1(historyRecords) {
 function renderPhase2(historyRecords) {
   let html = `
     <h3 class="eval-section-header">Phase 2 — Summary + Checklist + Action list: which model captures tasks best?</h3>
-    <p class="eval-note"><strong>Goal:</strong> beyond a summary, produce a <strong>checklist coverage</strong> (which required topics were discussed) and an <strong>action list</strong> (who committed to what). Two of the three outputs are scored against a known ground truth — deterministic, no judge opinion. Kickoff recording; Qwen vs Mistral.</p>
+    <p class="eval-note"><strong>Goal:</strong> beyond a summary, produce a <strong>checklist coverage</strong> (which required topics were discussed) and an <strong>action list</strong> (who committed to what). Both are scored against a known ground truth — deterministic, no judge opinion. Action-list capture/correctness runs across <strong>all 15 meetings</strong>; the checklist stays kickoff-only (its required-topics list is the kickoff's own agenda, not a sprint-status or UAT agenda). Qwen vs Mistral.</p>
   `;
 
   // Qwen + Mistral only for now (per scope); Claude not part of this comparison.
   const PHASE2_PROVIDERS = PHASE1_PROVIDERS.filter((p) => p.id !== "claude");
-  // latest run per provider (phase2 records carry checklist + action_extraction).
-  const byProv = {};
-  for (const r of historyRecords || []) {
+  const labelOf = (id) => (PHASE1_PROVIDERS.find((p) => p.id === id) || { label: id }).label;
+  const records = (historyRecords || []).filter((r) => r.summarizer_provider !== "claude");
+
+  // Kickoff full scorecard: latest record per provider carrying the checklist
+  // (only the kickoff run has one — the checklist is kickoff-specific).
+  const kickoffByProv = {};
+  for (const r of records) {
+    if (!r.checklist) continue;
     const p = r.summarizer_provider;
-    if (p === "claude") continue;
-    if (!byProv[p] || (r.timestamp || 0) > (byProv[p].timestamp || 0)) byProv[p] = r;
+    if (!kickoffByProv[p] || (r.timestamp || 0) > (kickoffByProv[p].timestamp || 0)) kickoffByProv[p] = r;
   }
-  const present = PHASE2_PROVIDERS.filter((p) => byProv[p.id]);
-  if (!present.length) {
+
+  // All-15 action metrics: latest record per (provider, meeting) carrying an
+  // action_extraction block and a meeting slug.
+  const perMeeting = {};
+  for (const r of records) {
+    if (!r.meeting || !r.action_extraction) continue;
+    const k = `${r.summarizer_provider}::${r.meeting}`;
+    if (!perMeeting[k] || (r.timestamp || 0) > (perMeeting[k].timestamp || 0)) perMeeting[k] = r;
+  }
+  const slugs = [...new Set(Object.values(perMeeting).map((r) => r.meeting))].sort();
+  // Pool over LABELED meetings only (gt >= 1). A meeting where the strict
+  // "I'll" heuristic finds zero commitments has no ground truth, so its
+  // generated bullets can't be judged real-vs-invented — including them would
+  // understate precision. Gen time is still summed across every meeting run.
+  const pooled = {}; // provider -> pooled action counts across its labeled meetings
+  for (const r of Object.values(perMeeting)) {
+    const p = r.summarizer_provider, ax = r.action_extraction;
+    const agg = pooled[p] || (pooled[p] = { meetings: 0, labeled: 0, gt: 0, matchedGt: 0, gen: 0, extra: 0, genTimes: [] });
+    agg.meetings += 1;
+    if (r.gen_seconds != null) agg.genTimes.push(r.gen_seconds);
+    if (!(ax.ground_truth_count > 0)) continue;
+    agg.labeled += 1;
+    agg.gt += ax.ground_truth_count || 0;
+    agg.matchedGt += (ax.ground_truth_count || 0) - (ax.missed || 0);
+    agg.gen += ax.generated_count || 0;
+    agg.extra += ax.extra || 0;
+  }
+  const poolRecall = (a) => (a.gt ? a.matchedGt / a.gt : null);
+  const poolPrecision = (a) => (a.gen ? (a.gen - a.extra) / a.gen : null);
+
+  if (!Object.keys(kickoffByProv).length && !slugs.length) {
     html += `<p class="eval-note">No runs yet.</p>`;
     return html;
   }
 
-  // Verdict — lead with action-list correctness (the discriminating metric).
-  const labelOf = (id) => (PHASE1_PROVIDERS.find((p) => p.id === id) || { label: id }).label;
-  const withAct = present.filter((p) => byProv[p.id].action_extraction?.precision != null);
-  if (withAct.length) {
-    const best = withAct.slice().sort((a, b) => byProv[b.id].action_extraction.precision - byProv[a.id].action_extraction.precision)[0];
-    const worst = withAct.slice().sort((a, b) => byProv[a.id].action_extraction.precision - byProv[b.id].action_extraction.precision)[0];
-    const ba = byProv[best.id].action_extraction, wa = byProv[worst.id].action_extraction;
-    let v = `Both models catch the real action item, but they differ on <strong>invented</strong> tasks: <strong>${escapeHtml(labelOf(best.id))}</strong> is more precise (${fmtPct(ba.precision)} — ${ba.generated_count - (ba.extra || 0)} of ${ba.generated_count} listed actions real)`;
-    if (worst.id !== best.id) v += `, while <strong>${escapeHtml(labelOf(worst.id))}</strong> over-extracts (${fmtPct(wa.precision)} — ${wa.generated_count} listed, ${wa.extra} invented)`;
-    v += `. The checklist metric is saturated at 100% for both, so it doesn't separate them — action-list correctness does.`;
+  // Verdict — lead with action-list correctness pooled across all meetings.
+  const withPool = PHASE2_PROVIDERS.filter((p) => pooled[p.id] && poolPrecision(pooled[p.id]) != null);
+  if (withPool.length) {
+    const totalGt = pooled[withPool[0].id].gt;
+    const nLabeled = pooled[withPool[0].id].labeled;
+    const nMeetings = pooled[withPool[0].id].meetings;
+    // Rank by capture (recall) first — the dominant gap across the timeline —
+    // then report precision for each. Data-driven, so it stays correct if a
+    // re-run shifts the numbers.
+    const byRecall = withPool.slice().sort((a, b) => poolRecall(pooled[b.id]) - poolRecall(pooled[a.id]));
+    const best = byRecall[0], worst = byRecall[byRecall.length - 1];
+    const ba = pooled[best.id], wa = pooled[worst.id];
+    let v = `Across the ${nMeetings}-meeting timeline the strict "I'll / I will" heuristic marks only <strong>${totalGt}</strong> ground-truth commitments, spread over ${nLabeled} meetings (the other ${nMeetings - nLabeled} had none) — a deliberately sparse, high-confidence label set. `;
+    if (worst.id !== best.id) {
+      const betterOnBoth = poolPrecision(ba) >= poolPrecision(wa);
+      v += `Pooled over the labeled meetings, <strong>${escapeHtml(labelOf(best.id))}</strong> captures far more of the real commitments (${fmtPct(poolRecall(ba))}, ${ba.matchedGt}/${ba.gt}) than <strong>${escapeHtml(labelOf(worst.id))}</strong> (${fmtPct(poolRecall(wa))}, ${wa.matchedGt}/${wa.gt})`;
+      v += betterOnBoth
+        ? `, and is also more precise (${fmtPct(poolPrecision(ba))} vs ${fmtPct(poolPrecision(wa))} real-vs-invented) — so it wins on both axes.`
+        : `, though it lists more invented tasks (${fmtPct(poolPrecision(ba))} precision vs ${fmtPct(poolPrecision(wa))}).`;
+      v += ` This <em>overturns</em> the kickoff-only read, where the single meeting made ${escapeHtml(labelOf(worst.id))} look competitive — extending the action metric across all ${nMeetings} meetings is what surfaced the real gap. Action-list capture is the discriminator; the checklist (kickoff-only) is saturated at 100%.`;
+    } else {
+      v += `Pooled capture is ${fmtPct(poolRecall(ba))} (${ba.matchedGt}/${ba.gt}) at ${fmtPct(poolPrecision(ba))} precision.`;
+    }
     html += roadmapVerdict(v);
   }
 
+  // --- Table 1: action list pooled across all 15 meetings ---
+  html += `<h4 class="eval-subsection-header">Action list — pooled across all 15 meetings</h4>`;
+  html += `
+    <div class="eval-table-wrap">
+      <table class="eval-table">
+        <thead><tr>
+          <th>Summarizer</th>
+          <th>Meetings (labeled/total)</th><th>Commitments (n)</th>
+          <th>Action capture</th><th>Action correctness</th>
+          <th>Avg gen time</th><th>Cost</th>
+        </tr></thead>
+        <tbody>
+  `;
+  for (const p of PHASE2_PROVIDERS) {
+    const a = pooled[p.id];
+    if (!a) { html += `<tr><td>${escapeHtml(p.label)}</td><td colspan="6" class="eval-muted">not run yet</td></tr>`; continue; }
+    const rec = poolRecall(a), prec = poolPrecision(a);
+    const cap = rec != null ? `${fmtPct(rec)} <span class="eval-muted" style="font-size:11px;">(${a.matchedGt}/${a.gt})</span>` : "—";
+    const corr = prec != null ? `${fmtPct(prec)} <span class="eval-muted" style="font-size:11px;">(${a.gen - a.extra}/${a.gen})</span>` : "—";
+    const avgGen = a.genTimes.length ? a.genTimes.reduce((x, y) => x + y, 0) / a.genTimes.length : null;
+    html += `
+      <tr>
+        <td>${escapeHtml(p.label)}</td>
+        <td>${a.labeled}/${a.meetings}</td>
+        <td>${a.gt}</td>
+        <td>${cap}</td>
+        <td>${corr}</td>
+        <td>${fmtSeconds(avgGen)}</td>
+        <td>free</td>
+      </tr>
+    `;
+  }
+  html += `</tbody></table></div>`;
+
+  // --- Table 2: kickoff full scorecard (summary quality + checklist) ---
+  html += `<h4 class="eval-subsection-header">Kickoff — summary quality &amp; checklist coverage</h4>`;
   html += `
     <div class="eval-table-wrap">
       <table class="eval-table">
@@ -1913,7 +1995,7 @@ function renderPhase2(historyRecords) {
         <tbody>
   `;
   for (const p of PHASE2_PROVIDERS) {
-    const r = byProv[p.id];
+    const r = kickoffByProv[p.id];
     if (!r) { html += `<tr><td>${escapeHtml(p.label)}</td><td colspan="8" class="eval-muted">not run yet</td></tr>`; continue; }
     const l2 = r.layer2 || {};
     const cl = r.checklist || {};
@@ -1937,12 +2019,33 @@ function renderPhase2(historyRecords) {
   html += `</tbody></table></div>`;
 
   html += `
-    <p class="eval-legend"><strong>Faithful / Complete / Concise</strong> = summary quality (judged) · <strong>Checklist acc</strong> = of the required topics, how many were correctly marked discussed-or-not (deterministic) · <strong>Action capture</strong> = of the real action items, how many were caught (recall) · <strong>Action correctness</strong> = of the listed actions, how many are real vs invented (precision) · <strong>Gen time / Cost</strong> = on-device compute (free).</p>
+    <p class="eval-legend"><strong>Faithful / Complete / Concise</strong> = summary quality (judged) · <strong>Checklist acc</strong> = of the required topics, how many were correctly marked discussed-or-not (deterministic, kickoff only) · <strong>Action capture</strong> = of the real commitments, how many were caught (recall) · <strong>Action correctness</strong> = of the listed actions, how many are real vs invented (precision) · <strong>Gen time / Cost</strong> = on-device compute (free).</p>
   `;
 
-  let caveats = `<p class="eval-note">Checklist accuracy and action metrics are <strong>deterministic</strong> — scored against a hardcoded ground truth for the kickoff (topics in <code>checklist.py</code>; commitments via the "I'll / I will" heuristic), not an LLM opinion. Summary quality is judge-scored (judge: Mistral, free — lenient, hence the identical 5/4/4 across models).</p>`;
-  caveats += `<p class="eval-note">Small sample: the kickoff has only ${withAct.length ? byProv[withAct[0].id].action_extraction.ground_truth_count : "a few"} ground-truth action commitment(s) by the line-based heuristic (multiple "I'll" clauses on one dialogue line count once), so action precision is a coarse signal here, not a large-n rate. Checklist coverage is saturated at 100% — kept for completeness but not a discriminator.</p>`;
-  html += roadmapDetails("How these are scored & caveats", caveats);
+  // --- Details: per-meeting action breakdown + scoring notes ---
+  let details = "";
+  if (slugs.length) {
+    details += `<div class="eval-table-wrap"><table class="eval-table"><thead><tr><th>Meeting</th><th>Commitments</th>`;
+    for (const p of PHASE2_PROVIDERS) details += `<th>${escapeHtml(p.label)} capture</th><th>correctness</th>`;
+    details += `</tr></thead><tbody>`;
+    for (const slug of slugs) {
+      details += `<tr><td>${escapeHtml(slug)}</td>`;
+      const anyRec = perMeeting[`${PHASE2_PROVIDERS[0].id}::${slug}`] || Object.values(perMeeting).find((r) => r.meeting === slug);
+      details += `<td>${anyRec ? anyRec.action_extraction.ground_truth_count : "—"}</td>`;
+      for (const p of PHASE2_PROVIDERS) {
+        const r = perMeeting[`${p.id}::${slug}`];
+        const ax = r && r.action_extraction;
+        // No labels on a meeting with zero heuristic commitments -> "—" for both.
+        const labeled = ax && ax.ground_truth_count > 0;
+        details += `<td>${labeled ? fmtPct(ax.recall) : "—"}</td><td>${labeled ? fmtPct(ax.precision) : "—"}</td>`;
+      }
+      details += `</tr>`;
+    }
+    details += `</tbody></table></div>`;
+  }
+  details += `<p class="eval-note">Action metrics are <strong>deterministic</strong> — scored against ground-truth commitments auto-derived per meeting via the same "I'll / I will" heuristic every summarizer's system prompt is told to use for Actions bullets (see <code>eval/extraction_efficiency.py</code>), not an LLM opinion. Transcripts are reused from the Foundation/Phase-6 Whisper runs; only summarization re-runs per meeting.</p>`;
+  details += `<p class="eval-note">The heuristic is intentionally strict, so most meetings contribute only 0–2 commitments — per-meeting recall is thin, which is why the headline numbers <strong>pool</strong> across all 15 (n above). Meetings with no "I'll" commitment show "—" for capture. Checklist coverage stays kickoff-only and is saturated at 100% there — kept for completeness, not a discriminator. Kickoff summary quality is judge-scored (judge: Mistral, free — lenient, hence the identical 5/4/4).</p>`;
+  html += roadmapDetails("Per-meeting breakdown, how these are scored & caveats", details);
   return html;
 }
 
