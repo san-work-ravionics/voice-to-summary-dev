@@ -1,4 +1,5 @@
 import argparse
+import importlib.util
 import json
 import os
 import sys
@@ -19,96 +20,128 @@ from transcribe import transcribe
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
-# See phase1-baseline/src/main.py — same shared kickoff recording, so this
-# phase's baseline-vs-references comparison is directly comparable to the
-# other single-meeting phases rather than needing its own recording.
 REPO_ROOT = os.path.dirname(PROJECT_ROOT)
-SOURCE_RECORDING = os.path.join(REPO_ROOT, "audio-generation", "output", "01-kickoff", "recording.wav")
-TRANSCRIPT_PATH = os.path.join(OUTPUT_DIR, "transcript.txt")
-BASELINE_SUMMARY_PATH = os.path.join(OUTPUT_DIR, "summary_baseline.txt")
-REFERENCES_SUMMARY_PATH = os.path.join(OUTPUT_DIR, "summary_with_references.txt")
-RETRIEVED_REFERENCES_PATH = os.path.join(OUTPUT_DIR, "retrieved_references.json")
-REFERENCE_GROUNDING_PATH = os.path.join(OUTPUT_DIR, "reference_grounding.json")
+AUDIO_GENERATION_DIR = os.path.join(REPO_ROOT, "audio-generation")
+
+
+def _load_meetings():
+    # audio-generation/ isn't a valid Python package name (hyphen), so it's
+    # loaded by file path — same technique eval/extraction_efficiency.py
+    # already uses for the same reason.
+    spec = importlib.util.spec_from_file_location(
+        "_audio_generation_dialogues", os.path.join(AUDIO_GENERATION_DIR, "src", "dialogues.py"),
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.MEETINGS
 
 
 def run_pipeline(regenerate=False, provider=None, judge_provider=None, retrieval="tfidf", on_stage=None):
-    """`regenerate` is accepted for CLI/webapp parity but has no effect —
-    see phase1-baseline/src/main.py. `retrieval` selects "tfidf" (default)
-    or "faiss" (real sentence embeddings + a vector index, see
+    """All 15 recordings come from audio-generation/output/<slug>/ — this
+    phase only transcribes and summarizes them, it doesn't generate its own
+    audio.  For each meeting a baseline summary (transcript only) is compared
+    against a reference-grounded summary that incorporates excerpts retrieved
+    from the project's reference documents.  `regenerate`, if set, forces
+    re-transcription of every meeting (clears cached transcript.txt files);
+    it can't regenerate the recordings themselves, which are
+    audio-generation/'s to own.  `retrieval` selects "tfidf" (default) or
+    "faiss" (real sentence embeddings + a vector index, see
     ../../faiss_retrieval.py) — kept as a comparable option, not a
-    replacement. Stages: 'transcribing', 'retrieving',
-    'summarizing_baseline', 'judging_baseline', 'summarizing_with_references',
-    'judging_with_references' (judging stages only when judge_provider is
-    given, skipped by default), 'done'."""
+    replacement.  Stages: per meeting (detail = "<label> (N/15)"):
+    'transcribing', 'retrieving', 'summarizing_baseline',
+    'summarizing_with_references', plus 'judging_baseline'/
+    'judging_with_references' when judge_provider is given (skipped by
+    default).  'done' at the very end."""
     on_stage = on_stage or (lambda stage, detail=None: None)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
+    meetings = _load_meetings()
 
-    on_stage("transcribing")
-    print("\nTranscribing...")
-    transcript = transcribe(SOURCE_RECORDING)
-    with open(TRANSCRIPT_PATH, "w") as f:
-        f.write(transcript)
-    print("\n--- Transcript ---")
-    print(transcript)
+    if regenerate:
+        for meeting in meetings:
+            transcript_path = os.path.join(OUTPUT_DIR, meeting["slug"], "transcript.txt")
+            if os.path.exists(transcript_path):
+                os.remove(transcript_path)
 
-    on_stage("retrieving")
-    print(f"\nRetrieving relevant reference-document excerpts (method={retrieval})...")
-    retrieved = retrieve_references(transcript, method=retrieval)
-    with open(RETRIEVED_REFERENCES_PATH, "w") as f:
-        json.dump(retrieved, f, indent=2)
+    for i, meeting in enumerate(meetings, start=1):
+        slug = meeting["slug"]
+        meeting_dir = os.path.join(OUTPUT_DIR, slug)
+        os.makedirs(meeting_dir, exist_ok=True)
+        detail = f"{meeting['label']} ({i}/{len(meetings)})"
+        recording_path = os.path.join(AUDIO_GENERATION_DIR, "output", slug, "recording.wav")
 
-    on_stage("summarizing_baseline")
-    print("\nSummarizing (baseline, transcript only)...")
-    baseline = summarize_baseline(transcript, provider=provider)
-    with open(BASELINE_SUMMARY_PATH, "w") as f:
-        f.write(baseline)
+        print(f"\n=== {meeting['label']} ===")
 
-    if judge_provider is not None:
-        on_stage("judging_baseline")
-        print("Judging (baseline)...")
-        evaluation = evaluate_variant(transcript, baseline, provider=judge_provider)
-        append_run("phase7-reference-rag", "baseline", provider, judge_provider, transcript, baseline, evaluation)
+        # --- Transcribe (cached unless regenerate) ---
+        transcript_path = os.path.join(meeting_dir, "transcript.txt")
+        on_stage("transcribing", detail)
+        if os.path.exists(transcript_path):
+            print("Using existing transcript")
+            with open(transcript_path) as f:
+                transcript = f.read()
+        else:
+            print("Transcribing...")
+            transcript = transcribe(recording_path)
+            with open(transcript_path, "w") as f:
+                f.write(transcript)
 
-    on_stage("summarizing_with_references")
-    print("Summarizing (with retrieved reference excerpts)...")
-    with_references = summarize_with_references(transcript, retrieved, provider=provider)
-    with open(REFERENCES_SUMMARY_PATH, "w") as f:
-        f.write(with_references)
+        # --- Retrieve reference-document excerpts ---
+        on_stage("retrieving", detail)
+        print(f"Retrieving relevant reference-document excerpts (method={retrieval})...")
+        retrieved = retrieve_references(transcript, method=retrieval)
+        with open(os.path.join(meeting_dir, "retrieved_references.json"), "w") as f:
+            json.dump(retrieved, f, indent=2)
 
-    # Deterministic, not LLM-judged — computed unconditionally (cheap, no
-    # generation call) unlike the faithfulness/completeness/conciseness
-    # judge below, which only runs when --judge-provider is given.
-    grounding = reference_grounding_score(baseline, with_references, retrieved)
-    grounding["retrieval_method"] = retrieval
-    with open(REFERENCE_GROUNDING_PATH, "w") as f:
-        json.dump(grounding, f, indent=2)
+        # --- Baseline summary (transcript only) ---
+        on_stage("summarizing_baseline", detail)
+        print("Summarizing (baseline, transcript only)...")
+        baseline = summarize_baseline(transcript, provider=provider)
+        with open(os.path.join(meeting_dir, "summary_baseline.txt"), "w") as f:
+            f.write(baseline)
 
-    if judge_provider is not None:
-        on_stage("judging_with_references")
-        print("Judging (with references)...")
-        evaluation = evaluate_variant(transcript, with_references, provider=judge_provider)
-        evaluation["reference_grounding"] = grounding
-        evaluation["retrieval_method"] = retrieval
-        append_run("phase7-reference-rag", "with_references", provider, judge_provider,
-                   transcript, with_references, evaluation)
+        if judge_provider is not None:
+            on_stage("judging_baseline", detail)
+            print("Judging (baseline)...")
+            evaluation = evaluate_variant(transcript, baseline, provider=judge_provider)
+            append_run("phase7-reference-rag", "baseline", provider, judge_provider,
+                       transcript, baseline, evaluation, meeting=slug)
 
-    print("\n--- Baseline summary (transcript only) ---")
-    print(baseline)
-    print("\n--- Reference-grounded summary ---")
-    print(with_references)
-    print(f"\n--- Reference Grounding Score ---\n{json.dumps(grounding, indent=2)}")
+        # --- Reference-grounded summary ---
+        on_stage("summarizing_with_references", detail)
+        print("Summarizing (with retrieved reference excerpts)...")
+        with_references = summarize_with_references(transcript, retrieved, provider=provider)
+        with open(os.path.join(meeting_dir, "summary_with_references.txt"), "w") as f:
+            f.write(with_references)
 
+        # Deterministic, not LLM-judged — computed unconditionally (cheap, no
+        # generation call) unlike the faithfulness/completeness/conciseness
+        # judge below, which only runs when --judge-provider is given.
+        grounding = reference_grounding_score(baseline, with_references, retrieved)
+        grounding["retrieval_method"] = retrieval
+        with open(os.path.join(meeting_dir, "reference_grounding.json"), "w") as f:
+            json.dump(grounding, f, indent=2)
+
+        if judge_provider is not None:
+            on_stage("judging_with_references", detail)
+            print("Judging (with references)...")
+            evaluation = evaluate_variant(transcript, with_references, provider=judge_provider)
+            evaluation["reference_grounding"] = grounding
+            evaluation["retrieval_method"] = retrieval
+            append_run("phase7-reference-rag", "with_references", provider, judge_provider,
+                       transcript, with_references, evaluation, meeting=slug)
+
+    print(f"\nDone. All {len(meetings)} meetings written under {OUTPUT_DIR}")
     on_stage("done")
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Phase 7 — voice -> transcript -> summary demo pipeline (reference-document RAG comparison)"
+        description="15-meeting story pipeline: baseline vs reference-document RAG summarization"
     )
     parser.add_argument(
         "--regenerate", action="store_true",
-        help=argparse.SUPPRESS,  # no-op here, kept for CLI/webapp parity with other phases
+        help="Force re-transcription of every meeting (recordings themselves "
+        "come from audio-generation/ and aren't regenerated here)",
     )
     parser.add_argument(
         "--provider", choices=["local", "mistral", "claude"], default=None,
@@ -117,7 +150,7 @@ def main():
     )
     parser.add_argument(
         "--judge-provider", choices=["local", "mistral", "claude"], default=None,
-        help="If set, score both summaries and append them to "
+        help="If set, score every meeting's summaries and append them to "
         "eval/output/run_history.jsonl. Skipped by default.",
     )
     parser.add_argument(

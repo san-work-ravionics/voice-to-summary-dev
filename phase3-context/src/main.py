@@ -1,4 +1,5 @@
 import argparse
+import importlib.util
 import os
 import sys
 
@@ -13,69 +14,105 @@ from transcribe import transcribe
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
-# See phase1-baseline/src/main.py — same shared kickoff recording.
 REPO_ROOT = os.path.dirname(PROJECT_ROOT)
-SOURCE_RECORDING = os.path.join(REPO_ROOT, "audio-generation", "output", "01-kickoff", "recording.wav")
-TRANSCRIPT_PATH = os.path.join(OUTPUT_DIR, "transcript.txt")
-BASELINE_SUMMARY_PATH = os.path.join(OUTPUT_DIR, "summary_baseline.txt")
-CONTEXT_SUMMARY_PATH = os.path.join(OUTPUT_DIR, "summary_with_context.txt")
+AUDIO_GENERATION_DIR = os.path.join(REPO_ROOT, "audio-generation")
+
+
+def _load_meetings():
+    # audio-generation/ isn't a valid Python package name (hyphen), so it's
+    # loaded by file path — same technique eval/extraction_efficiency.py
+    # already uses for the same reason.
+    spec = importlib.util.spec_from_file_location(
+        "_audio_generation_dialogues", os.path.join(AUDIO_GENERATION_DIR, "src", "dialogues.py"),
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.MEETINGS
 
 
 def run_pipeline(regenerate=False, provider=None, judge_provider=None, on_stage=None):
-    """`regenerate` is accepted for CLI/webapp parity but has no effect —
-    see phase1-baseline/src/main.py. Stages: 'transcribing',
+    """All 15 recordings come from audio-generation/output/<slug>/ (see its
+    README) — this phase only transcribes and summarizes them, it doesn't
+    generate its own audio.  `regenerate`, if set, forces re-transcription of
+    every meeting (clears cached transcript.txt files); it can't regenerate
+    the recordings themselves, which are audio-generation/'s to own.
+    Stages: per meeting (detail = "<label> (N/15)"): 'transcribing',
     'summarizing_baseline', 'summarizing_context', plus
     'judging_baseline'/'judging_context' when judge_provider is given
-    (skipped by default), 'done'."""
+    (skipped by default). 'done' at the very end."""
     on_stage = on_stage or (lambda stage, detail=None: None)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
+    meetings = _load_meetings()
 
-    on_stage("transcribing")
-    print("\nTranscribing...")
-    transcript = transcribe(SOURCE_RECORDING)
-    with open(TRANSCRIPT_PATH, "w") as f:
-        f.write(transcript)
-    print("\n--- Transcript ---")
-    print(transcript)
+    if regenerate:
+        for meeting in meetings:
+            transcript_path = os.path.join(OUTPUT_DIR, meeting["slug"], "transcript.txt")
+            if os.path.exists(transcript_path):
+                os.remove(transcript_path)
 
-    on_stage("summarizing_baseline")
-    print("\nSummarizing (baseline, no context)...")
-    baseline = summarize_baseline(transcript, provider=provider)
-    with open(BASELINE_SUMMARY_PATH, "w") as f:
-        f.write(baseline)
+    for i, meeting in enumerate(meetings, start=1):
+        slug = meeting["slug"]
+        meeting_dir = os.path.join(OUTPUT_DIR, slug)
+        os.makedirs(meeting_dir, exist_ok=True)
+        detail = f"{meeting['label']} ({i}/{len(meetings)})"
+        recording_path = os.path.join(AUDIO_GENERATION_DIR, "output", slug, "recording.wav")
 
-    if judge_provider is not None:
-        on_stage("judging_baseline")
-        print("Judging (baseline)...")
-        evaluation = evaluate_variant(transcript, baseline, provider=judge_provider)
-        append_run("phase3-context", "baseline", provider, judge_provider, transcript, baseline, evaluation)
+        print(f"\n=== {meeting['label']} ===")
 
-    on_stage("summarizing_context")
-    print("Summarizing (with meeting context)...")
-    with_context = summarize_with_context(transcript, provider=provider)
-    with open(CONTEXT_SUMMARY_PATH, "w") as f:
-        f.write(with_context)
+        # --- Transcription (cached) ---
+        transcript_path = os.path.join(meeting_dir, "transcript.txt")
+        on_stage("transcribing", detail)
+        if os.path.exists(transcript_path):
+            print("Using existing transcript")
+            with open(transcript_path) as f:
+                transcript = f.read()
+        else:
+            print("Transcribing...")
+            transcript = transcribe(recording_path)
+            with open(transcript_path, "w") as f:
+                f.write(transcript)
 
-    if judge_provider is not None:
-        on_stage("judging_context")
-        print("Judging (with context)...")
-        evaluation = evaluate_variant(transcript, with_context, provider=judge_provider)
-        append_run("phase3-context", "with_context", provider, judge_provider, transcript, with_context, evaluation)
+        # --- Baseline summary (no context) ---
+        on_stage("summarizing_baseline", detail)
+        print("Summarizing (baseline, no context)...")
+        baseline = summarize_baseline(transcript, provider=provider)
+        with open(os.path.join(meeting_dir, "summary_baseline.txt"), "w") as f:
+            f.write(baseline)
 
-    print("\n--- Baseline summary (no context) ---")
-    print(baseline)
-    print("\n--- Context-aware summary ---")
-    print(with_context)
+        if judge_provider is not None:
+            on_stage("judging_baseline", detail)
+            print("Judging (baseline)...")
+            evaluation = evaluate_variant(transcript, baseline, provider=judge_provider)
+            append_run("phase3-context", "baseline", provider, judge_provider, transcript, baseline,
+                       evaluation, meeting=slug)
 
+        # --- Context-aware summary ---
+        on_stage("summarizing_context", detail)
+        print("Summarizing (with meeting context)...")
+        with_context = summarize_with_context(transcript, provider=provider)
+        with open(os.path.join(meeting_dir, "summary_with_context.txt"), "w") as f:
+            f.write(with_context)
+
+        if judge_provider is not None:
+            on_stage("judging_context", detail)
+            print("Judging (with context)...")
+            evaluation = evaluate_variant(transcript, with_context, provider=judge_provider)
+            append_run("phase3-context", "with_context", provider, judge_provider, transcript, with_context,
+                       evaluation, meeting=slug)
+
+    print(f"\nDone. All {len(meetings)} meetings written under {OUTPUT_DIR}")
     on_stage("done")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Voice -> transcript -> summary demo pipeline (context comparison)")
+    parser = argparse.ArgumentParser(
+        description="15-meeting pipeline: baseline vs context-aware summarization"
+    )
     parser.add_argument(
         "--regenerate", action="store_true",
-        help=argparse.SUPPRESS,  # no-op here, kept for CLI/webapp parity with other phases
+        help="Force re-transcription of every meeting (recordings themselves "
+        "come from audio-generation/ and aren't regenerated here)",
     )
     parser.add_argument(
         "--provider", choices=["local", "mistral", "claude"], default=None,
@@ -84,7 +121,7 @@ def main():
     )
     parser.add_argument(
         "--judge-provider", choices=["local", "mistral", "claude"], default=None,
-        help="If set, score both summaries and append them to "
+        help="If set, score every meeting's summaries and append them to "
         "eval/output/run_history.jsonl. Skipped by default.",
     )
     parser.add_argument(

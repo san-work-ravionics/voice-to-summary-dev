@@ -49,26 +49,26 @@ SCENARIOS = {
         "label": "Phase 1 — Basic summary",
         "main_path": os.path.join(PROJECT_ROOT, "phase1-baseline", "src", "main.py"),
         "stages": ["transcribing", "summarizing", "judging", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "phase1-baseline", "output", "summary.txt"),
+        "final_output": os.path.join(PROJECT_ROOT, "phase1-baseline", "output", "15-launch-retro", "summary.txt"),
     },
     "phase2-checklist": {
         "label": "Phase 2 — Checklist coverage",
         "main_path": os.path.join(PROJECT_ROOT, "phase2-checklist", "src", "main.py"),
         "stages": ["transcribing", "summarizing", "judging", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "phase2-checklist", "output", "summary.txt"),
+        "final_output": os.path.join(PROJECT_ROOT, "phase2-checklist", "output", "15-launch-retro", "summary.txt"),
     },
     "phase3-context": {
         "label": "Phase 3 — Context-aware summary",
         "main_path": os.path.join(PROJECT_ROOT, "phase3-context", "src", "main.py"),
         "stages": ["transcribing", "summarizing_baseline", "judging_baseline",
                    "summarizing_context", "judging_context", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "phase3-context", "output", "summary_with_context.txt"),
+        "final_output": os.path.join(PROJECT_ROOT, "phase3-context", "output", "15-launch-retro", "summary_with_context.txt"),
     },
     "phase4-assistant": {
         "label": "Phase 4 — AI assistant in the room",
         "main_path": os.path.join(PROJECT_ROOT, "phase4-assistant", "src", "main.py"),
-        "stages": ["recording", "transcribing", "summarizing", "judging", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "phase4-assistant", "output", "summary.txt"),
+        "stages": ["transcribing", "summarizing", "judging", "done"],
+        "final_output": os.path.join(PROJECT_ROOT, "phase4-assistant", "output", "15-launch-retro", "summary.txt"),
     },
     "phase6-history": {
         "label": "Phase 6 — 15-meeting RAG history",
@@ -82,7 +82,7 @@ SCENARIOS = {
         "main_path": os.path.join(PROJECT_ROOT, "phase7-reference-rag", "src", "main.py"),
         "stages": ["transcribing", "retrieving", "summarizing_baseline", "judging_baseline",
                    "summarizing_with_references", "judging_with_references", "done"],
-        "final_output": os.path.join(PROJECT_ROOT, "phase7-reference-rag", "output", "summary_with_references.txt"),
+        "final_output": os.path.join(PROJECT_ROOT, "phase7-reference-rag", "output", "15-launch-retro", "summary_with_references.txt"),
     },
 }
 SCENARIO_ORDER = [
@@ -278,7 +278,12 @@ def _pipeline_status(scenario_id):
         last_run_at = os.path.getmtime(scenario["final_output"])
 
     if job is None:
-        status = "done" if last_run_at is not None else "not_run"
+        if file_status and stage and stage != "done":
+            status = "running"
+        elif last_run_at is not None:
+            status = "done"
+        else:
+            status = "not_run"
         error = None
         provider = _latest_summarizer_provider(scenario_id)
         judge_provider = None
@@ -567,6 +572,7 @@ def main():
     os.makedirs(CUSTOM_AUDIO_DIR, exist_ok=True)
     os.makedirs(CUSTOM_OUTPUT_DIR, exist_ok=True)
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8743
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
     with socketserver.ThreadingTCPServer(("", port), Handler) as httpd:
         logger.info("Serving %s", PROJECT_ROOT)
         logger.info("Open http://localhost:%s/webapp/index.html", port)

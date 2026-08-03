@@ -17,9 +17,10 @@ cd "$(dirname "$0")"
 PORT="${PORT:-8744}"
 URL="http://localhost:$PORT/webapp/index.html"
 
-if [ ! -x ".venv/bin/python" ]; then
-  echo "No .venv found at $(pwd)/.venv" >&2
-  echo "Create it first:  python3 -m venv .venv && .venv/bin/pip install -r requirements.txt" >&2
+VENV="${VENV:-$(dirname "$0")/../py-shared-env/dev}"
+if [ ! -x "$VENV/bin/python" ]; then
+  echo "No venv found at $VENV" >&2
+  echo "Set VENV to the path of your Python virtual environment." >&2
   exit 1
 fi
 
@@ -48,4 +49,4 @@ echo
   done
 ) &
 
-exec .venv/bin/python webapp/server.py "$PORT"
+exec "$VENV/bin/python" webapp/server.py "$PORT"
