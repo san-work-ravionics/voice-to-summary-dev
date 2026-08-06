@@ -1,0 +1,32 @@
+[
+  {
+    "id": "payments-vendor-integration#2",
+    "source": "payments-vendor-integration",
+    "text": "## Integration Approach\n1. Sandbox environment provisioning (target: week 1).\n2. SDK integration into the payments module.\n3. Webhook-based reconciliation for payment status updates (avoids polling).\n4. Staging certification against Meridian's test suite (target: week 4-6).\n5. Production cutover only after QA sign-off on the full test suite,\n   including failure-mode handling (declined payments, webhook retries,\n   timeout handling).",
+    "score": 5.295888386298536
+  },
+  {
+    "id": "design-spec#2",
+    "source": "design-spec",
+    "text": "## Onboarding Flow Redesign\nOld flow: 7 sequential screens, notification permission requested\nimmediately on screen 3. New flow: 4 screens, using progressive disclosure \u2014\nvalue proposition, minimal signup, a short explainer screen (\"why we need\nthis\") immediately before any OS permission prompt, then a single\nconfirmation screen. Every OS-level permission prompt in the new flow must be\npreceded by an in-app explainer; this applies to notifications and any future\npermission types added to the flow.",
+    "score": 3.411538358570815
+  },
+  {
+    "id": "design-spec#3",
+    "source": "design-spec",
+    "text": "## Component Inventory\nScreens affected: Welcome, Sign Up, Permission Explainer, Confirmation. All\nfour must ship with dark-mode variants at launch \u2014 partial dark-mode coverage\nis not acceptable per the PRD's \"100% of screens\" success metric.",
+    "score": 3.411001472509083
+  },
+  {
+    "id": "product-requirements#0",
+    "source": "product-requirements",
+    "text": "## Product Requirements Document \u2014 Mobile App Redesign",
+    "score": 3.245202753219086
+  },
+  {
+    "id": "payments-vendor-integration#1",
+    "source": "payments-vendor-integration",
+    "text": "## Vendor Selection\nMeridian Pay was selected over the incumbent processor for two reasons:\nbroader regional payout support and lower per-transaction fees at this\nrelease's projected volume. This is a new vendor relationship \u2014 no prior\nproduction history with them, which is why sandbox access on day one is a\nhard requirement rather than a preference.",
+    "score": 3.134965443257248
+  }
+]

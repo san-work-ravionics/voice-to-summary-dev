@@ -1,0 +1,18 @@
+## Topic
+Requirements Review Meeting
+
+## Key Points
+- Onboarding, flow, rebuild, and payments integration are P0.
+- Visual refresh and dark mode are P1.
+- Analytics instrumentation is also P1.
+- Localization is cut from this release due to schedule risk.
+
+## Decisions
+- Explicitly marked out-of-scope for the backlog.
+- Sprint cadence set to two-week sprints, seven before code freeze.
+- Legal engagement started this week; analytics scoping request sent.
+
+## Actions
+- Person A: Marked out-of-scope items explicitly in the backlog.
+- Person B: Set sprint cadence to two-week sprints, seven before code freeze.
+- Person B: Sent analytics scoping request.

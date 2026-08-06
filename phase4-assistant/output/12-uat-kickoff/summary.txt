@@ -1,0 +1,23 @@
+## Topic
+UAT kickoff for the mobile app redesign project
+
+## Key Points
+- 8 external testers and 2 internal stakeholders confirmed for next week.
+- Full app flow, including payments end-to-end in the dark mode variant, is covered in scripts.
+- Support for other languages requested by an internal stakeholder but was explicitly cut from the release at requirements review.
+- Testing schedule: full app flow tested for one week, daily triage calls starting tomorrow.
+
+## Decisions
+None applicable based on the provided transcript.
+
+## Actions
+- None applicable based on the provided transcript.
+
+## Checklist Coverage
+- Not covered: Onboarding flow status — not mentioned in the transcript
+- Covered: Payments integration status — "Full app flow, including payments end to end in the dark mode variant."
+- Covered: Design updates (e.g. dark mode) — "Full app flow, including payments end to end in the dark mode variant."
+- Not covered: Legal / privacy approval — not mentioned in the transcript
+- Not covered: Analytics instrumentation — not mentioned in the transcript
+- Not covered: Budget or cost impact — not mentioned in the transcript
+- Not covered: Next meeting / follow-up schedule — not mentioned in the transcript

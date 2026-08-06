@@ -1,0 +1,24 @@
+## Topic
+Agreeing on Project Goal, Scoping Workstreams, and Assigning Responsibilities
+
+## Key Points
+- Payments integration completed, patch ship scheduled for Tuesday.
+- Dark mode fully implemented across screens.
+- Legal approval received, copy edits made, and analytics instrumentation set up.
+- Load testing for payments handling real transactions should be scheduled before code freeze.
+
+## Decisions
+- No decisions were made during this initial sync meeting.
+
+## Actions
+- Person A: Ensure load testing for payments handling real transactions is scheduled for two weeks after the current test plan review.
+- Person B: Confirm with QA/QA lead on the status of the full suite re-run post-patch ship.
+
+## Checklist Coverage
+- Not covered: Onboarding flow status — not mentioned in the transcript
+- Covered: Payments integration status — "Let's do it, payments, the vendor fix?"
+- Covered: Design updates (e.g. dark mode) — "Huge relief, dark mode?"
+- Covered: Legal / privacy approval — "Excellent, legal?"
+- Covered: Analytics instrumentation — "Great, that threads closed, analytics?"
+- Not covered: Budget or cost impact — not mentioned in the transcript
+- Not covered: Next meeting / follow-up schedule — not mentioned in the transcript

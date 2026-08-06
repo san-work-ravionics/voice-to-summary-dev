@@ -1,0 +1,32 @@
+[
+  {
+    "id": "payments-vendor-integration#1",
+    "source": "payments-vendor-integration",
+    "text": "## Vendor Selection\nMeridian Pay was selected over the incumbent processor for two reasons:\nbroader regional payout support and lower per-transaction fees at this\nrelease's projected volume. This is a new vendor relationship \u2014 no prior\nproduction history with them, which is why sandbox access on day one is a\nhard requirement rather than a preference.",
+    "score": 5.137049298754414
+  },
+  {
+    "id": "product-requirements#0",
+    "source": "product-requirements",
+    "text": "## Product Requirements Document \u2014 Mobile App Redesign",
+    "score": 3.245202753219086
+  },
+  {
+    "id": "payments-vendor-integration#4",
+    "source": "payments-vendor-integration",
+    "text": "## Risk Notes\nBecause this is a new vendor, the sandbox's fidelity to production behavior\nis unproven going in \u2014 this is the single highest-risk workstream in the\nrelease and should get priority engineering attention if any workstream\nneeds to be reprioritized.",
+    "score": 3.157140903375949
+  },
+  {
+    "id": "payments-vendor-integration#2",
+    "source": "payments-vendor-integration",
+    "text": "## Integration Approach\n1. Sandbox environment provisioning (target: week 1).\n2. SDK integration into the payments module.\n3. Webhook-based reconciliation for payment status updates (avoids polling).\n4. Staging certification against Meridian's test suite (target: week 4-6).\n5. Production cutover only after QA sign-off on the full test suite,\n   including failure-mode handling (declined payments, webhook retries,\n   timeout handling).",
+    "score": 3.12572129701455
+  },
+  {
+    "id": "product-requirements#6",
+    "source": "product-requirements",
+    "text": "### Legal / Privacy\nUpdated consent language for notification permissions requires legal\nsign-off. Privacy review must confirm the release aligns with the company's\nSOC 2 Type II commitments before launch.",
+    "score": 2.8996044888855925
+  }
+]

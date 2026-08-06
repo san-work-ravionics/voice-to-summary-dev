@@ -1,0 +1,15 @@
+## Topic
+Agreeing on Project Goal, Scope Workstreams, and Assigning Responsibilities
+
+## Key Points
+- The project goal is to redesign the mobile app.
+- The onboarding flow will be rebuilt, reducing steps and improving cleanliness.
+- Visual refresh, including dark mode, is set as a P1 scope with commitment.
+- Legal/privacy review and analytics instrumentation remain as known workstreams.
+- Payment sandbox access was confirmed and will begin integration work starting Monday.
+
+## Decisions
+- No decisions were made regarding responsibilities at this initial meeting.
+
+## Actions
+- None.

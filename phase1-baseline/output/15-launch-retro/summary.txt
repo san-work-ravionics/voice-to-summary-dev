@@ -1,0 +1,21 @@
+### Topic
+The launch retro of the mobile app redesign.
+
+### Key Points
+- Launch went smoothly with no major incidents.
+- Early adoption numbers look positive.
+- Dark mode received positive feedback.
+- Onboarding completion increased significantly.
+- Payments have been stable since launch.
+- Vendor instability caused delays during the project.
+- Budget overrun was reported to finance.
+- Vendor stability should be a criterion for future payment providers.
+- Localization request is logged for the next roadmap cycle.
+- Post-launch analytics dashboard is live and will be monitored closely.
+
+### Decisions
+- No specific decisions were made.
+
+### Actions
+- Person A: Write a lesson learned about vendor stability for future payments providers.
+- Person B: Monitor the post-launch analytics dashboard for the next two weeks.

@@ -1,0 +1,25 @@
+## Topic
+Agreeing on Project Goal, Scoping Workstreams, and Assigning Responsibilities
+
+## Key Points
+- The project goal is to rebuild the onboarding flow, integrate a new payments provider, and perform a visual refresh with dark mode as a stretch goal.
+- Legal/privacy review and analytics instrumentation remain open issues.
+- User testing for the onboarding flow begins during Sprint 4.
+
+## Decisions
+- No decisions were made regarding the payment sandbox issue or the QA coverage.
+
+## Actions
+- Person A: Escalate the payment sandbox issue to the vendor's account manager.
+- Person B: Schedule user testing for the onboarding flow during Sprint 4.
+- Person A: Send a second nudge to legal/privacy review.
+- Person B: Consider freeing up additional resources to assist with analytics instrumentation.
+
+## Checklist Coverage
+- Not covered: Onboarding flow status — not mentioned in the transcript
+- Covered: Payments integration status — "All right, Sprint 3, payment sandbox, still the same story?"
+- Covered: Design updates (e.g. dark mode) — "Dark mode?"
+- Covered: Legal / privacy approval — "Legal, any movement?"
+- Covered: Analytics instrumentation — "And analytics, still stock?"
+- Not covered: Budget or cost impact — not mentioned in the transcript
+- Not covered: Next meeting / follow-up schedule — not mentioned in the transcript

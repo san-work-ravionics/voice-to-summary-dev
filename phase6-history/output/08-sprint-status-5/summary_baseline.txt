@@ -1,0 +1,14 @@
+### Topic
+Mobile App Redesign Project Status Sync
+
+### Key Points
+- Payments Vendor Fix: Patch ship Tuesday, QA re-running full suite.
+- Dark Mode: Fully shipped, screens with variant.
+- Legal Approval: Copy edits approved, signed off.
+- Threads Closed: Analytics instrumentation wired up, validating data.
+
+### Decisions
+- Load Testing Before Code Freeze: Scheduling for two weeks out.
+
+### Actions
+- Person A: Make sure load testing is scheduled for the test plan review two weeks out.

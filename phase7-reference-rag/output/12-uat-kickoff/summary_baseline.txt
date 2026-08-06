@@ -1,0 +1,14 @@
+### Topic
+UAT Kickoff Meeting for Mobile App Redesign Project
+
+### Key Points
+- External testers and internal stakeholders have been confirmed.
+- The full app flow, including payments, is covered in scripts.
+- Support for other languages requested but not included in the current release.
+
+### Decisions
+- No decisions made during the meeting.
+
+### Actions
+- Person A: Confirm the status of the external testers and internal stakeholders.
+- Person B: Ensure clarity regarding the language support request in the response.

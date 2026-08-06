@@ -1,0 +1,21 @@
+### Topic
+Requirements Review Meeting
+
+### Key Points
+- **Onboarding**: Priority P0
+- **Flow**: Priority P0
+- **Rebuild**: Priority P0
+- **Payments Integration**: Priority P0
+- **Visual Refresh**: Priority P1
+- **Dark Mode**: Stretch Item
+- **Legal and Privacy Review**: Hard Gate
+- **Analytics Instrumentation**: Priority P1
+- **Localization**: Out of Scope
+- **Sprint Cadence**: Two-week sprints, seven before code freeze, then test plan, UAT, and launch prep
+- **Design Review**: Once mockups are ready
+
+### Decisions
+- Marked "Localization" explicitly out of scope.
+
+### Actions
+- None

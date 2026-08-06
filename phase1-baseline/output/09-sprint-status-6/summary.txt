@@ -1,0 +1,15 @@
+### Topic
+Payments stability and load testing status
+
+### Key Points
+- Payments fully stable.
+- Regression suite green for a full week.
+- Analytics validated.
+- Load testing draft plans being prepared.
+
+### Decisions
+- Run load testing off to code freeze.
+
+### Actions
+- Person A: Draft load testing plans.
+- Person B: Run load testing off to code freeze.

@@ -1,0 +1,18 @@
+### Topic
+First Launch Review
+
+### Key Points
+- Payments P1 bug fixed and retested.
+- Low test caveat addressed.
+- Help center articles updated.
+- Support teams being brief on new flows.
+- Marketing has launched com schedule for launch day.
+- Vendor escalation and extra contractor pushed us over budget.
+
+### Decisions
+- Payments fire drill and vendor escalation need to be reported to finance after launch.
+- Next week's agenda includes reporting the budget overrun.
+
+### Actions
+- Person A: Confirm launch data.
+- Person B: Call launch.

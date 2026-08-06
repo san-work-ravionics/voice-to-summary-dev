@@ -1,0 +1,17 @@
+### Topic
+Design Review Meeting for Mobile App Redesign Project
+
+### Key Points
+- New coffee blend tested well; both participants enjoyed it.
+- Mockups for onboarding flow were praised for being cleaner and having fewer steps.
+- Visual refresh includes a stacker holder, which was prioritized as a non-stretch goal.
+- Dark mode is promoted from stretch to committed P1 scope due to its potential value.
+- Accessibility checks on dark mode confirm high contrast ratios.
+- Payment sandbox access was successfully provisioned.
+
+### Decisions
+- No decisions made during the meeting.
+
+### Actions
+- Person A: Update the backlog priority based on the accessibility check results.
+- Person B: Start integration work on payment sandbox access on Monday after sprint one begins.

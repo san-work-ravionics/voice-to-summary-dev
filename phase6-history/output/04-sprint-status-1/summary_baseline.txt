@@ -1,0 +1,16 @@
+### Topic
+Sprint One Status
+
+### Key Points
+- Onboarding flow development started on track.
+- Payments sandbox environment set up; first smoke tests conducted, noting some flakiness.
+- Dark mode not yet started; planned for post-onboarding phase.
+- Legal review officially kicked off this week, awaiting feedback.
+- Analytics events scoped with team.
+
+### Decisions
+None explicitly stated.
+
+### Actions
+- Person A: Schedule follow-up meetings with legal once they've received their feedback.
+- Person B: Coordinate with the analytics team to finalize event scope before the next sprint.

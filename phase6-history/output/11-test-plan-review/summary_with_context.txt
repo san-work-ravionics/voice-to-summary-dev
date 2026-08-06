@@ -1,0 +1,17 @@
+### Topic
+Test Plan review
+
+### Key Points
+- **Entry Criteria**: Code freeze
+- **Exit Criteria**: Zero open bugs, zero or one bugs, load test passing response time and concurrency thresholds
+- **UAT Start Date**: Two weeks from now, running for one week with daily triage calls
+- **Tester Recruitment**: Starting recruitment process this week
+
+### Decisions
+- None explicitly stated
+
+### Actions
+- **Person A**:
+  - Recruit testers for UAT starting this week
+- **Person B**:
+  - Start recruiting testers for UAT starting this week

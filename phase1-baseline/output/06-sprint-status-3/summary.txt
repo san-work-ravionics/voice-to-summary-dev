@@ -1,0 +1,16 @@
+### Topic
+Payment Sandbox
+
+### Key Points
+- Payment sandbox remains broken after three Sprints.
+- QA coverage is insufficient; only half of test cases completed.
+- Escalation to vendor's account manager recommended.
+- User testing scheduled early in the Sprint.
+
+### Decisions
+- Escalate to vendor's account manager regarding payment sandbox issues.
+- Schedule user testing during the current Sprint.
+
+### Actions
+- Person A: Escalate to vendor's account manager regarding payment sandbox issues.
+- Person B: Schedule user testing during the current Sprint.

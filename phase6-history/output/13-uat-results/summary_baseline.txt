@@ -1,0 +1,19 @@
+### Topic
+UAT Results and Bud Triage Meeting
+
+### Key Points
+- The UAT process was successful.
+- Only minor bugs were found, including a payment issue requiring immediate attention.
+- The P1 bug needs to be resolved before Goliv's involvement.
+- The load test exceeded its target concurrency, but an identified fix will address this.
+- Localization questions from UAT have been formalized as backlogs.
+
+### Decisions
+- Address the P1 bug immediately.
+- Schedule the fix for next week.
+- Conduct the Goliv readiness review after fixing the P1 bug.
+
+### Actions
+- Person A: Address the P1 bug immediately.
+- Person B: Schedule the fix for next week.
+- Person A: Conduct the Goliv readiness review after addressing the P1 bug.

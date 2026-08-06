@@ -1,0 +1,32 @@
+[
+  {
+    "id": "product-requirements#1",
+    "source": "product-requirements",
+    "text": "## Goals\nImprove onboarding conversion and refresh the app's visual design, with a hard\nlaunch target of 5 months from kickoff. Current onboarding completion rate is\n60%; this release targets 85%+.",
+    "score": 10.345216267173617
+  },
+  {
+    "id": "product-requirements#0",
+    "source": "product-requirements",
+    "text": "## Product Requirements Document \u2014 Mobile App Redesign",
+    "score": 9.888859665566992
+  },
+  {
+    "id": "product-requirements#7",
+    "source": "product-requirements",
+    "text": "### Analytics Instrumentation\nFunnel events for the new onboarding flow are instrumented through the\ninternal **Compass Analytics** platform. Minimum required events: flow start,\neach step completion, permission-prompt shown/accepted/declined, flow\ncomplete.",
+    "score": 8.495722918568928
+  },
+  {
+    "id": "product-requirements#4",
+    "source": "product-requirements",
+    "text": "### Payments Integration\nNew payments provider: **Meridian Pay**, selected for regional payout support\nand lower per-transaction fees than the incumbent processor. Sandbox access\nmust be provisioned in week 1 so integration risk surfaces early. Target:\ncertification complete within 6 weeks of kickoff.",
+    "score": 6.852134668454959
+  },
+  {
+    "id": "design-spec#2",
+    "source": "design-spec",
+    "text": "## Onboarding Flow Redesign\nOld flow: 7 sequential screens, notification permission requested\nimmediately on screen 3. New flow: 4 screens, using progressive disclosure \u2014\nvalue proposition, minimal signup, a short explainer screen (\"why we need\nthis\") immediately before any OS permission prompt, then a single\nconfirmation screen. Every OS-level permission prompt in the new flow must be\npreceded by an in-app explainer; this applies to notifications and any future\npermission types added to the flow.",
+    "score": 6.822611300405684
+  }
+]

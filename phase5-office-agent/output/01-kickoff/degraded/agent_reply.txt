@@ -1,0 +1,18 @@
+## Topic
+Kikov Mobile App Redesign Project Kickoff
+
+## Key Points
+- High-level goal: improve onboarding conversion, deliver visual refresh, hard launch target of five months
+- Engineering work streams: rebuilding onboarding flow, integrating new payments provider, visual refresh with dark mode as stretch goal, legal/privacy review, and analytics instrumentation
+- Payments integration presents risk due to unfamiliar vendor sandbox; early access needed on day one
+- Localization scope undecided; to be determined at next week's requirements review meeting
+- Project will follow two-week sprint syncs after initial requirements review
+
+## Decisions
+- Dark mode will be treated as a stretch goal
+- Localization scope decision deferred to requirements review next week
+
+## Actions
+- Person B: Push to provision payments provider access this week
+- Person B: Engage legal early to prevent bottleneck later
+- Person B: Loop analytics team in to start scoping events

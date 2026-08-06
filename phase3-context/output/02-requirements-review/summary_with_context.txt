@@ -1,0 +1,14 @@
+## Topic
+Setting the high-level goal and scoping the engineering workstreams
+
+## Key Points
+- Project goal: Mobile App Redesign
+- High-priority tasks: Rebuilding onboarding flow, integrating a new payments provider, visual refresh (P1), dark mode (stretch goal)
+- Low-priority tasks: Legal/privacy review, analytics instrumentation
+- Sprint cadence: Two-week sprints, seven before code freeze, test plan, UAT, and launch prep
+
+## Decisions
+- No changes made to the backlog regarding the project goals or workstream prioritization
+
+## Actions
+- None

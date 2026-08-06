@@ -1,0 +1,24 @@
+## Topic
+Agreeing on Project Goal, Scoping Workstreams, and Assigning Responsibilities
+
+## Key Points
+- The project goal is to redesign the mobile app.
+- The main workstreams include rebuilding the onboarding flow, integrating a new payments provider, a visual refresh with dark mode as a stretch goal, legal/privacy review, and analytics instrumentation.
+- Legal is still reviewing their responses.
+- Analytics hasn't responded to the scoping request yet.
+- The team plans to meet again in two weeks for a follow-up discussion.
+
+## Decisions
+- No decisions were made during this initial meeting.
+
+## Actions
+- None of the speakers have committed to any actions at this point.
+
+## Checklist Coverage
+- Covered: Onboarding flow status — "A great, quality over the deadline there, onboarding?"
+- Covered: Payments integration status — "Glad that's over, okay, Sprint 2, payment sandbox, last time it felt a little flaky."
+- Covered: Design updates (e.g. dark mode) — "Dark mode?"
+- Covered: Legal / privacy approval — "Good, legal?"
+- Covered: Analytics instrumentation — "And analytics, any response to the scoping request?"
+- Not covered: Budget or cost impact — not mentioned in the transcript
+- Not covered: Next meeting / follow-up schedule — not mentioned in the transcript

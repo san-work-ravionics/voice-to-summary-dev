@@ -1,0 +1,23 @@
+## Topic
+Setting the high-level goal and scoping the engineering workstreams
+
+## Key Points
+- Project goal: Mobile App Redesign
+- High-priority tasks: Rebuilding onboarding flow, integrating a new payments provider, visual refresh (P1), dark mode (stretch goal)
+- Low-priority tasks: Legal/privacy review, analytics instrumentation
+- Sprint cadence: Two-week sprints, seven before code freeze, test plan, UAT, and launch prep
+
+## Decisions
+- No changes made to the backlog regarding the project goals or workstream prioritization
+
+## Actions
+- None
+
+## Checklist Coverage
+- Covered: Onboarding flow status — "Onboarding, flow, rebuild, and payments integration are both P0, they gate launch, visual refresh as P1, and dark mode specifically stays a stretch item within that."
+- Covered: Payments integration status — "Onboarding, flow, rebuild, and payments integration are both P0, they gate launch, visual refresh as P1, and dark mode specifically stays a stretch item within that."
+- Covered: Design updates (e.g. dark mode) — "Onboarding, flow, rebuild, and payments integration are both P0, they gate launch, visual refresh as P1, and dark mode specifically stays a stretch item within that."
+- Covered: Legal / privacy approval — "Legal and privacy review is a hard gate, and analytics instrumentation as P1."
+- Covered: Analytics instrumentation — "Legal and privacy review is a hard gate, and analytics instrumentation as P1."
+- Not covered: Budget or cost impact — not mentioned in the transcript
+- Not covered: Next meeting / follow-up schedule — not mentioned in the transcript

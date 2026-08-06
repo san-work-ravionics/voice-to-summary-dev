@@ -1,0 +1,22 @@
+## Topic
+Payments integration and user testing
+
+## Key Points
+- Payment sandbox issue persists; Sprint 3 continues.
+- Testing progress slow; escalation to vendor account manager recommended.
+- User testing scheduled early in Sprint 3.
+- Dark mode development ongoing.
+- Legal team remains unresponsive; additional engineers needed for analytics.
+- Additional resources may be required to address legal issues.
+
+## Decisions
+- Escalate to vendor account manager regarding payment sandbox.
+- Schedule user testing in Sprint 3.
+- Continue dark mode development.
+- Request additional engineers for analytics.
+
+## Actions
+- Person A: Escalate to vendor account manager regarding payment sandbox.
+- Person B: Schedule user testing in Sprint 3.
+- Person A: Continue dark mode development.
+- Person B: Request additional engineers for analytics.

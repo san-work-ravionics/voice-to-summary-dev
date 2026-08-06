@@ -1,0 +1,16 @@
+### Topic
+Test Plan Review Meeting
+
+### Key Points
+- Functional regression across the full app.
+- Load and performance tests.
+- Security and privacy checklist.
+- Browser and device compatibility matrix.
+- Entry criteria: Code freeze.
+- Exit criteria: Zero open bugs, load test passes response time and concurrency thresholds.
+
+### Decisions
+- No specific decisions made at this meeting.
+
+### Actions
+- Person A: Start recruiting testers for UAT next week.

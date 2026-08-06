@@ -1,0 +1,14 @@
+### Topic
+UAT Kickoff Meeting for Mobile App Redesign Project
+
+### Key Points
+- External testers and internal stakeholders confirmed for next week.
+- Full app flow, including payments end-to-end in the dark mode variant, covered in scripts.
+- Internal stakeholder requested support for other languages, which was explicitly cut from the release.
+
+### Decisions
+- No decisions made during the meeting.
+
+### Actions
+- Person A: Confirm the status of the external testers and internal stakeholders for the upcoming week.
+- Person B: Schedule daily triage calls starting tomorrow.

@@ -1,0 +1,16 @@
+## Topic
+UAT results and Bud Triage
+
+## Key Points
+- The UAT process concluded positively, with minor bugs including a P1 in payments and several P2 and P3 cosmetic issues.
+- The P1 bug in payments is blocking the launch due to silent failures.
+- The load test exceeded past targets but slowed under a specific spiky load pattern; the fix is known.
+- Localization requests from UAT have been formalized as a backlog item for a future release.
+- The fix cycle for the P1 bug is planned for this week, followed by a Goliv readiness review.
+
+## Decisions
+- No explicit decisions were made.
+
+## Actions
+- Person A: Recruit testers for UAT starting this week.
+- Person B: Start recruiting testers for UAT starting this week.

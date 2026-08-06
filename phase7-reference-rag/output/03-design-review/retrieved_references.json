@@ -1,0 +1,32 @@
+[
+  {
+    "id": "product-requirements#5",
+    "source": "product-requirements",
+    "text": "### Visual Refresh (Dark Mode)\nDark mode ships using the existing **Aurora Design System**'s token-based\ntheming \u2014 semantic color tokens, not per-screen manual overrides \u2014 so future\ntheme changes don't require touching individual screens.",
+    "score": 7.169729050927787
+  },
+  {
+    "id": "design-spec#0",
+    "source": "design-spec",
+    "text": "## Design Spec \u2014 Visual Refresh & Onboarding",
+    "score": 5.89003529213947
+  },
+  {
+    "id": "product-requirements#1",
+    "source": "product-requirements",
+    "text": "## Goals\nImprove onboarding conversion and refresh the app's visual design, with a hard\nlaunch target of 5 months from kickoff. Current onboarding completion rate is\n60%; this release targets 85%+.",
+    "score": 5.8301719827299525
+  },
+  {
+    "id": "product-requirements#7",
+    "source": "product-requirements",
+    "text": "### Analytics Instrumentation\nFunnel events for the new onboarding flow are instrumented through the\ninternal **Compass Analytics** platform. Minimum required events: flow start,\neach step completion, permission-prompt shown/accepted/declined, flow\ncomplete.",
+    "score": 5.508471525938052
+  },
+  {
+    "id": "design-spec#1",
+    "source": "design-spec",
+    "text": "## Dark Mode\nImplemented via the Aurora Design System's semantic color tokens (e.g.\n`surface.primary`, `text.onSurface`) rather than hardcoded per-screen colors,\nso a single token-file change propagates everywhere. All screens must meet\nWCAG 2.1 AA contrast ratios in both light and dark themes before sign-off \u2014\nthis is a launch blocker, not a nice-to-have.",
+    "score": 5.500385949003693
+  }
+]

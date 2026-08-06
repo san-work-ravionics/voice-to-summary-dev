@@ -1,0 +1,19 @@
+## Topic
+Kikov mobile app redesign project kickoff and scope overview
+
+## Key Points
+- High-level goal: improve onboarding conversion, visual refresh, five-month timeline
+- Engineering work streams: onboarding flow rebuild, new payments provider integration, visual refresh with dark mode as stretch goal, legal/privacy review, analytics instrumentation
+- New payments vendor presents risk; sandbox reliability unknown until integration begins
+- Localization scope not yet decided; will be determined at requirements review
+- Project structure: requirements review next week, then bi-weekly sprint syncs thereafter
+
+## Decisions
+- Payments provider integration will proceed with early access acquisition
+- Localization scope decision deferred to requirements review meeting next week
+- Cadence established: requirements review next week, followed by two-week sprint cycles
+
+## Actions
+- Person A: Push to provision new payments provider sandbox access this week
+- Person A: Engage legal early to prevent bottlenecks later
+- Person A: Loop in analytics team to begin scoping events

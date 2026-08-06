@@ -1,0 +1,15 @@
+## Topic
+Test Plan Review Meeting for Mobile App Redesign Project
+
+## Key Points
+- The Test Plan includes functional regression testing, load and performance tests, security and privacy checks, and browser/device compatibility.
+- Code freeze is considered an entry criterion; zero open issues and bugs are expected upon exit.
+- UAT is scheduled to begin in two weeks, lasting approximately one week with daily triage calls.
+- Recruitment of testers will commence this week.
+
+## Decisions
+- No specific decisions were made regarding the timing or details of the UAT schedule.
+
+## Actions
+- Person A: Start recruiting testers this week.
+- Person B: Confirm tester recruitment timeline.

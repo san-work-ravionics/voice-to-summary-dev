@@ -1,0 +1,735 @@
+{
+  "generated_at": "2026-08-06T17:02:40.770775+00:00",
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "noise_keywords": [
+    "marathon",
+    "tarmac",
+    "coffee blend",
+    "hike",
+    "plumbing",
+    "game night",
+    "podcast",
+    "commute",
+    "puppy",
+    "recipe",
+    "concert",
+    "new phone",
+    "elevator",
+    "pizza party"
+  ],
+  "meetings": [
+    {
+      "slug": "01-kickoff",
+      "label": "Project Kickoff",
+      "noise": {
+        "baseline": {
+          "leaked": false,
+          "keywords_found": []
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": false,
+            "offending_lines": []
+          },
+          "with_context": {
+            "conflated": false,
+            "offending_lines": []
+          }
+        }
+      },
+      "probes": []
+    },
+    {
+      "slug": "02-requirements-review",
+      "label": "Requirements Review",
+      "noise": {
+        "baseline": {
+          "leaked": false,
+          "keywords_found": []
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": false,
+            "offending_lines": []
+          },
+          "with_context": {
+            "conflated": false,
+            "offending_lines": []
+          }
+        },
+        "stale_actions": {
+          "baseline": {
+            "stale": false,
+            "matches": []
+          },
+          "with_context": {
+            "stale": true,
+            "matches": [
+              {
+                "current_bullet": "- None reported in this meeting.",
+                "matched_history_phrase": "- None reported in this meeting.",
+                "overlap_ratio": 1.0
+              }
+            ]
+          }
+        }
+      },
+      "probes": []
+    },
+    {
+      "slug": "03-design-review",
+      "label": "Design Review",
+      "noise": {
+        "baseline": {
+          "leaked": true,
+          "keywords_found": [
+            "coffee blend"
+          ]
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": false,
+            "offending_lines": []
+          },
+          "with_context": {
+            "conflated": false,
+            "offending_lines": []
+          }
+        },
+        "stale_actions": {
+          "baseline": {
+            "stale": false,
+            "matches": []
+          },
+          "with_context": {
+            "stale": false,
+            "matches": []
+          }
+        }
+      },
+      "probes": []
+    },
+    {
+      "slug": "04-sprint-status-1",
+      "label": "Sprint 1 Status",
+      "noise": {
+        "baseline": {
+          "leaked": false,
+          "keywords_found": []
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": false,
+            "offending_lines": []
+          },
+          "with_context": {
+            "conflated": false,
+            "offending_lines": []
+          }
+        },
+        "stale_actions": {
+          "baseline": {
+            "stale": false,
+            "matches": []
+          },
+          "with_context": {
+            "stale": true,
+            "matches": [
+              {
+                "current_bullet": "- Person A: Update the backlog priority for the accessibility check on dark mode.",
+                "matched_history_phrase": "- Person A: Update the backlog priority for the accessibility check on dark mode. - Person B: Confirm the availability of payment sandbox access for integration work.",
+                "overlap_ratio": 0.5
+              },
+              {
+                "current_bullet": "- Person B: Confirm the availability of payment sandbox access for integration work.",
+                "matched_history_phrase": "- Person A: Update the backlog priority for the accessibility check on dark mode. - Person B: Confirm the availability of payment sandbox access for integration work.",
+                "overlap_ratio": 0.5
+              }
+            ]
+          }
+        }
+      },
+      "probes": []
+    },
+    {
+      "slug": "05-sprint-status-2",
+      "label": "Sprint 2 Status",
+      "noise": {
+        "baseline": {
+          "leaked": true,
+          "keywords_found": [
+            "plumbing"
+          ]
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": false,
+            "offending_lines": []
+          },
+          "with_context": {
+            "conflated": false,
+            "offending_lines": []
+          }
+        },
+        "stale_actions": {
+          "baseline": {
+            "stale": false,
+            "matches": []
+          },
+          "with_context": {
+            "stale": false,
+            "matches": []
+          }
+        }
+      },
+      "probes": [
+        {
+          "id": "payments_escalation",
+          "question": "Does the summary correctly convey that the payments sandbox instability got WORSE this sprint (an escalation), rather than just describing a generic ongoing issue?",
+          "expected": "yes",
+          "baseline": {
+            "answer": "yes",
+            "rationale": "The summary accurately states 'Payment sandbox has been unstable most of this Sprint', indicating an escalation compared to previous mentions.",
+            "raw": "{\"answer\": \"yes\", \"rationale\": \"The summary accurately states 'Payment sandbox has been unstable most of this Sprint', indicating an escalation compared to previous mentions.\"}",
+            "parse_error": false,
+            "pass": true
+          },
+          "with_context": {
+            "answer": "yes",
+            "rationale": "The summary accurately states 'It's gotten worse, the vendor sandbox has been unstable most of this Sprint', which indicates an escalation of the issue.",
+            "raw": "{\"answer\": \"yes\", \"rationale\": \"The summary accurately states 'It's gotten worse, the vendor sandbox has been unstable most of this Sprint', which indicates an escalation of the issue.\"}",
+            "parse_error": false,
+            "pass": true
+          }
+        }
+      ]
+    },
+    {
+      "slug": "06-sprint-status-3",
+      "label": "Sprint 3 Status",
+      "noise": {
+        "baseline": {
+          "leaked": false,
+          "keywords_found": []
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": false,
+            "offending_lines": []
+          },
+          "with_context": {
+            "conflated": false,
+            "offending_lines": []
+          }
+        },
+        "stale_actions": {
+          "baseline": {
+            "stale": false,
+            "matches": []
+          },
+          "with_context": {
+            "stale": false,
+            "matches": []
+          }
+        }
+      },
+      "probes": []
+    },
+    {
+      "slug": "07-sprint-status-4",
+      "label": "Sprint 4 Status",
+      "noise": {
+        "baseline": {
+          "leaked": false,
+          "keywords_found": []
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": true,
+            "offending_lines": [
+              "Payments after escalation; Onboarding testing completed; Dark mode screens shipped; Legal response received; Additional analytics engineer hired"
+            ]
+          },
+          "with_context": {
+            "conflated": false,
+            "offending_lines": []
+          }
+        },
+        "stale_actions": {
+          "baseline": {
+            "stale": false,
+            "matches": []
+          },
+          "with_context": {
+            "stale": true,
+            "matches": [
+              {
+                "current_bullet": "- Person A: Escalated payment sandbox issues to vendor's account manager.",
+                "matched_history_phrase": "- Person A: Escalate payment sandbox issues to vendor's account manager. - Person B: Schedule user testing in the first week of the Sprint.",
+                "overlap_ratio": 0.46
+              }
+            ]
+          }
+        }
+      },
+      "probes": []
+    },
+    {
+      "slug": "08-sprint-status-5",
+      "label": "Sprint 5 Status",
+      "noise": {
+        "baseline": {
+          "leaked": false,
+          "keywords_found": []
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": false,
+            "offending_lines": []
+          },
+          "with_context": {
+            "conflated": false,
+            "offending_lines": []
+          }
+        },
+        "stale_actions": {
+          "baseline": {
+            "stale": false,
+            "matches": []
+          },
+          "with_context": {
+            "stale": true,
+            "matches": [
+              {
+                "current_bullet": "- Person A: Escalating payment sandbox issues to vendor's account manager.",
+                "matched_history_phrase": "- Person A: Escalate payment sandbox issues to vendor's account manager. - Person B: Schedule user testing in the first week of the Sprint.",
+                "overlap_ratio": 0.46
+              },
+              {
+                "current_bullet": "- Person A: Escalating payment sandbox issues to vendor's account manager.",
+                "matched_history_phrase": "- Person A: Escalated payment sandbox issues to vendor's account manager. - Person B: Scheduled user testing for the first week of the Sprint.",
+                "overlap_ratio": 0.46
+              }
+            ]
+          }
+        }
+      },
+      "probes": []
+    },
+    {
+      "slug": "09-sprint-status-6",
+      "label": "Sprint 6 Status",
+      "noise": {
+        "baseline": {
+          "leaked": false,
+          "keywords_found": []
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": false,
+            "offending_lines": []
+          },
+          "with_context": {
+            "conflated": false,
+            "offending_lines": []
+          }
+        },
+        "stale_actions": {
+          "baseline": {
+            "stale": false,
+            "matches": []
+          },
+          "with_context": {
+            "stale": true,
+            "matches": [
+              {
+                "current_bullet": "- Person A: Escalated payment sandbox issues to vendor's account manager.",
+                "matched_history_phrase": "- Person A: Escalate payment sandbox issues to vendor's account manager. - Person B: Schedule user testing in the first week of the Sprint.",
+                "overlap_ratio": 0.46
+              },
+              {
+                "current_bullet": "- Person A: Escalated payment sandbox issues to vendor's account manager.",
+                "matched_history_phrase": "- Person A: Escalated payment sandbox issues to vendor's account manager. - Person B: Scheduled user testing for the first week of the Sprint.",
+                "overlap_ratio": 0.58
+              },
+              {
+                "current_bullet": "- Person A: Escalated payment sandbox issues to vendor's account manager.",
+                "matched_history_phrase": "- Person A: Escalating payment sandbox issues to vendor's account manager. - Person B: Scheduling user testing for the first week of Sprint 6.",
+                "overlap_ratio": 0.46
+              },
+              {
+                "current_bullet": "- Person B: Scheduled user testing for the first week of Sprint 6.",
+                "matched_history_phrase": "- Person A: Escalated payment sandbox issues to vendor's account manager. - Person B: Scheduled user testing for the first week of the Sprint.",
+                "overlap_ratio": 0.42
+              }
+            ]
+          }
+        }
+      },
+      "probes": [
+        {
+          "id": "payments_resolution",
+          "question": "Does the summary correctly convey that the payments sandbox instability, previously an ongoing problem, is now fully RESOLVED and stable (not still ongoing)?",
+          "expected": "yes",
+          "baseline": {
+            "answer": "no",
+            "rationale": "The summary states that 'Payments are fully stable' but does not mention any previous issues like 'payments sandbox instability'. It also doesn't indicate if these issues were resolved.",
+            "raw": "```json\n{\"answer\": \"no\", \"rationale\": \"The summary states that 'Payments are fully stable' but does not mention any previous issues like 'payments sandbox instability'. It also doesn't indicate if these issues were resolved.\"}\n```",
+            "parse_error": false,
+            "pass": false
+          },
+          "with_context": {
+            "answer": "no",
+            "rationale": "The summary states that 'Fully stable' means payments are stable, but it does not mention any previous instability.",
+            "raw": "{\"answer\": \"no\", \"rationale\": \"The summary states that 'Fully stable' means payments are stable, but it does not mention any previous instability.\"}",
+            "parse_error": false,
+            "pass": false
+          }
+        }
+      ]
+    },
+    {
+      "slug": "10-sprint-status-7",
+      "label": "Sprint 7 Status",
+      "noise": {
+        "baseline": {
+          "leaked": false,
+          "keywords_found": []
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": true,
+            "offending_lines": [
+              "- Onboarding, payments, dark mode, legal, and analytics are all complete."
+            ]
+          },
+          "with_context": {
+            "conflated": true,
+            "offending_lines": [
+              "- All feature areas including onboarding, payments, dark mode, legal, and analytics have been completed."
+            ]
+          }
+        },
+        "stale_actions": {
+          "baseline": {
+            "stale": false,
+            "matches": []
+          },
+          "with_context": {
+            "stale": true,
+            "matches": [
+              {
+                "current_bullet": "- None reported.",
+                "matched_history_phrase": "- None reported in this meeting.",
+                "overlap_ratio": 0.67
+              },
+              {
+                "current_bullet": "- None reported.",
+                "matched_history_phrase": "- None reported in this meeting.",
+                "overlap_ratio": 0.67
+              }
+            ]
+          }
+        }
+      },
+      "probes": []
+    },
+    {
+      "slug": "11-test-plan-review",
+      "label": "Test Plan Review",
+      "noise": {
+        "baseline": {
+          "leaked": false,
+          "keywords_found": []
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": false,
+            "offending_lines": []
+          },
+          "with_context": {
+            "conflated": false,
+            "offending_lines": []
+          }
+        },
+        "stale_actions": {
+          "baseline": {
+            "stale": false,
+            "matches": []
+          },
+          "with_context": {
+            "stale": false,
+            "matches": []
+          }
+        }
+      },
+      "probes": []
+    },
+    {
+      "slug": "12-uat-kickoff",
+      "label": "UAT Kickoff",
+      "noise": {
+        "baseline": {
+          "leaked": false,
+          "keywords_found": []
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": false,
+            "offending_lines": []
+          },
+          "with_context": {
+            "conflated": false,
+            "offending_lines": []
+          }
+        },
+        "stale_actions": {
+          "baseline": {
+            "stale": false,
+            "matches": []
+          },
+          "with_context": {
+            "stale": true,
+            "matches": [
+              {
+                "current_bullet": "- Person A: Recruit testers for UAT starting this week.",
+                "matched_history_phrase": "- **Person A**: - Recruit testers for UAT starting this week - **Person B**: - Start recruiting testers for UAT starting this week",
+                "overlap_ratio": 0.8
+              },
+              {
+                "current_bullet": "- Person B: Start recruiting testers for UAT starting this week.",
+                "matched_history_phrase": "- **Person A**: - Recruit testers for UAT starting this week - **Person B**: - Start recruiting testers for UAT starting this week",
+                "overlap_ratio": 0.8
+              }
+            ]
+          }
+        }
+      },
+      "probes": []
+    },
+    {
+      "slug": "13-uat-results",
+      "label": "UAT Results / Bug Triage",
+      "noise": {
+        "baseline": {
+          "leaked": false,
+          "keywords_found": []
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": false,
+            "offending_lines": []
+          },
+          "with_context": {
+            "conflated": false,
+            "offending_lines": []
+          }
+        },
+        "stale_actions": {
+          "baseline": {
+            "stale": false,
+            "matches": []
+          },
+          "with_context": {
+            "stale": true,
+            "matches": [
+              {
+                "current_bullet": "- Person A: Recruit testers for UAT starting this week.",
+                "matched_history_phrase": "- **Person A**: - Recruit testers for UAT starting this week - **Person B**: - Start recruiting testers for UAT starting this week",
+                "overlap_ratio": 0.8
+              },
+              {
+                "current_bullet": "- Person A: Recruit testers for UAT starting this week.",
+                "matched_history_phrase": "- Person A: Recruit testers for UAT starting this week. - Person B: Start recruiting testers for UAT starting this week.",
+                "overlap_ratio": 0.8
+              },
+              {
+                "current_bullet": "- Person B: Start recruiting testers for UAT starting this week.",
+                "matched_history_phrase": "- **Person A**: - Recruit testers for UAT starting this week - **Person B**: - Start recruiting testers for UAT starting this week",
+                "overlap_ratio": 0.8
+              },
+              {
+                "current_bullet": "- Person B: Start recruiting testers for UAT starting this week.",
+                "matched_history_phrase": "- Person A: Recruit testers for UAT starting this week. - Person B: Start recruiting testers for UAT starting this week.",
+                "overlap_ratio": 0.8
+              }
+            ]
+          }
+        }
+      },
+      "probes": []
+    },
+    {
+      "slug": "14-go-live-readiness",
+      "label": "Go-Live Readiness Review",
+      "noise": {
+        "baseline": {
+          "leaked": false,
+          "keywords_found": []
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": false,
+            "offending_lines": []
+          },
+          "with_context": {
+            "conflated": false,
+            "offending_lines": []
+          }
+        },
+        "stale_actions": {
+          "baseline": {
+            "stale": false,
+            "matches": []
+          },
+          "with_context": {
+            "stale": false,
+            "matches": []
+          }
+        }
+      },
+      "probes": [
+        {
+          "id": "budget_gap",
+          "question": "Does the summary correctly reflect that a budget/cost overrun was raised as something that still needs to be reported to finance separately, rather than already resolved or not mentioned at all?",
+          "expected": "yes",
+          "baseline": {
+            "answer": "yes",
+            "rationale": "The summary accurately reflects that the cost overrun due to vendor escalation and extra contractor was identified and noted as needing to be reported to finance after the launch.",
+            "raw": "{\"answer\": \"yes\", \"rationale\": \"The summary accurately reflects that the cost overrun due to vendor escalation and extra contractor was identified and noted as needing to be reported to finance after the launch.\"}",
+            "parse_error": false,
+            "pass": true
+          },
+          "with_context": {
+            "answer": "yes",
+            "rationale": "The summary accurately states that 'Vendor escalation and extra contractor cost pushed us over budget by a meaningful amount' and that 'That cost needs to be reported to finance right after we launch, not swept under the rug.' This indicates that the overrun was indeed raised as needing separate reporting.",
+            "raw": "{\"answer\": \"yes\", \"rationale\": \"The summary accurately states that 'Vendor escalation and extra contractor cost pushed us over budget by a meaningful amount' and that 'That cost needs to be reported to finance right after we launch, not swept under the rug.' This indicates that the overrun was indeed raised as needing separate reporting.\"}",
+            "parse_error": false,
+            "pass": true
+          }
+        }
+      ]
+    },
+    {
+      "slug": "15-launch-retro",
+      "label": "Launch Retro",
+      "noise": {
+        "baseline": {
+          "leaked": false,
+          "keywords_found": []
+        },
+        "with_context": {
+          "leaked": false,
+          "keywords_found": []
+        }
+      },
+      "deterministic_checks": {
+        "conflation": {
+          "baseline": {
+            "conflated": false,
+            "offending_lines": []
+          },
+          "with_context": {
+            "conflated": false,
+            "offending_lines": []
+          }
+        },
+        "stale_actions": {
+          "baseline": {
+            "stale": false,
+            "matches": []
+          },
+          "with_context": {
+            "stale": false,
+            "matches": []
+          }
+        }
+      },
+      "probes": []
+    }
+  ]
+}

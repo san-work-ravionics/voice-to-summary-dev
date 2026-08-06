@@ -1,0 +1,14 @@
+## Topic
+Mobile app redesign project requirements review meeting
+
+## Key Points
+- Out of scope for this release due to potential schedule risk.
+- Sprint cadence: two-week sprints, seven before code freeze.
+- Legal engagement started this week.
+- Design review scheduled once mockups are ready.
+
+## Decisions
+- No changes made to the backlog regarding the product requirements document.
+
+## Actions
+- None reported.

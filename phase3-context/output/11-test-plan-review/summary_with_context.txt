@@ -1,0 +1,14 @@
+## Topic
+Setting the high-level goal and scoping the engineering workstreams
+
+## Key Points
+- The project goal is to redesign the mobile app.
+- Workstreams include rebuilding the onboarding flow, integrating a new payments provider, a visual refresh with dark mode as a stretch goal, legal/privacy review, and analytics instrumentation.
+- The purpose of this meeting is to agree on the project's goal, scope the workstreams, and assign responsibilities before the next sync.
+
+## Decisions
+- No decisions were made during this meeting.
+
+## Actions
+- Person A: Start recruiting testers for UAT in the coming week.
+- Person B: Continue discussing the remaining details of the test plan.

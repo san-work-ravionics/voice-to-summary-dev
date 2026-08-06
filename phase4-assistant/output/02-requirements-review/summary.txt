@@ -1,0 +1,29 @@
+## Topic
+Kickoff Meeting for Mobile App Redesign Project
+
+## Key Points
+- **Project Goal**: Agree on the project's goal and scope.
+- **Workstream Priorities**:
+  - Onboarding Flow (P0): Gates Launch
+  - Payments Integration (P0): Gates Launch
+  - Visual Refresh (P1): Part of the Stretch Goal
+  - Dark Mode (Stretch Goal): Not a priority for this release
+  - Legal & Privacy Review (Hard Gate)
+  - Analytics Instrumentation (P1)
+
+- **Sprint Cadence**: Two-week sprints, seven in total before code freeze, followed by Test Plan, UAT, and Launch Prep.
+
+## Decisions
+- No decisions made during the meeting.
+
+## Actions
+- None.
+
+## Checklist Coverage
+- Covered: Onboarding flow status — "Onboarding, flow, rebuild, and payments integration are both P0, they gate launch, visual refresh as P1, and dark mode specifically stays a stretch item within that."
+- Covered: Payments integration status — "Onboarding, flow, rebuild, and payments integration are both P0, they gate launch, visual refresh as P1, and dark mode specifically stays a stretch item within that."
+- Covered: Design updates (e.g. dark mode) — "Onboarding, flow, rebuild, and payments integration are both P0, they gate launch, visual refresh as P1, and dark mode specifically stays a stretch item within that."
+- Covered: Legal / privacy approval — "Legal and privacy review is a hard gate, and analytics instrumentation as P1."
+- Covered: Analytics instrumentation — "Legal and privacy review is a hard gate, and analytics instrumentation as P1."
+- Not covered: Budget or cost impact — not mentioned in the transcript
+- Not covered: Next meeting / follow-up schedule — not mentioned in the transcript

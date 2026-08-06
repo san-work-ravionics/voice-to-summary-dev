@@ -1,0 +1,14 @@
+## Topic
+Payments integration issue and localization backlog item logging
+
+## Key Points
+- The P1 bug in payments, which causes a silent failure, needs to be addressed before Goliv.
+- The load test slowed down under a specific spiky load pattern, and the fix has already been identified.
+- The localization question was logged as a backlog item for a future release.
+
+## Decisions
+- No decisions were made regarding the localization question.
+
+## Actions
+- Person A: Log the P1 bug in payments as a priority task for next week.
+- Person B: Coordinate with Goliv for readiness review.

@@ -1,0 +1,17 @@
+## Topic
+Sprint One Status
+
+## Key Points
+- Onboarding flow development started and on track.
+- Payments integration is in progress with a standing sandbox environment.
+- Smoke tests for payments integration have been run, noting some flakiness.
+- Dark mode feature is not yet implemented.
+- Legal review is underway, awaiting approval.
+- Analytics events are being scoped with the team.
+
+## Decisions
+- None explicitly stated.
+
+## Actions
+- Person A: Update the backlog priority for the accessibility check on dark mode.
+- Person B: Confirm the availability of payment sandbox access for integration work.

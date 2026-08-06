@@ -1,0 +1,17 @@
+## Topic
+Agreeing on project goals, scoping workstreams, and assigning responsibilities
+
+## Key Points
+- Project goal: Mobile App Redesign
+- Workstream scope: Rebuilding onboarding flow, integrating new payments provider, visual refresh with dark mode, legal/privacy review, and analytics instrumentation
+- Legal approval received for dark mode implementation
+- Payments integration scheduled for patch ship on Tuesday
+- Analytics instrumentation completed and validated
+- Load testing for payments integration planned for two weeks after code freeze
+
+## Decisions
+- No decisions made at this meeting
+
+## Actions
+- Person A: Ensure load testing for payments integration is included in the test plan review for two weeks after code freeze
+- Person B: Confirm with QA/QA teams that the full suite is passing and update the sprint backlog accordingly

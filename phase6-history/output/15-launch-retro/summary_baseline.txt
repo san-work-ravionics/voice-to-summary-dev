@@ -1,0 +1,20 @@
+### Topic
+The launch retro of the 15th episode.
+
+### Key Points
+- Launch went smoothly with no major incidents.
+- Early adoption numbers look positive.
+- Dark mode received a lot of positive feedback.
+- Onboarding completion rate increased significantly.
+- Payments have been stable since launch.
+- Vendor instability during the middle of the project caused a budget overrun.
+- Vendor stability should be a criterion for future payment providers.
+- Localization request is logged for the next roadmap cycle.
+- Post-launch analytics dashboard is live and will be monitored closely for the next two weeks.
+
+### Decisions
+- No decisions were made.
+
+### Actions
+- Person A: Write a lesson learned on vendor stability for future payments providers.
+- Person B: Watch the post-launch analytics dashboard closely for the next two weeks.

@@ -1,0 +1,17 @@
+### Topic
+Payments after escalation; Onboarding testing completed; Dark mode screens shipped; Legal response received; Additional analytics engineer hired
+
+### Key Points
+- Vendor engagement confirmed.
+- Engineering team fixing payment issue.
+- Onboarding test completion rate increased significantly.
+- Dark mode screens ready for release.
+- Permissions copy edits finalized.
+- Analytics instrumentation work initiated.
+
+### Decisions
+- No decisions made.
+
+### Actions
+- Person A: Discuss payments status with vendor.
+- Person B: Review dark mode updates and ensure all features are functional.

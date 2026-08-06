@@ -1,0 +1,27 @@
+## Topic
+Kickoff Meeting for Mobile App Redesign Project
+
+## Key Points
+- Payments P1 bug fixed and retested, passing clean.
+- Low test caveat resolved, within thresholds under spiky pattern.
+- Help center articles updated for support readiness.
+- Marketing has launched a com schedule for the release.
+- Vendor escalation and extra contractor cost pushed project over budget by a meaningful amount.
+- Budgeted item needs reporting to finance immediately after launch.
+
+## Decisions
+- Agree to proceed with launch based on all green lights.
+- Next step is to report the vendor escalation cost to finance.
+
+## Actions
+- Person A: Confirm launch date with stakeholders.
+- Person B: Report vendor escalation cost to finance immediately after launch.
+
+## Checklist Coverage
+- Not covered: Onboarding flow status — not mentioned in the transcript
+- Covered: Payments integration status — "The payments P1 bug from UAT?"
+- Not covered: Design updates (e.g. dark mode) — not mentioned in the transcript
+- Not covered: Legal / privacy approval — not mentioned in the transcript
+- Not covered: Analytics instrumentation — not mentioned in the transcript
+- Covered: Budget or cost impact — "The payments fire drill, the vendor escalation and the extra contractor we pulled in for that week, pushed us over budget by a meaningful amount."
+- Not covered: Next meeting / follow-up schedule — not mentioned in the transcript

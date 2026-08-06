@@ -1,0 +1,15 @@
+### Topic
+Sprint 6 stage sync for the mobile app redesign project
+
+### Key Points
+- Payments are fully stable.
+- Regression suites have been green for a full week straight.
+- Analytics validated successfully.
+- Load testing plans are being drafted.
+
+### Decisions
+- Run load testing off to code freeze.
+
+### Actions
+- Person A: Draft load testing plans.
+- Person B: Run load testing off to code freeze.

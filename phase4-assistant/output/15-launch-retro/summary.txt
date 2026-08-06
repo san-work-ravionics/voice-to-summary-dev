@@ -1,0 +1,22 @@
+## Topic
+Kickoff Meeting for Mobile App Redesign Project
+
+## Key Points
+- The project aims to redesign the mobile app.
+- Workstreams include rebuilding the onboarding flow, integrating a new payments provider, a visual refresh with dark mode as a stretch goal, legal/privacy review, and analytics instrumentation.
+- The purpose of the meeting is to set the high-level goal, scope the workstreams, and assign responsibilities before the next sync.
+
+## Decisions
+- No decisions were made during the meeting.
+
+## Actions
+- None.
+
+## Checklist Coverage
+- Covered: Onboarding flow status — "Dark mode's gotten a lot of positive feedback already, and onboarding completion is way up from where we started."
+- Covered: Payments integration status — "And payments has been rock solid since launch, which honestly still surprises me given how rough the middle of the project was."
+- Covered: Design updates (e.g. dark mode) — "Dark mode's gotten a lot of positive feedback already, and onboarding completion is way up from where we started."
+- Not covered: Legal / privacy approval — not mentioned in the transcript
+- Covered: Analytics instrumentation — "And the post-launch analytics dashboard is live, I'll be watching it closely for the next two weeks."
+- Covered: Budget or cost impact — "The payments vendor instability cost us real time in the middle of the project, and led to the budget overrun you flagged last week."
+- Not covered: Next meeting / follow-up schedule — not mentioned in the transcript

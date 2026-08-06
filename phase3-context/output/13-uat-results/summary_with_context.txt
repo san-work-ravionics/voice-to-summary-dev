@@ -1,0 +1,17 @@
+## Topic
+Agreeing on Project Goal, Scoping Workstreams, and Assigning Responsibilities
+
+## Key Points
+- The project goal is to redesign the mobile app.
+- The primary workstream is rebuilding the onboarding flow.
+- Integrating a new payments provider is also part of the scope.
+- A visual refresh with dark mode is considered a stretch goal.
+- Legal/privacy review and analytics instrumentation are additional tasks.
+- The project will have three main phases: UAT results, load testing, and a final readiness review.
+
+## Decisions
+- No decisions were made regarding the project's goal or scope during this meeting.
+
+## Actions
+- Person A: Schedule a follow-up meeting to discuss the load test findings and potential fixes.
+- Person B: Coordinate with the development team to ensure the payment issue is resolved before Goliv.

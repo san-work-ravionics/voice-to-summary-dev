@@ -1,0 +1,19 @@
+## Topic
+GoLive Readiness review for the mobile app redesign project
+
+## Key Points
+- Payments P1 bug from UAT is fixed and retested, passing cleanly.
+- Low test caveat is also addressed; tested under spiky patterns and within thresholds.
+- Help center articles are updated for support readiness.
+- Marketing has launched a com schedule for the release.
+- Vendor escalation and extra contractor cost pushed the project over budget by a meaningful amount.
+- This cost needs to be reported to finance immediately after launch.
+- Launch is confirmed, proceeding with final preparations.
+
+## Decisions
+- Agree to proceed with launch based on all other aspects being green.
+- Report the vendor escalation and extra contractor cost to finance immediately after launch.
+
+## Actions
+- Person A: Not applicable (launch confirmation).
+- Person B: Report the vendor escalation and extra contractor cost to finance immediately after launch.

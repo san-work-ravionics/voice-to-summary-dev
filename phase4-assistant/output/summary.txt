@@ -1,0 +1,24 @@
+## Topic
+Kickoff for the mobile app redesign project
+
+## Key Points
+- High-level goal: Improve onboarding conversion and deliver a visual refresh within 5 months.
+- Scoped workstreams: Onboarding flow rebuild, payments integration, visual refresh with dark mode, legal and analytics support.
+- Payment sandbox access will be provisioned by Person A, legal engagement will be early, and analytics will scope events.
+- Localization status is undecided and will be settled at requirements review next week.
+- Sprint cadence will transition to two-week sprints following requirements review.
+
+## Decisions
+- No decisions made during the meeting.
+
+## Actions
+- Person A: Provision payment sandbox access, engage legal early, and loop in analytics to scope events.
+
+## Checklist Coverage
+- Covered: Onboarding flow status — "Improve onboarding conversion and give the app a visual refresh, with a hard target of launching in about five months."
+- Covered: Payments integration status — "For work streams, rebuilding the onboarding flow, integrating a new payments provider, the visual refresh with dark mode as a stretch goal, and we'll need legal and privacy review plus analytics instrumentation running alongside all of it."
+- Covered: Design updates (e.g. dark mode) — "For work streams, rebuilding the onboarding flow, integrating a new payments provider, the visual refresh with dark mode as a stretch goal, and we'll need legal and privacy review plus analytics instrumentation running alongside all of it."
+- Covered: Legal / privacy approval — "For work streams, rebuilding the onboarding flow, integrating a new payments provider, the visual refresh with dark mode as a stretch goal, and we'll need legal and privacy review plus analytics instrumentation running alongside all of it."
+- Covered: Analytics instrumentation — "For work streams, rebuilding the onboarding flow, integrating a new payments provider, the visual refresh with dark mode as a stretch goal, and we'll need legal and privacy review plus analytics instrumentation running alongside all of it."
+- Not covered: Budget or cost impact — not mentioned in the transcript
+- Covered: Next meeting / follow-up schedule — "Great, let's reconvene next week for requirements review, then we'll settle into two weeks sprints after that."

@@ -1,0 +1,728 @@
+{
+  "generated_at": "2026-08-06T15:45:15.276419+00:00",
+  "method_note": "Ground truth: lines in the scripted dialogue matching the same commitment heuristic (\"I'll\"/\"I will\"/\"let me\") every summarizer's own system prompt is instructed to use for Actions bullets, excluding the AI Assistant's own lines in v4. Each commitment is matched against generated bullets using the commitment line PLUS up to 4 preceding lines as context (a commitment like \"I'll ping them\" often depends on a pronoun referent or question raised a turn or two earlier), via containment of the bullet's words in that context (>=0.5) \u2014 a deterministic heuristic, not another LLM judgment call. Known limitation: a referent raised even further back than the lookback window will still be missed.",
+  "scenarios": [
+    {
+      "id": "phase1-baseline",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": 1.0,
+          "precision": 0.25,
+          "ground_truth_count": 1,
+          "generated_count": 4,
+          "matches": [
+            {
+              "ground_truth": "Agreed, I'll push to get that provisioned this week. I'll also get legal engaged early so it's not a bottleneck later, and loop analytics in to start scoping events.",
+              "ground_truth_speaker": "A",
+              "generated_bullet": "- Person A: Loop analytics and start scoping events.",
+              "overlap_ratio": 1.0
+            }
+          ],
+          "missed": [],
+          "extra": [
+            "- Person A: Push to get stacker holder access provisioned this week.",
+            "- Person A: Engage legal early to avoid bottlenecks later.",
+            "- Person A: Bring localization decision to requirements review next week."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase2-checklist",
+      "variants": [
+        {
+          "variant": "context_checklist",
+          "recall": 1.0,
+          "precision": 0.25,
+          "ground_truth_count": 1,
+          "generated_count": 4,
+          "matches": [
+            {
+              "ground_truth": "Agreed, I'll push to get that provisioned this week. I'll also get legal engaged early so it's not a bottleneck later, and loop analytics in to start scoping events.",
+              "ground_truth_speaker": "A",
+              "generated_bullet": "- Person A: Pushes to get access to the new payment provider provisioned this week.",
+              "overlap_ratio": 0.75
+            }
+          ],
+          "missed": [],
+          "extra": [
+            "- Person A: Engages legal early to avoid bottlenecks later.",
+            "- Person A: Loops analytics and sets up events for scoping.",
+            "- Person B: Will attend the requirements review session to discuss localization considerations."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase3-context",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": 1.0,
+          "precision": 0.25,
+          "ground_truth_count": 1,
+          "generated_count": 4,
+          "matches": [
+            {
+              "ground_truth": "Agreed, I'll push to get that provisioned this week. I'll also get legal engaged early so it's not a bottleneck later, and loop analytics in to start scoping events.",
+              "ground_truth_speaker": "A",
+              "generated_bullet": "- Person A: Loop analytics and start scoping events.",
+              "overlap_ratio": 1.0
+            }
+          ],
+          "missed": [],
+          "extra": [
+            "- Person A: Push to get stacker holder access provisioned this week.",
+            "- Person A: Engage legal early to avoid bottlenecks later.",
+            "- Person A: Bring localization decision to requirements review next week."
+          ]
+        },
+        {
+          "variant": "with_context",
+          "recall": 1.0,
+          "precision": 0.25,
+          "ground_truth_count": 1,
+          "generated_count": 4,
+          "matches": [
+            {
+              "ground_truth": "Agreed, I'll push to get that provisioned this week. I'll also get legal engaged early so it's not a bottleneck later, and loop analytics in to start scoping events.",
+              "ground_truth_speaker": "A",
+              "generated_bullet": "- Person A: Pushes to get access to the new payment provider provisioned this week.",
+              "overlap_ratio": 0.75
+            }
+          ],
+          "missed": [],
+          "extra": [
+            "- Person A: Engages legal early to avoid bottlenecks later.",
+            "- Person A: Loops analytics and sets up events for scoping.",
+            "- Person B: Will attend the requirements review session to discuss localization considerations."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase4-assistant",
+      "variants": [
+        {
+          "variant": "context_checklist_assistant",
+          "recall": 1.0,
+          "precision": 1.0,
+          "ground_truth_count": 1,
+          "generated_count": 1,
+          "matches": [
+            {
+              "ground_truth": "Agreed, I'll push to get that provisioned this week. I'll also get legal engaged early so it's not a bottleneck later, and loop analytics in to start scoping events.",
+              "ground_truth_speaker": "A",
+              "generated_bullet": "- Person A: Provision payment sandbox access, engage legal early, and loop in analytics to scope events.",
+              "overlap_ratio": 0.64
+            }
+          ],
+          "missed": [],
+          "extra": []
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-01-kickoff",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": 1.0,
+          "precision": 0.25,
+          "ground_truth_count": 1,
+          "generated_count": 4,
+          "matches": [
+            {
+              "ground_truth": "Agreed, I'll push to get that provisioned this week. I'll also get legal engaged early so it's not a bottleneck later, and loop analytics in to start scoping events.",
+              "ground_truth_speaker": "A",
+              "generated_bullet": "- Person A: Loop analytics and begin scoping events.",
+              "overlap_ratio": 0.8
+            }
+          ],
+          "missed": [],
+          "extra": [
+            "- Person A: Push to get provisions for accessing the new payments provider on day one.",
+            "- Person A: Engage legal early to avoid bottlenecks later.",
+            "- Person A: Bring localization decision to requirements review next week."
+          ]
+        },
+        {
+          "variant": "with_context",
+          "recall": 0.0,
+          "precision": 0.0,
+          "ground_truth_count": 1,
+          "generated_count": 1,
+          "matches": [],
+          "missed": [
+            {
+              "speaker": "A",
+              "line": "Agreed, I'll push to get that provisioned this week. I'll also get legal engaged early so it's not a bottleneck later, and loop analytics in to start scoping events.",
+              "match_text": "Improve onboarding conversion and give the app a visual refresh, with a hard target of launching in about five months. Okay. What's the engineering scope look like? Four workstreams: rebuilding the onboarding flow, integrating a new payments provider, the visual refresh with dark mode as a stretch goal, and we'll need legal and privacy review plus analytics instrumentation running alongside all of it. Payments is the one that worries me. New vendor means we don't know their sandbox is solid until we're in it. I want access on day one. Agreed, I'll push to get that provisioned this week. I'll also get legal engaged early so it's not a bottleneck later, and loop analytics in to start scoping events."
+            }
+          ],
+          "extra": [
+            "- None reported in this meeting."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-02-requirements-review",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": 0.0,
+          "precision": 0.0,
+          "ground_truth_count": 1,
+          "generated_count": 1,
+          "matches": [],
+          "missed": [
+            {
+              "speaker": "B",
+              "line": "Okay, I'll mark it explicitly out of scope in the backlog rather than just leaving it off, so nobody assumes it got missed.",
+              "match_text": "Go ahead. Onboarding flow rebuild and payments integration are both P0, they gate launch. Visual refresh is P1, and dark mode specifically stays a stretch item within that. Legal and privacy review is a hard gate, and analytics instrumentation is P1. Makes sense. And localization, the thing from kickoff? Cutting it from this release. It's a real request, but it's not worth the schedule risk right now. Okay, I'll mark it explicitly out of scope in the backlog rather than just leaving it off, so nobody assumes it got missed."
+            }
+          ],
+          "extra": [
+            "- None"
+          ]
+        },
+        {
+          "variant": "with_context",
+          "recall": 0.0,
+          "precision": 0.0,
+          "ground_truth_count": 1,
+          "generated_count": 1,
+          "matches": [],
+          "missed": [
+            {
+              "speaker": "B",
+              "line": "Okay, I'll mark it explicitly out of scope in the backlog rather than just leaving it off, so nobody assumes it got missed.",
+              "match_text": "Go ahead. Onboarding flow rebuild and payments integration are both P0, they gate launch. Visual refresh is P1, and dark mode specifically stays a stretch item within that. Legal and privacy review is a hard gate, and analytics instrumentation is P1. Makes sense. And localization, the thing from kickoff? Cutting it from this release. It's a real request, but it's not worth the schedule risk right now. Okay, I'll mark it explicitly out of scope in the backlog rather than just leaving it off, so nobody assumes it got missed."
+            }
+          ],
+          "extra": [
+            "- None reported in this meeting."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-03-design-review",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": 0.0,
+          "precision": 0.0,
+          "ground_truth_count": 1,
+          "generated_count": 2,
+          "matches": [],
+          "missed": [
+            {
+              "speaker": "B",
+              "line": "That'll add real work, but I agree it's worth it. I'll update the backlog priority.",
+              "match_text": "These look great, much cleaner than the current flow. Fewer steps too. Agreed. Now the visual refresh, including the dark mode variant. This is really strong. Honestly, a stakeholder in the design walkthrough pushed hard for this not to be a stretch goal, they want it committed. I heard the same feedback. Let's promote dark mode from stretch to committed P1 scope, it's worth the extra sprint or two. That'll add real work, but I agree it's worth it. I'll update the backlog priority."
+            }
+          ],
+          "extra": [
+            "- Person A: Update backlog priority based on accessibility check results.",
+            "- Person B: Provision payment sandbox access."
+          ]
+        },
+        {
+          "variant": "with_context",
+          "recall": 1.0,
+          "precision": 0.5,
+          "ground_truth_count": 1,
+          "generated_count": 2,
+          "matches": [
+            {
+              "ground_truth": "That'll add real work, but I agree it's worth it. I'll update the backlog priority.",
+              "ground_truth_speaker": "B",
+              "generated_bullet": "- Person A: Update the backlog priority for the accessibility check on dark mode.",
+              "overlap_ratio": 0.71
+            }
+          ],
+          "missed": [],
+          "extra": [
+            "- Person B: Confirm the availability of payment sandbox access for integration work."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-04-sprint-status-1",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": null,
+          "precision": 0.0,
+          "ground_truth_count": 0,
+          "generated_count": 2,
+          "matches": [],
+          "missed": [],
+          "extra": [
+            "- Person A: Schedule follow-up meetings with legal once they've received their feedback.",
+            "- Person B: Coordinate with the analytics team to finalize event scope before the next sprint."
+          ]
+        },
+        {
+          "variant": "with_context",
+          "recall": null,
+          "precision": 0.0,
+          "ground_truth_count": 0,
+          "generated_count": 2,
+          "matches": [],
+          "missed": [],
+          "extra": [
+            "- Person A: Update the backlog priority for the accessibility check on dark mode.",
+            "- Person B: Confirm the availability of payment sandbox access for integration work."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-05-sprint-status-2",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": 0.0,
+          "precision": 0.0,
+          "ground_truth_count": 1,
+          "generated_count": 1,
+          "matches": [],
+          "missed": [
+            {
+              "speaker": "B",
+              "line": "Not yet, I'll chase them, it's becoming a risk.",
+              "match_text": "An engineer starts on it this sprint, since it's committed scope now, not a stretch. Good. Legal? Still reviewing, no answer yet. And analytics, any response to the scoping request? Not yet, I'll chase them, it's becoming a risk."
+            }
+          ],
+          "extra": [
+            "- Person A: Regroup in two weeks."
+          ]
+        },
+        {
+          "variant": "with_context",
+          "recall": 1.0,
+          "precision": 0.5,
+          "ground_truth_count": 1,
+          "generated_count": 2,
+          "matches": [
+            {
+              "ground_truth": "Not yet, I'll chase them, it's becoming a risk.",
+              "ground_truth_speaker": "B",
+              "generated_bullet": "- Person B: Chase analytics team regarding the scoping request.",
+              "overlap_ratio": 0.67
+            }
+          ],
+          "missed": [],
+          "extra": [
+            "- Person A: No action required."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-06-sprint-status-3",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": 0.5,
+          "precision": 0.5,
+          "ground_truth_count": 2,
+          "generated_count": 2,
+          "matches": [
+            {
+              "ground_truth": "Nudged them again, still no answer, I'll send a second nudge.",
+              "ground_truth_speaker": "B",
+              "generated_bullet": "- Person B: Schedule user testing during the current sprint.",
+              "overlap_ratio": 0.5
+            }
+          ],
+          "missed": [
+            {
+              "speaker": "A",
+              "line": "I'll see who I can free up. Let's sync again in two weeks.",
+              "match_text": "Legal, any movement? Nudged them again, still no answer, I'll send a second nudge. And analytics, still stuck? Yes, honestly the original owner is overloaded, we could use an extra engineer to help push it through. I'll see who I can free up. Let's sync again in two weeks."
+            }
+          ],
+          "extra": [
+            "- Person A: Escalate to the vendor\u2019s account manager regarding the payment sandbox issue."
+          ]
+        },
+        {
+          "variant": "with_context",
+          "recall": 0.5,
+          "precision": 0.5,
+          "ground_truth_count": 2,
+          "generated_count": 2,
+          "matches": [
+            {
+              "ground_truth": "Nudged them again, still no answer, I'll send a second nudge.",
+              "ground_truth_speaker": "B",
+              "generated_bullet": "- Person B: Schedule user testing in the first week of the Sprint.",
+              "overlap_ratio": 0.5
+            }
+          ],
+          "missed": [
+            {
+              "speaker": "A",
+              "line": "I'll see who I can free up. Let's sync again in two weeks.",
+              "match_text": "Legal, any movement? Nudged them again, still no answer, I'll send a second nudge. And analytics, still stuck? Yes, honestly the original owner is overloaded, we could use an extra engineer to help push it through. I'll see who I can free up. Let's sync again in two weeks."
+            }
+          ],
+          "extra": [
+            "- Person A: Escalate payment sandbox issues to vendor's account manager."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-07-sprint-status-4",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": 0.0,
+          "precision": 0.0,
+          "ground_truth_count": 1,
+          "generated_count": 2,
+          "matches": [],
+          "missed": [
+            {
+              "speaker": "A",
+              "line": "I'll bump it up my list then. Okay, sprint four. Big question first, payments, after the escalation?",
+              "match_text": "Did you end up finishing that podcast series you recommended to me? I did, the last few episodes were the best of the season honestly. I'll bump it up my list then. Okay, sprint four. Big question first, payments, after the escalation?"
+            }
+          ],
+          "extra": [
+            "- Person A: Discuss payments status with vendor.",
+            "- Person B: Review dark mode updates and ensure all features are functional."
+          ]
+        },
+        {
+          "variant": "with_context",
+          "recall": 0.0,
+          "precision": 0.0,
+          "ground_truth_count": 1,
+          "generated_count": 2,
+          "matches": [],
+          "missed": [
+            {
+              "speaker": "A",
+              "line": "I'll bump it up my list then. Okay, sprint four. Big question first, payments, after the escalation?",
+              "match_text": "Did you end up finishing that podcast series you recommended to me? I did, the last few episodes were the best of the season honestly. I'll bump it up my list then. Okay, sprint four. Big question first, payments, after the escalation?"
+            }
+          ],
+          "extra": [
+            "- Person A: Escalated payment sandbox issues to vendor's account manager.",
+            "- Person B: Scheduled user testing for the first week of the Sprint."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-08-sprint-status-5",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": 1.0,
+          "precision": 1.0,
+          "ground_truth_count": 1,
+          "generated_count": 1,
+          "matches": [
+            {
+              "ground_truth": "I'll make sure it's on the list for the test plan review later. Two weeks out.",
+              "ground_truth_speaker": "A",
+              "generated_bullet": "- Person A: Make sure load testing is scheduled for the test plan review two weeks out.",
+              "overlap_ratio": 0.91
+            }
+          ],
+          "missed": [],
+          "extra": []
+        },
+        {
+          "variant": "with_context",
+          "recall": 0.0,
+          "precision": 0.0,
+          "ground_truth_count": 1,
+          "generated_count": 2,
+          "matches": [],
+          "missed": [
+            {
+              "speaker": "A",
+              "line": "I'll make sure it's on the list for the test plan review later. Two weeks out.",
+              "match_text": "Great, that thread's closed. Analytics? Instrumentation is wired up, we're validating the data now. One new thing, given payments handles real transaction volume, we should schedule load testing before code freeze. Good call, I hadn't raised it yet, let's get it on the plan. I'll make sure it's on the list for the test plan review later. Two weeks out."
+            }
+          ],
+          "extra": [
+            "- Person A: Escalating payment sandbox issues to vendor's account manager.",
+            "- Person B: Scheduling user testing for the first week of Sprint 6."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-09-sprint-status-6",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": null,
+          "precision": 0.0,
+          "ground_truth_count": 0,
+          "generated_count": 2,
+          "matches": [],
+          "missed": [],
+          "extra": [
+            "- Person A: Draft load testing plans.",
+            "- Person B: Run load testing off to code freeze."
+          ]
+        },
+        {
+          "variant": "with_context",
+          "recall": null,
+          "precision": 0.0,
+          "ground_truth_count": 0,
+          "generated_count": 2,
+          "matches": [],
+          "missed": [],
+          "extra": [
+            "- Person A: Escalated payment sandbox issues to vendor's account manager.",
+            "- Person B: Scheduled user testing for the first week of Sprint 6."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-10-sprint-status-7",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": null,
+          "precision": 0.0,
+          "ground_truth_count": 0,
+          "generated_count": 2,
+          "matches": [],
+          "missed": [],
+          "extra": [
+            "- Person A: Schedule the formal test plan review for immediate execution following the load test.",
+            "- Person B: Prepare for UAT after the formal test plan review."
+          ]
+        },
+        {
+          "variant": "with_context",
+          "recall": null,
+          "precision": 0.0,
+          "ground_truth_count": 0,
+          "generated_count": 1,
+          "matches": [],
+          "missed": [],
+          "extra": [
+            "- None reported."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-11-test-plan-review",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": 1.0,
+          "precision": 1.0,
+          "ground_truth_count": 1,
+          "generated_count": 1,
+          "matches": [
+            {
+              "ground_truth": "I'll start on that this week.",
+              "ground_truth_speaker": "B",
+              "generated_bullet": "- Person A: Start recruiting testers for UAT next week.",
+              "overlap_ratio": 0.67
+            }
+          ],
+          "missed": [],
+          "extra": []
+        },
+        {
+          "variant": "with_context",
+          "recall": 1.0,
+          "precision": 0.25,
+          "ground_truth_count": 1,
+          "generated_count": 4,
+          "matches": [
+            {
+              "ground_truth": "I'll start on that this week.",
+              "ground_truth_speaker": "B",
+              "generated_bullet": "- Start recruiting testers for UAT starting this week",
+              "overlap_ratio": 0.67
+            }
+          ],
+          "missed": [],
+          "extra": [
+            "- **Person A**:",
+            "- Recruit testers for UAT starting this week",
+            "- **Person B**:"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-12-uat-kickoff",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": 0.0,
+          "precision": 0.0,
+          "ground_truth_count": 1,
+          "generated_count": 2,
+          "matches": [],
+          "missed": [
+            {
+              "speaker": "B",
+              "line": "I'll make sure that's communicated clearly in the response.",
+              "match_text": "Full app flow, including payments end to end and the dark mode variant. I've written scripts covering the main paths. Good. Anything come up in the pre-brief with testers? One of the internal stakeholders asked again about support for other languages. Right, same one from kickoff probably. Let's be clear, that was explicitly cut from this release at requirements review, it's a future request, not something we missed. I'll make sure that's communicated clearly in the response."
+            }
+          ],
+          "extra": [
+            "- Person A: Confirm the status of the external testers and internal stakeholders for the upcoming week.",
+            "- Person B: Schedule daily triage calls starting tomorrow."
+          ]
+        },
+        {
+          "variant": "with_context",
+          "recall": 0.0,
+          "precision": 0.0,
+          "ground_truth_count": 1,
+          "generated_count": 2,
+          "matches": [],
+          "missed": [
+            {
+              "speaker": "B",
+              "line": "I'll make sure that's communicated clearly in the response.",
+              "match_text": "Full app flow, including payments end to end and the dark mode variant. I've written scripts covering the main paths. Good. Anything come up in the pre-brief with testers? One of the internal stakeholders asked again about support for other languages. Right, same one from kickoff probably. Let's be clear, that was explicitly cut from this release at requirements review, it's a future request, not something we missed. I'll make sure that's communicated clearly in the response."
+            }
+          ],
+          "extra": [
+            "- Person A: Recruit testers for UAT starting this week.",
+            "- Person B: Start recruiting testers for UAT starting this week."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-13-uat-results",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": null,
+          "precision": 0.0,
+          "ground_truth_count": 0,
+          "generated_count": 3,
+          "matches": [],
+          "missed": [],
+          "extra": [
+            "- Person A: Address the P1 bug immediately.",
+            "- Person B: Schedule the fix for next week.",
+            "- Person A: Conduct the Goliv readiness review after addressing the P1 bug."
+          ]
+        },
+        {
+          "variant": "with_context",
+          "recall": null,
+          "precision": 0.0,
+          "ground_truth_count": 0,
+          "generated_count": 2,
+          "matches": [],
+          "missed": [],
+          "extra": [
+            "- Person A: Recruit testers for UAT starting this week.",
+            "- Person B: Start recruiting testers for UAT starting this week."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-14-go-live-readiness",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": null,
+          "precision": 0.0,
+          "ground_truth_count": 0,
+          "generated_count": 2,
+          "matches": [],
+          "missed": [],
+          "extra": [
+            "- Person A: Confirm launch data.",
+            "- Person B: Call launch."
+          ]
+        },
+        {
+          "variant": "with_context",
+          "recall": null,
+          "precision": 0.0,
+          "ground_truth_count": 0,
+          "generated_count": 2,
+          "matches": [],
+          "missed": [],
+          "extra": [
+            "- Person A: Not applicable (launch confirmation).",
+            "- Person B: Report the vendor escalation and extra contractor cost to finance immediately after launch."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase6-history-15-launch-retro",
+      "variants": [
+        {
+          "variant": "baseline",
+          "recall": 1.0,
+          "precision": 1.0,
+          "ground_truth_count": 2,
+          "generated_count": 2,
+          "matches": [
+            {
+              "ground_truth": "Agreed, I'll write that up as a lesson learned.",
+              "ground_truth_speaker": "B",
+              "generated_bullet": "- Person A: Write a lesson learned on vendor stability for future payments providers.",
+              "overlap_ratio": 0.75
+            },
+            {
+              "ground_truth": "And the post-launch analytics dashboard is live, I'll be watching it closely for the next two weeks.",
+              "ground_truth_speaker": "B",
+              "generated_bullet": "- Person B: Watch the post-launch analytics dashboard closely for the next two weeks.",
+              "overlap_ratio": 0.89
+            }
+          ],
+          "missed": [],
+          "extra": []
+        },
+        {
+          "variant": "with_context",
+          "recall": 1.0,
+          "precision": 1.0,
+          "ground_truth_count": 2,
+          "generated_count": 2,
+          "matches": [
+            {
+              "ground_truth": "Agreed, I'll write that up as a lesson learned.",
+              "ground_truth_speaker": "B",
+              "generated_bullet": "- Person A: Write a lesson learned on vendor stability.",
+              "overlap_ratio": 1.0
+            },
+            {
+              "ground_truth": "And the post-launch analytics dashboard is live, I'll be watching it closely for the next two weeks.",
+              "ground_truth_speaker": "B",
+              "generated_bullet": "- Person B: Monitor the post-launch analytics dashboard for the next two weeks.",
+              "overlap_ratio": 0.88
+            }
+          ],
+          "missed": [],
+          "extra": []
+        }
+      ]
+    }
+  ]
+}

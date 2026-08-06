@@ -1,0 +1,17 @@
+### Topic
+Final Sprint Status Before Code Freeze
+
+### Key Points
+- Onboarding, payments, dark mode, legal, and analytics are all complete.
+- Feature complete, which is a great place to be.
+- Code freeze is officially scheduled for this Friday.
+- Load test plan is finalized and ready to execute next week.
+- QA teams are prepping the full regression pass alongside the load test.
+- Formal test plan review follows, followed by UAT.
+
+### Decisions
+- No decisions were made during the discussion.
+
+### Actions
+- Person A: Schedule the formal test plan review.
+- Person B: Prepare for UAT following the formal test plan review.

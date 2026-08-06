@@ -1,0 +1,304 @@
+{
+  "generated_at": "2026-08-05T19:15:13.908583+00:00",
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "scenarios": [
+    {
+      "id": "phase1-baseline",
+      "label": "Phase 1 \u2014 Basic summary",
+      "has_checklist": false,
+      "variants": [
+        {
+          "variant": "baseline",
+          "summary_path": "phase1-baseline/output/summary.txt",
+          "layer1": {
+            "schema": {
+              "sections": {
+                "Topic": {
+                  "present": true,
+                  "heading_level": 3
+                },
+                "Key Points": {
+                  "present": true,
+                  "heading_level": 3
+                },
+                "Decisions": {
+                  "present": true,
+                  "heading_level": 3
+                },
+                "Actions": {
+                  "present": true,
+                  "heading_level": 3
+                }
+              },
+              "all_sections_present": true,
+              "heading_level_matches_spec": false
+            },
+            "actions": {
+              "checked": true,
+              "bullets": [
+                "Person A: Push to get stacker holder access provisioned this week.",
+                "Person A: Engage legal early to avoid bottlenecks later.",
+                "Person A: Loop analytics and start scoping events.",
+                "Person A: Bring localization decision to requirements review next week."
+              ],
+              "violations": [],
+              "compliant": true
+            }
+          },
+          "layer2": {
+            "faithfulness": 4,
+            "faithfulness_notes": "The summary accurately captures key points from the transcript.",
+            "completeness": 3,
+            "completeness_notes": "Substantive points and decisions are reflected, but some details are omitted.",
+            "conciseness": 4,
+            "conciseness_notes": "The summary is concise without being redundant or irrelevant.",
+            "unsupported_claims": [],
+            "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures key points from the transcript.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"Substantive points and decisions are reflected, but some details are omitted.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise without being redundant or irrelevant.\",\n  \"unsupported_claims\": []\n}\n```",
+            "parse_error": false
+          },
+          "checklist": null
+        }
+      ]
+    },
+    {
+      "id": "phase2-checklist",
+      "label": "Phase 2 \u2014 Checklist coverage check",
+      "has_checklist": true,
+      "variants": [
+        {
+          "variant": "context_checklist",
+          "summary_path": "phase2-checklist/output/summary.txt",
+          "layer1": {
+            "schema": {
+              "sections": {
+                "Topic": {
+                  "present": true,
+                  "heading_level": 2
+                },
+                "Key Points": {
+                  "present": true,
+                  "heading_level": 2
+                },
+                "Decisions": {
+                  "present": true,
+                  "heading_level": 2
+                },
+                "Actions": {
+                  "present": true,
+                  "heading_level": 2
+                }
+              },
+              "all_sections_present": true,
+              "heading_level_matches_spec": true
+            },
+            "actions": {
+              "checked": true,
+              "bullets": [
+                "Person A: Pushes to get access to the new payment provider provisioned this week.",
+                "Person A: Engages legal early to avoid bottlenecks later.",
+                "Person A: Loops analytics and sets up events for scoping.",
+                "Person B: Will attend the requirements review session to discuss localization considerations."
+              ],
+              "violations": [],
+              "compliant": true
+            }
+          },
+          "layer2": {
+            "faithfulness": 4,
+            "faithfulness_notes": "The summary accurately captures key points and decisions from the transcript.",
+            "completeness": 3,
+            "completeness_notes": "Substantive points and decisions are included, but some details are missing.",
+            "conciseness": 2,
+            "conciseness_notes": "The summary is concise but lacks detail compared to the original transcript.",
+            "unsupported_claims": [],
+            "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures key points and decisions from the transcript.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"Substantive points and decisions are included, but some details are missing.\",\n  \"conciseness\": 2,\n  \"conciseness_notes\": \"The summary is concise but lacks detail compared to the original transcript.\",\n  \"unsupported_claims\": []\n}\n```",
+            "parse_error": false
+          },
+          "checklist": {
+            "tp": 6,
+            "fp": 0,
+            "fn": 0,
+            "tn": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "accuracy": 1.0,
+            "mismatches": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "phase3-context",
+      "label": "Phase 3 \u2014 Context-aware summarization",
+      "has_checklist": false,
+      "variants": [
+        {
+          "variant": "baseline",
+          "summary_path": "phase3-context/output/summary_baseline.txt",
+          "layer1": {
+            "schema": {
+              "sections": {
+                "Topic": {
+                  "present": true,
+                  "heading_level": 3
+                },
+                "Key Points": {
+                  "present": true,
+                  "heading_level": 3
+                },
+                "Decisions": {
+                  "present": true,
+                  "heading_level": 3
+                },
+                "Actions": {
+                  "present": true,
+                  "heading_level": 3
+                }
+              },
+              "all_sections_present": true,
+              "heading_level_matches_spec": false
+            },
+            "actions": {
+              "checked": true,
+              "bullets": [
+                "Person A: Push to get stacker holder access provisioned this week.",
+                "Person A: Engage legal early to avoid bottlenecks later.",
+                "Person A: Loop analytics and start scoping events.",
+                "Person A: Bring localization decision to requirements review next week."
+              ],
+              "violations": [],
+              "compliant": true
+            }
+          },
+          "layer2": {
+            "faithfulness": 4,
+            "faithfulness_notes": "The summary accurately captures key points from the transcript.",
+            "completeness": 3,
+            "completeness_notes": "Substantive points and decisions are reflected, but some details are omitted.",
+            "conciseness": 4,
+            "conciseness_notes": "The summary is concise without being redundant or irrelevant.",
+            "unsupported_claims": [],
+            "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures key points from the transcript.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"Substantive points and decisions are reflected, but some details are omitted.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise without being redundant or irrelevant.\",\n  \"unsupported_claims\": []\n}\n```",
+            "parse_error": false
+          },
+          "checklist": null
+        },
+        {
+          "variant": "with_context",
+          "summary_path": "phase3-context/output/summary_with_context.txt",
+          "layer1": {
+            "schema": {
+              "sections": {
+                "Topic": {
+                  "present": true,
+                  "heading_level": 2
+                },
+                "Key Points": {
+                  "present": true,
+                  "heading_level": 2
+                },
+                "Decisions": {
+                  "present": true,
+                  "heading_level": 2
+                },
+                "Actions": {
+                  "present": true,
+                  "heading_level": 2
+                }
+              },
+              "all_sections_present": true,
+              "heading_level_matches_spec": true
+            },
+            "actions": {
+              "checked": true,
+              "bullets": [
+                "Person A: Pushes to get access to the new payment provider provisioned this week.",
+                "Person A: Engages legal early to avoid bottlenecks later.",
+                "Person A: Loops analytics and sets up events for scoping.",
+                "Person B: Will attend the requirements review session to discuss localization considerations."
+              ],
+              "violations": [],
+              "compliant": true
+            }
+          },
+          "layer2": {
+            "faithfulness": 4,
+            "faithfulness_notes": "The summary accurately captures key points and decisions from the transcript.",
+            "completeness": 3,
+            "completeness_notes": "Substantive points and decisions are included, but some details are missing.",
+            "conciseness": 2,
+            "conciseness_notes": "The summary is concise but lacks detail compared to the original transcript.",
+            "unsupported_claims": [],
+            "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures key points and decisions from the transcript.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"Substantive points and decisions are included, but some details are missing.\",\n  \"conciseness\": 2,\n  \"conciseness_notes\": \"The summary is concise but lacks detail compared to the original transcript.\",\n  \"unsupported_claims\": []\n}\n```",
+            "parse_error": false
+          },
+          "checklist": null
+        }
+      ]
+    },
+    {
+      "id": "phase4-assistant",
+      "label": "Phase 4 \u2014 AI Assistant as third actor",
+      "has_checklist": true,
+      "variants": [
+        {
+          "variant": "context_checklist_assistant",
+          "summary_path": "phase4-assistant/output/summary.txt",
+          "layer1": {
+            "schema": {
+              "sections": {
+                "Topic": {
+                  "present": true,
+                  "heading_level": 2
+                },
+                "Key Points": {
+                  "present": true,
+                  "heading_level": 2
+                },
+                "Decisions": {
+                  "present": true,
+                  "heading_level": 2
+                },
+                "Actions": {
+                  "present": true,
+                  "heading_level": 2
+                }
+              },
+              "all_sections_present": true,
+              "heading_level_matches_spec": true
+            },
+            "actions": {
+              "checked": true,
+              "bullets": [
+                "Person A: Provision payment sandbox access, engage legal early, and loop in analytics to scope events."
+              ],
+              "violations": [],
+              "compliant": true
+            }
+          },
+          "layer2": {
+            "faithfulness": 4,
+            "faithfulness_notes": "The summary accurately captures the main points and decisions from the transcript.",
+            "completeness": 3,
+            "completeness_notes": "The summary covers most of the substantive points and decisions but misses some details like the exact dates and specific actions related to localization.",
+            "conciseness": 4,
+            "conciseness_notes": "The summary is concise without being redundant or including unnecessary information.",
+            "unsupported_claims": [],
+            "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures the main points and decisions from the transcript.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"The summary covers most of the substantive points and decisions but misses some details like the exact dates and specific actions related to localization.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise without being redundant or including unnecessary information.\",\n  \"unsupported_claims\": []\n}\n```",
+            "parse_error": false
+          },
+          "checklist": {
+            "tp": 6,
+            "fp": 0,
+            "fn": 0,
+            "tn": 1,
+            "precision": 1.0,
+            "recall": 1.0,
+            "accuracy": 1.0,
+            "mismatches": []
+          }
+        }
+      ]
+    }
+  ]
+}

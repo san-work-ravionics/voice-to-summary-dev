@@ -1,0 +1,23 @@
+## Topic
+Setting the high-level goal and scoping the engineering workstreams
+
+## Key Points
+- The project goal is to redesign the mobile app.
+- Workstreams include rebuilding the onboarding flow, integrating a new payments provider, a visual refresh with dark mode as a stretch goal, legal/privacy review, and analytics instrumentation.
+- The purpose of this meeting is to agree on the project's goal, scope the workstreams, and assign responsibilities before the next sync.
+
+## Decisions
+- No decisions were made during this meeting.
+
+## Actions
+- Person A: Start recruiting testers for UAT in the coming week.
+- Person B: Continue discussing the remaining details of the test plan.
+
+## Checklist Coverage
+- Not covered: Onboarding flow status — not mentioned in the transcript
+- Covered: Payments integration status — "Sure, functional regression across the full app, the load and performance test we scoped, a security and privacy checklist pass given the payments and permissions work and a browser and device compatibility matrix."
+- Not covered: Design updates (e.g. dark mode) — not mentioned in the transcript
+- Covered: Legal / privacy approval — "Sure, functional regression across the full app, the load and performance test we scoped, a security and privacy checklist pass given the payments and permissions work and a browser and device compatibility matrix."
+- Not covered: Analytics instrumentation — not mentioned in the transcript
+- Not covered: Budget or cost impact — not mentioned in the transcript
+- Not covered: Next meeting / follow-up schedule — not mentioned in the transcript

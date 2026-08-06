@@ -1,0 +1,14 @@
+### Topic
+Sprint 2 progress update
+
+### Key Points
+- Plumbing repair completed after three visits.
+- Payment sandbox issues persistently unstable during this sprint.
+- Vendor sandbox instability affecting QA testing.
+- Payment sign-off delayed due to untested code.
+
+### Decisions
+- No immediate decision made regarding payment sign-off stability.
+
+### Actions
+- Person A: Regroup in two weeks.

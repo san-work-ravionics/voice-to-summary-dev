@@ -1,0 +1,34 @@
+## Topic
+Kickoff Meeting for Mobile App Redesign Project
+
+## Key Points
+- Agree on project goal: "rebuild the onboarding flow" and "integrate a new payments provider".
+- Scope workstreams: 
+  - Onboarding flow: Cleaned up and streamlined.
+  - Visual refresh: Dark mode variant promoted from stretch goal to committed P1 scope.
+  - Legal/Privacy review: Already agreed upon.
+  - Analytics instrumentation: Not yet scoped.
+- Set priorities for upcoming sprint: 
+  - Onboarding flow: Focus on implementation.
+  - Payment sandbox access: Provisioning completed, ready for integration work.
+  - Visual refresh: Promoted from stretch to committed P1 scope.
+  - Accessibility check on dark mode: Done, contrast ratios validated.
+  - Legal/Privacy review: Agreed upon.
+  - Analytics instrumentation: Not scoped yet.
+
+## Decisions
+- No decisions made at this meeting.
+
+## Actions
+- Person A: Update the backlog priority for the accessibility check on dark mode.
+- Person B: Confirm the status of the legal/privacy review.
+- Person A: Coordinate with the team to begin integration work on the payment sandbox access after provisioning completes.
+
+## Checklist Coverage
+- Covered: Onboarding flow status — "Same, okay, let's walk through the mockups, onboarding flow first."
+- Covered: Payments integration status — "Great, last thing, payment sandbox access, did that come through?"
+- Covered: Design updates (e.g. dark mode) — "A great, now the visual refresh, including the dark mode variant."
+- Not covered: Legal / privacy approval — not mentioned in the transcript
+- Not covered: Analytics instrumentation — not mentioned in the transcript
+- Not covered: Budget or cost impact — not mentioned in the transcript
+- Not covered: Next meeting / follow-up schedule — not mentioned in the transcript

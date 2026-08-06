@@ -1,0 +1,7505 @@
+{
+  "generated_at": "2026-08-04T15:48:53.683029+00:00",
+  "engines": [
+    "whisper"
+  ],
+  "primary_engine": "whisper",
+  "whisper_model": "base",
+  "voxtral_model": null,
+  "wer_benchmark_note": "A commonly cited target is under 5-8% WER for domain-specific audio. Note: this project's ground truth is the exact TTS script text, so any gap here is genuine ASR error or transcript-formatting divergence (e.g. Whisper renders spoken numbers as digits \u2014 '88%' vs the script's 'eighty-eight percent' \u2014 which counts as a substitution under strict WER even though no information was lost); see individual diffs.",
+  "noise_tiers_note": "light_noise: white noise mixed in at ~20dB below the speech level (mild background hiss). heavy_noise: white noise at ~8dB below speech (much more prominent) plus a 3kHz low-pass filter, simulating a muffled/low-quality microphone. Real accent variety is not tested \u2014 all recordings use the same one or two macOS system TTS voices.",
+  "timing_note": "seconds = wall-clock time of the Whisper transcribe() call for that tier; rtf (real-time factor) = seconds / audio length, so 0.05 means the recording transcribed 20x faster than real time. These times are specific to the machine that generated this file (Whisper 'base' on CPU) and will differ on other hardware. Note: the 'clean' tier is now transcribed fresh here (timed) rather than read from each phase's stored transcript, so its WER and its time describe the same run \u2014 clean WER may therefore differ very slightly from a phase's own stored transcript, since Whisper decoding is not bit-for-bit reproducible.",
+  "diarization_note": "Not implemented / not measurable here. whisper.load_model(...).transcribe() as used throughout this project returns a single undifferentiated text stream with no speaker labels at all \u2014 the 'Person A' / 'Person B' (and 'Assistant' in phase4-assistant) attribution seen in every summary is reconstructed entirely by the downstream LLM from conversational context, not from the ASR step. There is no diarization output to score for accuracy. A real diarization benchmark would need a diarization-capable pipeline (e.g. pyannote.audio or WhisperX), which this project does not include. The closest available proxy is downstream: whether the summarizer's own speaker attribution stays internally consistent (only 'Person A:' / 'Person B:' ever prefix an Action) \u2014 see the Actions-prefix compliance check in eval/judge.py and eval/story_judge.py.",
+  "scenarios": [
+    {
+      "id": "01-kickoff",
+      "audio_seconds": 76.1,
+      "tiers": {
+        "clean": {
+          "wer": 0.08396946564885496,
+          "substitutions": 16,
+          "deletions": 1,
+          "insertions": 5,
+          "reference_word_count": 262,
+          "hypothesis_word_count": 266,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "fifteen",
+              "hyp": "15"
+            },
+            {
+              "op": "sub",
+              "ref": "kickoff",
+              "hyp": "kikov"
+            },
+            {
+              "op": "sub",
+              "ref": "kickoff",
+              "hyp": "kikov"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "half"
+            },
+            {
+              "op": "sub",
+              "ref": "halfmarathon",
+              "hyp": "marathon"
+            },
+            {
+              "op": "sub",
+              "ref": "kickoff",
+              "hyp": "kikov"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "high"
+            },
+            {
+              "op": "sub",
+              "ref": "highlevel",
+              "hyp": "level"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "for"
+            },
+            {
+              "op": "sub",
+              "ref": "four",
+              "hyp": "work"
+            },
+            {
+              "op": "sub",
+              "ref": "workstreams",
+              "hyp": "streams"
+            },
+            {
+              "op": "sub",
+              "ref": "as",
+              "hyp": "is"
+            },
+            {
+              "op": "del",
+              "ref": "sandbox",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "is",
+              "hyp": "sandboxes"
+            },
+            {
+              "op": "sub",
+              "ref": "provisioned",
+              "hyp": "provision"
+            },
+            {
+              "op": "sub",
+              "ref": "engaged",
+              "hyp": "engage"
+            },
+            {
+              "op": "sub",
+              "ref": "in",
+              "hyp": "and"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "stacker"
+            },
+            {
+              "op": "sub",
+              "ref": "stakeholder",
+              "hyp": "holder"
+            },
+            {
+              "op": "sub",
+              "ref": "asked",
+              "hyp": "ask"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "two"
+            },
+            {
+              "op": "sub",
+              "ref": "twoweek",
+              "hyp": "weeks"
+            }
+          ],
+          "seconds": 157.45,
+          "rtf": 2.069
+        },
+        "light_noise": {
+          "wer": 0.09923664122137404,
+          "substitutions": 20,
+          "deletions": 1,
+          "insertions": 5,
+          "reference_word_count": 262,
+          "hypothesis_word_count": 266,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "fifteen",
+              "hyp": "15"
+            },
+            {
+              "op": "sub",
+              "ref": "kickoff",
+              "hyp": "kikov"
+            },
+            {
+              "op": "sub",
+              "ref": "five",
+              "hyp": "5"
+            },
+            {
+              "op": "sub",
+              "ref": "kickoff",
+              "hyp": "kikov"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "half"
+            },
+            {
+              "op": "sub",
+              "ref": "halfmarathon",
+              "hyp": "marathon"
+            },
+            {
+              "op": "sub",
+              "ref": "kickoff",
+              "hyp": "kikov"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "high"
+            },
+            {
+              "op": "sub",
+              "ref": "highlevel",
+              "hyp": "level"
+            },
+            {
+              "op": "sub",
+              "ref": "a",
+              "hyp": "the"
+            },
+            {
+              "op": "sub",
+              "ref": "five",
+              "hyp": "5"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "for"
+            },
+            {
+              "op": "sub",
+              "ref": "four",
+              "hyp": "work"
+            },
+            {
+              "op": "sub",
+              "ref": "workstreams",
+              "hyp": "streams"
+            },
+            {
+              "op": "sub",
+              "ref": "dark",
+              "hyp": "dart"
+            },
+            {
+              "op": "sub",
+              "ref": "as",
+              "hyp": "is"
+            },
+            {
+              "op": "del",
+              "ref": "sandbox",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "is",
+              "hyp": "sandboxes"
+            },
+            {
+              "op": "sub",
+              "ref": "provisioned",
+              "hyp": "provision"
+            },
+            {
+              "op": "sub",
+              "ref": "in",
+              "hyp": "and"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "stack"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "of"
+            },
+            {
+              "op": "sub",
+              "ref": "stakeholder",
+              "hyp": "holder"
+            },
+            {
+              "op": "sub",
+              "ref": "twoweek",
+              "hyp": "two"
+            },
+            {
+              "op": "sub",
+              "ref": "sprint",
+              "hyp": "weeks"
+            },
+            {
+              "op": "sub",
+              "ref": "syncs",
+              "hyp": "printsinks"
+            }
+          ],
+          "seconds": 46.38,
+          "rtf": 0.609
+        },
+        "heavy_noise": {
+          "wer": 0.10305343511450382,
+          "substitutions": 22,
+          "deletions": 1,
+          "insertions": 4,
+          "reference_word_count": 262,
+          "hypothesis_word_count": 265,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "fifteen",
+              "hyp": "15"
+            },
+            {
+              "op": "sub",
+              "ref": "spanning",
+              "hyp": "turning"
+            },
+            {
+              "op": "sub",
+              "ref": "five",
+              "hyp": "5"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "half"
+            },
+            {
+              "op": "sub",
+              "ref": "halfmarathon",
+              "hyp": "marathon"
+            },
+            {
+              "op": "sub",
+              "ref": "i",
+              "hyp": "hi"
+            },
+            {
+              "op": "sub",
+              "ref": "did",
+              "hyp": "there"
+            },
+            {
+              "op": "sub",
+              "ref": "train",
+              "hyp": "frame"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "high"
+            },
+            {
+              "op": "sub",
+              "ref": "highlevel",
+              "hyp": "level"
+            },
+            {
+              "op": "sub",
+              "ref": "five",
+              "hyp": "5"
+            },
+            {
+              "op": "sub",
+              "ref": "four",
+              "hyp": "for"
+            },
+            {
+              "op": "sub",
+              "ref": "as",
+              "hyp": "is"
+            },
+            {
+              "op": "del",
+              "ref": "sandbox",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "is",
+              "hyp": "sandboxes"
+            },
+            {
+              "op": "sub",
+              "ref": "provisioned",
+              "hyp": "provision"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "bottle"
+            },
+            {
+              "op": "sub",
+              "ref": "bottleneck",
+              "hyp": "neck"
+            },
+            {
+              "op": "sub",
+              "ref": "loop",
+              "hyp": "look"
+            },
+            {
+              "op": "sub",
+              "ref": "in",
+              "hyp": "and"
+            },
+            {
+              "op": "sub",
+              "ref": "to",
+              "hyp": "just"
+            },
+            {
+              "op": "sub",
+              "ref": "stakeholder",
+              "hyp": "scatterholder"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "two"
+            },
+            {
+              "op": "sub",
+              "ref": "twoweek",
+              "hyp": "weeks"
+            },
+            {
+              "op": "sub",
+              "ref": "sprint",
+              "hyp": "spring"
+            },
+            {
+              "op": "sub",
+              "ref": "syncs",
+              "hyp": "sinks"
+            },
+            {
+              "op": "sub",
+              "ref": "talk",
+              "hyp": "thought"
+            }
+          ],
+          "seconds": 54.2,
+          "rtf": 0.712
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.08396946564885496,
+            "substitutions": 16,
+            "deletions": 1,
+            "insertions": 5,
+            "reference_word_count": 262,
+            "hypothesis_word_count": 266,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "fifteen",
+                "hyp": "15"
+              },
+              {
+                "op": "sub",
+                "ref": "kickoff",
+                "hyp": "kikov"
+              },
+              {
+                "op": "sub",
+                "ref": "kickoff",
+                "hyp": "kikov"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "half"
+              },
+              {
+                "op": "sub",
+                "ref": "halfmarathon",
+                "hyp": "marathon"
+              },
+              {
+                "op": "sub",
+                "ref": "kickoff",
+                "hyp": "kikov"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "high"
+              },
+              {
+                "op": "sub",
+                "ref": "highlevel",
+                "hyp": "level"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "for"
+              },
+              {
+                "op": "sub",
+                "ref": "four",
+                "hyp": "work"
+              },
+              {
+                "op": "sub",
+                "ref": "workstreams",
+                "hyp": "streams"
+              },
+              {
+                "op": "sub",
+                "ref": "as",
+                "hyp": "is"
+              },
+              {
+                "op": "del",
+                "ref": "sandbox",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "is",
+                "hyp": "sandboxes"
+              },
+              {
+                "op": "sub",
+                "ref": "provisioned",
+                "hyp": "provision"
+              },
+              {
+                "op": "sub",
+                "ref": "engaged",
+                "hyp": "engage"
+              },
+              {
+                "op": "sub",
+                "ref": "in",
+                "hyp": "and"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "stacker"
+              },
+              {
+                "op": "sub",
+                "ref": "stakeholder",
+                "hyp": "holder"
+              },
+              {
+                "op": "sub",
+                "ref": "asked",
+                "hyp": "ask"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "two"
+              },
+              {
+                "op": "sub",
+                "ref": "twoweek",
+                "hyp": "weeks"
+              }
+            ],
+            "seconds": 157.45,
+            "rtf": 2.069
+          },
+          "light_noise": {
+            "wer": 0.09923664122137404,
+            "substitutions": 20,
+            "deletions": 1,
+            "insertions": 5,
+            "reference_word_count": 262,
+            "hypothesis_word_count": 266,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "fifteen",
+                "hyp": "15"
+              },
+              {
+                "op": "sub",
+                "ref": "kickoff",
+                "hyp": "kikov"
+              },
+              {
+                "op": "sub",
+                "ref": "five",
+                "hyp": "5"
+              },
+              {
+                "op": "sub",
+                "ref": "kickoff",
+                "hyp": "kikov"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "half"
+              },
+              {
+                "op": "sub",
+                "ref": "halfmarathon",
+                "hyp": "marathon"
+              },
+              {
+                "op": "sub",
+                "ref": "kickoff",
+                "hyp": "kikov"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "high"
+              },
+              {
+                "op": "sub",
+                "ref": "highlevel",
+                "hyp": "level"
+              },
+              {
+                "op": "sub",
+                "ref": "a",
+                "hyp": "the"
+              },
+              {
+                "op": "sub",
+                "ref": "five",
+                "hyp": "5"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "for"
+              },
+              {
+                "op": "sub",
+                "ref": "four",
+                "hyp": "work"
+              },
+              {
+                "op": "sub",
+                "ref": "workstreams",
+                "hyp": "streams"
+              },
+              {
+                "op": "sub",
+                "ref": "dark",
+                "hyp": "dart"
+              },
+              {
+                "op": "sub",
+                "ref": "as",
+                "hyp": "is"
+              },
+              {
+                "op": "del",
+                "ref": "sandbox",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "is",
+                "hyp": "sandboxes"
+              },
+              {
+                "op": "sub",
+                "ref": "provisioned",
+                "hyp": "provision"
+              },
+              {
+                "op": "sub",
+                "ref": "in",
+                "hyp": "and"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "stack"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "of"
+              },
+              {
+                "op": "sub",
+                "ref": "stakeholder",
+                "hyp": "holder"
+              },
+              {
+                "op": "sub",
+                "ref": "twoweek",
+                "hyp": "two"
+              },
+              {
+                "op": "sub",
+                "ref": "sprint",
+                "hyp": "weeks"
+              },
+              {
+                "op": "sub",
+                "ref": "syncs",
+                "hyp": "printsinks"
+              }
+            ],
+            "seconds": 46.38,
+            "rtf": 0.609
+          },
+          "heavy_noise": {
+            "wer": 0.10305343511450382,
+            "substitutions": 22,
+            "deletions": 1,
+            "insertions": 4,
+            "reference_word_count": 262,
+            "hypothesis_word_count": 265,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "fifteen",
+                "hyp": "15"
+              },
+              {
+                "op": "sub",
+                "ref": "spanning",
+                "hyp": "turning"
+              },
+              {
+                "op": "sub",
+                "ref": "five",
+                "hyp": "5"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "half"
+              },
+              {
+                "op": "sub",
+                "ref": "halfmarathon",
+                "hyp": "marathon"
+              },
+              {
+                "op": "sub",
+                "ref": "i",
+                "hyp": "hi"
+              },
+              {
+                "op": "sub",
+                "ref": "did",
+                "hyp": "there"
+              },
+              {
+                "op": "sub",
+                "ref": "train",
+                "hyp": "frame"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "high"
+              },
+              {
+                "op": "sub",
+                "ref": "highlevel",
+                "hyp": "level"
+              },
+              {
+                "op": "sub",
+                "ref": "five",
+                "hyp": "5"
+              },
+              {
+                "op": "sub",
+                "ref": "four",
+                "hyp": "for"
+              },
+              {
+                "op": "sub",
+                "ref": "as",
+                "hyp": "is"
+              },
+              {
+                "op": "del",
+                "ref": "sandbox",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "is",
+                "hyp": "sandboxes"
+              },
+              {
+                "op": "sub",
+                "ref": "provisioned",
+                "hyp": "provision"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "bottle"
+              },
+              {
+                "op": "sub",
+                "ref": "bottleneck",
+                "hyp": "neck"
+              },
+              {
+                "op": "sub",
+                "ref": "loop",
+                "hyp": "look"
+              },
+              {
+                "op": "sub",
+                "ref": "in",
+                "hyp": "and"
+              },
+              {
+                "op": "sub",
+                "ref": "to",
+                "hyp": "just"
+              },
+              {
+                "op": "sub",
+                "ref": "stakeholder",
+                "hyp": "scatterholder"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "two"
+              },
+              {
+                "op": "sub",
+                "ref": "twoweek",
+                "hyp": "weeks"
+              },
+              {
+                "op": "sub",
+                "ref": "sprint",
+                "hyp": "spring"
+              },
+              {
+                "op": "sub",
+                "ref": "syncs",
+                "hyp": "sinks"
+              },
+              {
+                "op": "sub",
+                "ref": "talk",
+                "hyp": "thought"
+              }
+            ],
+            "seconds": 54.2,
+            "rtf": 0.712
+          }
+        }
+      }
+    },
+    {
+      "id": "02-requirements-review",
+      "audio_seconds": 66.6,
+      "tiers": {
+        "clean": {
+          "wer": 0.03619909502262444,
+          "substitutions": 6,
+          "deletions": 0,
+          "insertions": 2,
+          "reference_word_count": 221,
+          "hypothesis_word_count": 223,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "the"
+            },
+            {
+              "op": "sub",
+              "ref": "delayed",
+              "hyp": "late"
+            },
+            {
+              "op": "sub",
+              "ref": "three",
+              "hyp": "3"
+            },
+            {
+              "op": "sub",
+              "ref": "is",
+              "hyp": "as"
+            },
+            {
+              "op": "sub",
+              "ref": "is",
+              "hyp": "as"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "two"
+            },
+            {
+              "op": "sub",
+              "ref": "twoweek",
+              "hyp": "week"
+            },
+            {
+              "op": "sub",
+              "ref": "too",
+              "hyp": "to"
+            }
+          ],
+          "seconds": 35.37,
+          "rtf": 0.531
+        },
+        "light_noise": {
+          "wer": 0.07692307692307693,
+          "substitutions": 11,
+          "deletions": 0,
+          "insertions": 6,
+          "reference_word_count": 221,
+          "hypothesis_word_count": 227,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "off"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "to"
+            },
+            {
+              "op": "sub",
+              "ref": "after",
+              "hyp": "kick"
+            },
+            {
+              "op": "sub",
+              "ref": "kickoff",
+              "hyp": "off"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "the"
+            },
+            {
+              "op": "sub",
+              "ref": "delayed",
+              "hyp": "late"
+            },
+            {
+              "op": "sub",
+              "ref": "three",
+              "hyp": "3"
+            },
+            {
+              "op": "sub",
+              "ref": "of",
+              "hyp": "hog"
+            },
+            {
+              "op": "sub",
+              "ref": "rough",
+              "hyp": "ruff"
+            },
+            {
+              "op": "sub",
+              "ref": "dark",
+              "hyp": "dart"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "kick"
+            },
+            {
+              "op": "sub",
+              "ref": "kickoff",
+              "hyp": "off"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "two"
+            },
+            {
+              "op": "sub",
+              "ref": "twoweek",
+              "hyp": "weak"
+            },
+            {
+              "op": "sub",
+              "ref": "scoping",
+              "hyp": "coping"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "more"
+            },
+            {
+              "op": "sub",
+              "ref": "mockups",
+              "hyp": "caps"
+            }
+          ],
+          "seconds": 37.88,
+          "rtf": 0.569
+        },
+        "heavy_noise": {
+          "wer": 0.12669683257918551,
+          "substitutions": 23,
+          "deletions": 2,
+          "insertions": 3,
+          "reference_word_count": 221,
+          "hypothesis_word_count": 222,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "kickoff",
+              "hyp": "kiko"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "the"
+            },
+            {
+              "op": "sub",
+              "ref": "delayed",
+              "hyp": "late"
+            },
+            {
+              "op": "sub",
+              "ref": "three",
+              "hyp": "3"
+            },
+            {
+              "op": "del",
+              "ref": "tarmac",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "of",
+              "hyp": "thomas"
+            },
+            {
+              "op": "sub",
+              "ref": "all",
+              "hyp": "hobo"
+            },
+            {
+              "op": "sub",
+              "ref": "a",
+              "hyp": "an"
+            },
+            {
+              "op": "sub",
+              "ref": "normal",
+              "hyp": "orno"
+            },
+            {
+              "op": "sub",
+              "ref": "desk",
+              "hyp": "death"
+            },
+            {
+              "op": "sub",
+              "ref": "rough",
+              "hyp": "rock"
+            },
+            {
+              "op": "sub",
+              "ref": "a",
+              "hyp": "the"
+            },
+            {
+              "op": "sub",
+              "ref": "ive",
+              "hyp": "i"
+            },
+            {
+              "op": "sub",
+              "ref": "backlog",
+              "hyp": "backroader"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "on"
+            },
+            {
+              "op": "sub",
+              "ref": "onboarding",
+              "hyp": "boarding"
+            },
+            {
+              "op": "sub",
+              "ref": "dark",
+              "hyp": "vark"
+            },
+            {
+              "op": "sub",
+              "ref": "mode",
+              "hyp": "most"
+            },
+            {
+              "op": "sub",
+              "ref": "kickoff",
+              "hyp": "kiko"
+            },
+            {
+              "op": "sub",
+              "ref": "of",
+              "hyp": "on"
+            },
+            {
+              "op": "sub",
+              "ref": "backlog",
+              "hyp": "battle"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "two"
+            },
+            {
+              "op": "sub",
+              "ref": "twoweek",
+              "hyp": "weeks"
+            },
+            {
+              "op": "sub",
+              "ref": "sprints",
+              "hyp": "sprint"
+            },
+            {
+              "op": "sub",
+              "ref": "intro",
+              "hyp": "info"
+            },
+            {
+              "op": "del",
+              "ref": "analytics",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "scoping",
+              "hyp": "analyticsgoating"
+            },
+            {
+              "op": "sub",
+              "ref": "back",
+              "hyp": "that"
+            }
+          ],
+          "seconds": 71.14,
+          "rtf": 1.068
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.03619909502262444,
+            "substitutions": 6,
+            "deletions": 0,
+            "insertions": 2,
+            "reference_word_count": 221,
+            "hypothesis_word_count": 223,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "the"
+              },
+              {
+                "op": "sub",
+                "ref": "delayed",
+                "hyp": "late"
+              },
+              {
+                "op": "sub",
+                "ref": "three",
+                "hyp": "3"
+              },
+              {
+                "op": "sub",
+                "ref": "is",
+                "hyp": "as"
+              },
+              {
+                "op": "sub",
+                "ref": "is",
+                "hyp": "as"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "two"
+              },
+              {
+                "op": "sub",
+                "ref": "twoweek",
+                "hyp": "week"
+              },
+              {
+                "op": "sub",
+                "ref": "too",
+                "hyp": "to"
+              }
+            ],
+            "seconds": 35.37,
+            "rtf": 0.531
+          },
+          "light_noise": {
+            "wer": 0.07692307692307693,
+            "substitutions": 11,
+            "deletions": 0,
+            "insertions": 6,
+            "reference_word_count": 221,
+            "hypothesis_word_count": 227,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "off"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "to"
+              },
+              {
+                "op": "sub",
+                "ref": "after",
+                "hyp": "kick"
+              },
+              {
+                "op": "sub",
+                "ref": "kickoff",
+                "hyp": "off"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "the"
+              },
+              {
+                "op": "sub",
+                "ref": "delayed",
+                "hyp": "late"
+              },
+              {
+                "op": "sub",
+                "ref": "three",
+                "hyp": "3"
+              },
+              {
+                "op": "sub",
+                "ref": "of",
+                "hyp": "hog"
+              },
+              {
+                "op": "sub",
+                "ref": "rough",
+                "hyp": "ruff"
+              },
+              {
+                "op": "sub",
+                "ref": "dark",
+                "hyp": "dart"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "kick"
+              },
+              {
+                "op": "sub",
+                "ref": "kickoff",
+                "hyp": "off"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "two"
+              },
+              {
+                "op": "sub",
+                "ref": "twoweek",
+                "hyp": "weak"
+              },
+              {
+                "op": "sub",
+                "ref": "scoping",
+                "hyp": "coping"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "more"
+              },
+              {
+                "op": "sub",
+                "ref": "mockups",
+                "hyp": "caps"
+              }
+            ],
+            "seconds": 37.88,
+            "rtf": 0.569
+          },
+          "heavy_noise": {
+            "wer": 0.12669683257918551,
+            "substitutions": 23,
+            "deletions": 2,
+            "insertions": 3,
+            "reference_word_count": 221,
+            "hypothesis_word_count": 222,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "kickoff",
+                "hyp": "kiko"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "the"
+              },
+              {
+                "op": "sub",
+                "ref": "delayed",
+                "hyp": "late"
+              },
+              {
+                "op": "sub",
+                "ref": "three",
+                "hyp": "3"
+              },
+              {
+                "op": "del",
+                "ref": "tarmac",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "of",
+                "hyp": "thomas"
+              },
+              {
+                "op": "sub",
+                "ref": "all",
+                "hyp": "hobo"
+              },
+              {
+                "op": "sub",
+                "ref": "a",
+                "hyp": "an"
+              },
+              {
+                "op": "sub",
+                "ref": "normal",
+                "hyp": "orno"
+              },
+              {
+                "op": "sub",
+                "ref": "desk",
+                "hyp": "death"
+              },
+              {
+                "op": "sub",
+                "ref": "rough",
+                "hyp": "rock"
+              },
+              {
+                "op": "sub",
+                "ref": "a",
+                "hyp": "the"
+              },
+              {
+                "op": "sub",
+                "ref": "ive",
+                "hyp": "i"
+              },
+              {
+                "op": "sub",
+                "ref": "backlog",
+                "hyp": "backroader"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "on"
+              },
+              {
+                "op": "sub",
+                "ref": "onboarding",
+                "hyp": "boarding"
+              },
+              {
+                "op": "sub",
+                "ref": "dark",
+                "hyp": "vark"
+              },
+              {
+                "op": "sub",
+                "ref": "mode",
+                "hyp": "most"
+              },
+              {
+                "op": "sub",
+                "ref": "kickoff",
+                "hyp": "kiko"
+              },
+              {
+                "op": "sub",
+                "ref": "of",
+                "hyp": "on"
+              },
+              {
+                "op": "sub",
+                "ref": "backlog",
+                "hyp": "battle"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "two"
+              },
+              {
+                "op": "sub",
+                "ref": "twoweek",
+                "hyp": "weeks"
+              },
+              {
+                "op": "sub",
+                "ref": "sprints",
+                "hyp": "sprint"
+              },
+              {
+                "op": "sub",
+                "ref": "intro",
+                "hyp": "info"
+              },
+              {
+                "op": "del",
+                "ref": "analytics",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "scoping",
+                "hyp": "analyticsgoating"
+              },
+              {
+                "op": "sub",
+                "ref": "back",
+                "hyp": "that"
+              }
+            ],
+            "seconds": 71.14,
+            "rtf": 1.068
+          }
+        }
+      }
+    },
+    {
+      "id": "03-design-review",
+      "audio_seconds": 55.5,
+      "tiers": {
+        "clean": {
+          "wer": 0.05142857142857143,
+          "substitutions": 5,
+          "deletions": 1,
+          "insertions": 3,
+          "reference_word_count": 175,
+          "hypothesis_word_count": 177,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "agreed",
+              "hyp": "great"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "stacker"
+            },
+            {
+              "op": "sub",
+              "ref": "stakeholder",
+              "hyp": "holder"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "walk"
+            },
+            {
+              "op": "sub",
+              "ref": "walkthrough",
+              "hyp": "frow"
+            },
+            {
+              "op": "del",
+              "ref": "want",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "it",
+              "hyp": "wanted"
+            },
+            {
+              "op": "sub",
+              "ref": "payments",
+              "hyp": "payment"
+            }
+          ],
+          "seconds": 31.96,
+          "rtf": 0.576
+        },
+        "light_noise": {
+          "wer": 0.05714285714285714,
+          "substitutions": 6,
+          "deletions": 2,
+          "insertions": 2,
+          "reference_word_count": 175,
+          "hypothesis_word_count": 175,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "cups",
+              "hyp": "cuts"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "stack"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "of"
+            },
+            {
+              "op": "sub",
+              "ref": "stakeholder",
+              "hyp": "holder"
+            },
+            {
+              "op": "del",
+              "ref": "walkthrough",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "pushed",
+              "hyp": "walkprouched"
+            },
+            {
+              "op": "del",
+              "ref": "want",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "it",
+              "hyp": "wanted"
+            },
+            {
+              "op": "sub",
+              "ref": "payments",
+              "hyp": "payment"
+            },
+            {
+              "op": "sub",
+              "ref": "work",
+              "hyp": "worth"
+            }
+          ],
+          "seconds": 18.72,
+          "rtf": 0.337
+        },
+        "heavy_noise": {
+          "wer": 0.08571428571428572,
+          "substitutions": 12,
+          "deletions": 2,
+          "insertions": 1,
+          "reference_word_count": 175,
+          "hypothesis_word_count": 174,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "app",
+              "hyp": "battery"
+            },
+            {
+              "op": "sub",
+              "ref": "redesign",
+              "hyp": "design"
+            },
+            {
+              "op": "sub",
+              "ref": "put",
+              "hyp": "could"
+            },
+            {
+              "op": "del",
+              "ref": "dangerously",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "good",
+              "hyp": "dangerous"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "few"
+            },
+            {
+              "op": "sub",
+              "ref": "fewer",
+              "hyp": "are"
+            },
+            {
+              "op": "sub",
+              "ref": "stakeholder",
+              "hyp": "staccaholder"
+            },
+            {
+              "op": "sub",
+              "ref": "walkthrough",
+              "hyp": "warp"
+            },
+            {
+              "op": "sub",
+              "ref": "pushed",
+              "hyp": "proucushed"
+            },
+            {
+              "op": "del",
+              "ref": "want",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "it",
+              "hyp": "wanted"
+            },
+            {
+              "op": "sub",
+              "ref": "backlog",
+              "hyp": "backup"
+            },
+            {
+              "op": "sub",
+              "ref": "payments",
+              "hyp": "payment"
+            },
+            {
+              "op": "sub",
+              "ref": "work",
+              "hyp": "worth"
+            }
+          ],
+          "seconds": 30.76,
+          "rtf": 0.554
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.05142857142857143,
+            "substitutions": 5,
+            "deletions": 1,
+            "insertions": 3,
+            "reference_word_count": 175,
+            "hypothesis_word_count": 177,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "agreed",
+                "hyp": "great"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "stacker"
+              },
+              {
+                "op": "sub",
+                "ref": "stakeholder",
+                "hyp": "holder"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "walk"
+              },
+              {
+                "op": "sub",
+                "ref": "walkthrough",
+                "hyp": "frow"
+              },
+              {
+                "op": "del",
+                "ref": "want",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "it",
+                "hyp": "wanted"
+              },
+              {
+                "op": "sub",
+                "ref": "payments",
+                "hyp": "payment"
+              }
+            ],
+            "seconds": 31.96,
+            "rtf": 0.576
+          },
+          "light_noise": {
+            "wer": 0.05714285714285714,
+            "substitutions": 6,
+            "deletions": 2,
+            "insertions": 2,
+            "reference_word_count": 175,
+            "hypothesis_word_count": 175,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "cups",
+                "hyp": "cuts"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "stack"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "of"
+              },
+              {
+                "op": "sub",
+                "ref": "stakeholder",
+                "hyp": "holder"
+              },
+              {
+                "op": "del",
+                "ref": "walkthrough",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "pushed",
+                "hyp": "walkprouched"
+              },
+              {
+                "op": "del",
+                "ref": "want",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "it",
+                "hyp": "wanted"
+              },
+              {
+                "op": "sub",
+                "ref": "payments",
+                "hyp": "payment"
+              },
+              {
+                "op": "sub",
+                "ref": "work",
+                "hyp": "worth"
+              }
+            ],
+            "seconds": 18.72,
+            "rtf": 0.337
+          },
+          "heavy_noise": {
+            "wer": 0.08571428571428572,
+            "substitutions": 12,
+            "deletions": 2,
+            "insertions": 1,
+            "reference_word_count": 175,
+            "hypothesis_word_count": 174,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "app",
+                "hyp": "battery"
+              },
+              {
+                "op": "sub",
+                "ref": "redesign",
+                "hyp": "design"
+              },
+              {
+                "op": "sub",
+                "ref": "put",
+                "hyp": "could"
+              },
+              {
+                "op": "del",
+                "ref": "dangerously",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "good",
+                "hyp": "dangerous"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "few"
+              },
+              {
+                "op": "sub",
+                "ref": "fewer",
+                "hyp": "are"
+              },
+              {
+                "op": "sub",
+                "ref": "stakeholder",
+                "hyp": "staccaholder"
+              },
+              {
+                "op": "sub",
+                "ref": "walkthrough",
+                "hyp": "warp"
+              },
+              {
+                "op": "sub",
+                "ref": "pushed",
+                "hyp": "proucushed"
+              },
+              {
+                "op": "del",
+                "ref": "want",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "it",
+                "hyp": "wanted"
+              },
+              {
+                "op": "sub",
+                "ref": "backlog",
+                "hyp": "backup"
+              },
+              {
+                "op": "sub",
+                "ref": "payments",
+                "hyp": "payment"
+              },
+              {
+                "op": "sub",
+                "ref": "work",
+                "hyp": "worth"
+              }
+            ],
+            "seconds": 30.76,
+            "rtf": 0.554
+          }
+        }
+      }
+    },
+    {
+      "id": "04-sprint-status-1",
+      "audio_seconds": 42.2,
+      "tiers": {
+        "clean": {
+          "wer": 0.05511811023622047,
+          "substitutions": 5,
+          "deletions": 0,
+          "insertions": 2,
+          "reference_word_count": 127,
+          "hypothesis_word_count": 129,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "sink"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "on"
+            },
+            {
+              "op": "sub",
+              "ref": "onboarding",
+              "hyp": "boarding"
+            },
+            {
+              "op": "sub",
+              "ref": "queued",
+              "hyp": "cute"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "sink"
+            }
+          ],
+          "seconds": 20.85,
+          "rtf": 0.494
+        },
+        "light_noise": {
+          "wer": 0.07874015748031496,
+          "substitutions": 8,
+          "deletions": 0,
+          "insertions": 2,
+          "reference_word_count": 127,
+          "hypothesis_word_count": 129,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "sink"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "note"
+            },
+            {
+              "op": "sub",
+              "ref": "noted",
+              "hyp": "it"
+            },
+            {
+              "op": "sub",
+              "ref": "dark",
+              "hyp": "dart"
+            },
+            {
+              "op": "sub",
+              "ref": "queued",
+              "hyp": "good"
+            },
+            {
+              "op": "sub",
+              "ref": "wraps",
+              "hyp": "raps"
+            },
+            {
+              "op": "sub",
+              "ref": "scoped",
+              "hyp": "stoked"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "sink"
+            }
+          ],
+          "seconds": 22.24,
+          "rtf": 0.527
+        },
+        "heavy_noise": {
+          "wer": 0.09448818897637795,
+          "substitutions": 8,
+          "deletions": 3,
+          "insertions": 1,
+          "reference_word_count": 127,
+          "hypothesis_word_count": 125,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "of"
+            },
+            {
+              "op": "del",
+              "ref": "hike",
+              "hyp": null
+            },
+            {
+              "op": "del",
+              "ref": "this",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "weekend",
+              "hyp": "highfusweekend"
+            },
+            {
+              "op": "sub",
+              "ref": "tests",
+              "hyp": "test"
+            },
+            {
+              "op": "del",
+              "ref": "dark",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "mode",
+              "hyp": "markmove"
+            },
+            {
+              "op": "sub",
+              "ref": "queued",
+              "hyp": "cute"
+            },
+            {
+              "op": "sub",
+              "ref": "wraps",
+              "hyp": "raps"
+            },
+            {
+              "op": "sub",
+              "ref": "kicked",
+              "hyp": "kick"
+            },
+            {
+              "op": "sub",
+              "ref": "scoped",
+              "hyp": "stoked"
+            }
+          ],
+          "seconds": 27.35,
+          "rtf": 0.648
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.05511811023622047,
+            "substitutions": 5,
+            "deletions": 0,
+            "insertions": 2,
+            "reference_word_count": 127,
+            "hypothesis_word_count": 129,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "sink"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "on"
+              },
+              {
+                "op": "sub",
+                "ref": "onboarding",
+                "hyp": "boarding"
+              },
+              {
+                "op": "sub",
+                "ref": "queued",
+                "hyp": "cute"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "sink"
+              }
+            ],
+            "seconds": 20.85,
+            "rtf": 0.494
+          },
+          "light_noise": {
+            "wer": 0.07874015748031496,
+            "substitutions": 8,
+            "deletions": 0,
+            "insertions": 2,
+            "reference_word_count": 127,
+            "hypothesis_word_count": 129,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "sink"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "note"
+              },
+              {
+                "op": "sub",
+                "ref": "noted",
+                "hyp": "it"
+              },
+              {
+                "op": "sub",
+                "ref": "dark",
+                "hyp": "dart"
+              },
+              {
+                "op": "sub",
+                "ref": "queued",
+                "hyp": "good"
+              },
+              {
+                "op": "sub",
+                "ref": "wraps",
+                "hyp": "raps"
+              },
+              {
+                "op": "sub",
+                "ref": "scoped",
+                "hyp": "stoked"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "sink"
+              }
+            ],
+            "seconds": 22.24,
+            "rtf": 0.527
+          },
+          "heavy_noise": {
+            "wer": 0.09448818897637795,
+            "substitutions": 8,
+            "deletions": 3,
+            "insertions": 1,
+            "reference_word_count": 127,
+            "hypothesis_word_count": 125,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "of"
+              },
+              {
+                "op": "del",
+                "ref": "hike",
+                "hyp": null
+              },
+              {
+                "op": "del",
+                "ref": "this",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "weekend",
+                "hyp": "highfusweekend"
+              },
+              {
+                "op": "sub",
+                "ref": "tests",
+                "hyp": "test"
+              },
+              {
+                "op": "del",
+                "ref": "dark",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "mode",
+                "hyp": "markmove"
+              },
+              {
+                "op": "sub",
+                "ref": "queued",
+                "hyp": "cute"
+              },
+              {
+                "op": "sub",
+                "ref": "wraps",
+                "hyp": "raps"
+              },
+              {
+                "op": "sub",
+                "ref": "kicked",
+                "hyp": "kick"
+              },
+              {
+                "op": "sub",
+                "ref": "scoped",
+                "hyp": "stoked"
+              }
+            ],
+            "seconds": 27.35,
+            "rtf": 0.648
+          }
+        }
+      }
+    },
+    {
+      "id": "05-sprint-status-2",
+      "audio_seconds": 52.8,
+      "tiers": {
+        "clean": {
+          "wer": 0.09937888198757763,
+          "substitutions": 12,
+          "deletions": 0,
+          "insertions": 4,
+          "reference_word_count": 161,
+          "hypothesis_word_count": 165,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "2"
+            },
+            {
+              "op": "sub",
+              "ref": "two",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "sink"
+            },
+            {
+              "op": "sub",
+              "ref": "howd",
+              "hyp": "how"
+            },
+            {
+              "op": "sub",
+              "ref": "three",
+              "hyp": "3"
+            },
+            {
+              "op": "sub",
+              "ref": "two",
+              "hyp": "2"
+            },
+            {
+              "op": "sub",
+              "ref": "payments",
+              "hyp": "payment"
+            },
+            {
+              "op": "sub",
+              "ref": "vendors",
+              "hyp": "vendor"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "payment"
+            },
+            {
+              "op": "sub",
+              "ref": "payments",
+              "hyp": "sign"
+            },
+            {
+              "op": "sub",
+              "ref": "signoff",
+              "hyp": "off"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "half"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "tested"
+            },
+            {
+              "op": "sub",
+              "ref": "halftested",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "agreed",
+              "hyp": "great"
+            }
+          ],
+          "seconds": 29.74,
+          "rtf": 0.563
+        },
+        "light_noise": {
+          "wer": 0.10559006211180125,
+          "substitutions": 13,
+          "deletions": 0,
+          "insertions": 4,
+          "reference_word_count": 161,
+          "hypothesis_word_count": 165,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "2"
+            },
+            {
+              "op": "sub",
+              "ref": "two",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "sink"
+            },
+            {
+              "op": "sub",
+              "ref": "howd",
+              "hyp": "how"
+            },
+            {
+              "op": "sub",
+              "ref": "three",
+              "hyp": "3"
+            },
+            {
+              "op": "sub",
+              "ref": "two",
+              "hyp": "2"
+            },
+            {
+              "op": "sub",
+              "ref": "payments",
+              "hyp": "payment"
+            },
+            {
+              "op": "sub",
+              "ref": "vendors",
+              "hyp": "vendor"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "few"
+            },
+            {
+              "op": "sub",
+              "ref": "qas",
+              "hyp": "as"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "payment"
+            },
+            {
+              "op": "sub",
+              "ref": "payments",
+              "hyp": "sign"
+            },
+            {
+              "op": "sub",
+              "ref": "signoff",
+              "hyp": "off"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "half"
+            },
+            {
+              "op": "sub",
+              "ref": "halftested",
+              "hyp": "tested"
+            },
+            {
+              "op": "sub",
+              "ref": "dark",
+              "hyp": "dart"
+            }
+          ],
+          "seconds": 25.21,
+          "rtf": 0.478
+        },
+        "heavy_noise": {
+          "wer": 0.16770186335403728,
+          "substitutions": 25,
+          "deletions": 0,
+          "insertions": 2,
+          "reference_word_count": 161,
+          "hypothesis_word_count": 163,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "sprint",
+              "hyp": "spring"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "stages"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "sink"
+            },
+            {
+              "op": "sub",
+              "ref": "app",
+              "hyp": "battery"
+            },
+            {
+              "op": "sub",
+              "ref": "redesign",
+              "hyp": "design"
+            },
+            {
+              "op": "sub",
+              "ref": "howd",
+              "hyp": "how"
+            },
+            {
+              "op": "sub",
+              "ref": "leak",
+              "hyp": "lease"
+            },
+            {
+              "op": "sub",
+              "ref": "sprint",
+              "hyp": "spring"
+            },
+            {
+              "op": "sub",
+              "ref": "payments",
+              "hyp": "payment"
+            },
+            {
+              "op": "sub",
+              "ref": "vendors",
+              "hyp": "vendor"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "spring"
+            },
+            {
+              "op": "sub",
+              "ref": "sprint",
+              "hyp": "few"
+            },
+            {
+              "op": "sub",
+              "ref": "qas",
+              "hyp": "as"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "payment"
+            },
+            {
+              "op": "sub",
+              "ref": "payments",
+              "hyp": "sign"
+            },
+            {
+              "op": "sub",
+              "ref": "signoff",
+              "hyp": "off"
+            },
+            {
+              "op": "sub",
+              "ref": "rush",
+              "hyp": "russiad"
+            },
+            {
+              "op": "sub",
+              "ref": "it",
+              "hyp": "through"
+            },
+            {
+              "op": "sub",
+              "ref": "through",
+              "hyp": "half"
+            },
+            {
+              "op": "sub",
+              "ref": "halftested",
+              "hyp": "tested"
+            },
+            {
+              "op": "sub",
+              "ref": "agreed",
+              "hyp": "agree"
+            },
+            {
+              "op": "sub",
+              "ref": "dark",
+              "hyp": "dart"
+            },
+            {
+              "op": "sub",
+              "ref": "sprint",
+              "hyp": "spring"
+            },
+            {
+              "op": "sub",
+              "ref": "scope",
+              "hyp": "spoke"
+            },
+            {
+              "op": "sub",
+              "ref": "yet",
+              "hyp": "yes"
+            },
+            {
+              "op": "sub",
+              "ref": "scoping",
+              "hyp": "sculpting"
+            },
+            {
+              "op": "sub",
+              "ref": "yet",
+              "hyp": "yes"
+            }
+          ],
+          "seconds": 18.87,
+          "rtf": 0.357
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.09937888198757763,
+            "substitutions": 12,
+            "deletions": 0,
+            "insertions": 4,
+            "reference_word_count": 161,
+            "hypothesis_word_count": 165,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "2"
+              },
+              {
+                "op": "sub",
+                "ref": "two",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "sink"
+              },
+              {
+                "op": "sub",
+                "ref": "howd",
+                "hyp": "how"
+              },
+              {
+                "op": "sub",
+                "ref": "three",
+                "hyp": "3"
+              },
+              {
+                "op": "sub",
+                "ref": "two",
+                "hyp": "2"
+              },
+              {
+                "op": "sub",
+                "ref": "payments",
+                "hyp": "payment"
+              },
+              {
+                "op": "sub",
+                "ref": "vendors",
+                "hyp": "vendor"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "payment"
+              },
+              {
+                "op": "sub",
+                "ref": "payments",
+                "hyp": "sign"
+              },
+              {
+                "op": "sub",
+                "ref": "signoff",
+                "hyp": "off"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "half"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "tested"
+              },
+              {
+                "op": "sub",
+                "ref": "halftested",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "agreed",
+                "hyp": "great"
+              }
+            ],
+            "seconds": 29.74,
+            "rtf": 0.563
+          },
+          "light_noise": {
+            "wer": 0.10559006211180125,
+            "substitutions": 13,
+            "deletions": 0,
+            "insertions": 4,
+            "reference_word_count": 161,
+            "hypothesis_word_count": 165,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "2"
+              },
+              {
+                "op": "sub",
+                "ref": "two",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "sink"
+              },
+              {
+                "op": "sub",
+                "ref": "howd",
+                "hyp": "how"
+              },
+              {
+                "op": "sub",
+                "ref": "three",
+                "hyp": "3"
+              },
+              {
+                "op": "sub",
+                "ref": "two",
+                "hyp": "2"
+              },
+              {
+                "op": "sub",
+                "ref": "payments",
+                "hyp": "payment"
+              },
+              {
+                "op": "sub",
+                "ref": "vendors",
+                "hyp": "vendor"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "few"
+              },
+              {
+                "op": "sub",
+                "ref": "qas",
+                "hyp": "as"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "payment"
+              },
+              {
+                "op": "sub",
+                "ref": "payments",
+                "hyp": "sign"
+              },
+              {
+                "op": "sub",
+                "ref": "signoff",
+                "hyp": "off"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "half"
+              },
+              {
+                "op": "sub",
+                "ref": "halftested",
+                "hyp": "tested"
+              },
+              {
+                "op": "sub",
+                "ref": "dark",
+                "hyp": "dart"
+              }
+            ],
+            "seconds": 25.21,
+            "rtf": 0.478
+          },
+          "heavy_noise": {
+            "wer": 0.16770186335403728,
+            "substitutions": 25,
+            "deletions": 0,
+            "insertions": 2,
+            "reference_word_count": 161,
+            "hypothesis_word_count": 163,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "sprint",
+                "hyp": "spring"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "stages"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "sink"
+              },
+              {
+                "op": "sub",
+                "ref": "app",
+                "hyp": "battery"
+              },
+              {
+                "op": "sub",
+                "ref": "redesign",
+                "hyp": "design"
+              },
+              {
+                "op": "sub",
+                "ref": "howd",
+                "hyp": "how"
+              },
+              {
+                "op": "sub",
+                "ref": "leak",
+                "hyp": "lease"
+              },
+              {
+                "op": "sub",
+                "ref": "sprint",
+                "hyp": "spring"
+              },
+              {
+                "op": "sub",
+                "ref": "payments",
+                "hyp": "payment"
+              },
+              {
+                "op": "sub",
+                "ref": "vendors",
+                "hyp": "vendor"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "spring"
+              },
+              {
+                "op": "sub",
+                "ref": "sprint",
+                "hyp": "few"
+              },
+              {
+                "op": "sub",
+                "ref": "qas",
+                "hyp": "as"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "payment"
+              },
+              {
+                "op": "sub",
+                "ref": "payments",
+                "hyp": "sign"
+              },
+              {
+                "op": "sub",
+                "ref": "signoff",
+                "hyp": "off"
+              },
+              {
+                "op": "sub",
+                "ref": "rush",
+                "hyp": "russiad"
+              },
+              {
+                "op": "sub",
+                "ref": "it",
+                "hyp": "through"
+              },
+              {
+                "op": "sub",
+                "ref": "through",
+                "hyp": "half"
+              },
+              {
+                "op": "sub",
+                "ref": "halftested",
+                "hyp": "tested"
+              },
+              {
+                "op": "sub",
+                "ref": "agreed",
+                "hyp": "agree"
+              },
+              {
+                "op": "sub",
+                "ref": "dark",
+                "hyp": "dart"
+              },
+              {
+                "op": "sub",
+                "ref": "sprint",
+                "hyp": "spring"
+              },
+              {
+                "op": "sub",
+                "ref": "scope",
+                "hyp": "spoke"
+              },
+              {
+                "op": "sub",
+                "ref": "yet",
+                "hyp": "yes"
+              },
+              {
+                "op": "sub",
+                "ref": "scoping",
+                "hyp": "sculpting"
+              },
+              {
+                "op": "sub",
+                "ref": "yet",
+                "hyp": "yes"
+              }
+            ],
+            "seconds": 18.87,
+            "rtf": 0.357
+          }
+        }
+      }
+    },
+    {
+      "id": "06-sprint-status-3",
+      "audio_seconds": 54.3,
+      "tiers": {
+        "clean": {
+          "wer": 0.09248554913294797,
+          "substitutions": 12,
+          "deletions": 0,
+          "insertions": 4,
+          "reference_word_count": 173,
+          "hypothesis_word_count": 177,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "3"
+            },
+            {
+              "op": "sub",
+              "ref": "three",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "sink"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "all"
+            },
+            {
+              "op": "sub",
+              "ref": "alright",
+              "hyp": "right"
+            },
+            {
+              "op": "sub",
+              "ref": "three",
+              "hyp": "3"
+            },
+            {
+              "op": "sub",
+              "ref": "payments",
+              "hyp": "payment"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "have"
+            },
+            {
+              "op": "sub",
+              "ref": "halftested",
+              "hyp": "tested"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "on"
+            },
+            {
+              "op": "sub",
+              "ref": "onboarding",
+              "hyp": "boarding"
+            },
+            {
+              "op": "sub",
+              "ref": "nudged",
+              "hyp": "nudge"
+            },
+            {
+              "op": "sub",
+              "ref": "stuck",
+              "hyp": "stock"
+            },
+            {
+              "op": "sub",
+              "ref": "overloaded",
+              "hyp": "overrated"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "sink"
+            }
+          ],
+          "seconds": 15.73,
+          "rtf": 0.29
+        },
+        "light_noise": {
+          "wer": 0.10404624277456648,
+          "substitutions": 14,
+          "deletions": 0,
+          "insertions": 4,
+          "reference_word_count": 173,
+          "hypothesis_word_count": 177,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "3"
+            },
+            {
+              "op": "sub",
+              "ref": "three",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "sink"
+            },
+            {
+              "op": "sub",
+              "ref": "three",
+              "hyp": "3"
+            },
+            {
+              "op": "sub",
+              "ref": "payments",
+              "hyp": "payment"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "you"
+            },
+            {
+              "op": "sub",
+              "ref": "qas",
+              "hyp": "as"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "half"
+            },
+            {
+              "op": "sub",
+              "ref": "halftested",
+              "hyp": "tested"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "use"
+            },
+            {
+              "op": "sub",
+              "ref": "user",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "starts",
+              "hyp": "start"
+            },
+            {
+              "op": "sub",
+              "ref": "dark",
+              "hyp": "dart"
+            },
+            {
+              "op": "sub",
+              "ref": "nudged",
+              "hyp": "nudge"
+            },
+            {
+              "op": "sub",
+              "ref": "stuck",
+              "hyp": "stock"
+            },
+            {
+              "op": "sub",
+              "ref": "overloaded",
+              "hyp": "overrated"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "sink"
+            }
+          ],
+          "seconds": 19.31,
+          "rtf": 0.356
+        },
+        "heavy_noise": {
+          "wer": 0.1329479768786127,
+          "substitutions": 18,
+          "deletions": 0,
+          "insertions": 5,
+          "reference_word_count": 173,
+          "hypothesis_word_count": 178,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "3"
+            },
+            {
+              "op": "sub",
+              "ref": "three",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "of"
+            },
+            {
+              "op": "sub",
+              "ref": "had",
+              "hyp": "have"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "the"
+            },
+            {
+              "op": "sub",
+              "ref": "though",
+              "hyp": "l"
+            },
+            {
+              "op": "sub",
+              "ref": "cards",
+              "hyp": "tard"
+            },
+            {
+              "op": "sub",
+              "ref": "two",
+              "hyp": "2"
+            },
+            {
+              "op": "sub",
+              "ref": "ha",
+              "hyp": "hard"
+            },
+            {
+              "op": "sub",
+              "ref": "three",
+              "hyp": "3"
+            },
+            {
+              "op": "sub",
+              "ref": "payments",
+              "hyp": "payment"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "few"
+            },
+            {
+              "op": "sub",
+              "ref": "qas",
+              "hyp": "as"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "have"
+            },
+            {
+              "op": "sub",
+              "ref": "halftested",
+              "hyp": "tested"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "use"
+            },
+            {
+              "op": "sub",
+              "ref": "user",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "starts",
+              "hyp": "start"
+            },
+            {
+              "op": "sub",
+              "ref": "sprint",
+              "hyp": "spring"
+            },
+            {
+              "op": "sub",
+              "ref": "dark",
+              "hyp": "start"
+            },
+            {
+              "op": "sub",
+              "ref": "nudged",
+              "hyp": "nudge"
+            },
+            {
+              "op": "sub",
+              "ref": "stuck",
+              "hyp": "stop"
+            },
+            {
+              "op": "sub",
+              "ref": "overloaded",
+              "hyp": "overrated"
+            }
+          ],
+          "seconds": 24.04,
+          "rtf": 0.443
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.09248554913294797,
+            "substitutions": 12,
+            "deletions": 0,
+            "insertions": 4,
+            "reference_word_count": 173,
+            "hypothesis_word_count": 177,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "3"
+              },
+              {
+                "op": "sub",
+                "ref": "three",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "sink"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "all"
+              },
+              {
+                "op": "sub",
+                "ref": "alright",
+                "hyp": "right"
+              },
+              {
+                "op": "sub",
+                "ref": "three",
+                "hyp": "3"
+              },
+              {
+                "op": "sub",
+                "ref": "payments",
+                "hyp": "payment"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "have"
+              },
+              {
+                "op": "sub",
+                "ref": "halftested",
+                "hyp": "tested"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "on"
+              },
+              {
+                "op": "sub",
+                "ref": "onboarding",
+                "hyp": "boarding"
+              },
+              {
+                "op": "sub",
+                "ref": "nudged",
+                "hyp": "nudge"
+              },
+              {
+                "op": "sub",
+                "ref": "stuck",
+                "hyp": "stock"
+              },
+              {
+                "op": "sub",
+                "ref": "overloaded",
+                "hyp": "overrated"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "sink"
+              }
+            ],
+            "seconds": 15.73,
+            "rtf": 0.29
+          },
+          "light_noise": {
+            "wer": 0.10404624277456648,
+            "substitutions": 14,
+            "deletions": 0,
+            "insertions": 4,
+            "reference_word_count": 173,
+            "hypothesis_word_count": 177,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "3"
+              },
+              {
+                "op": "sub",
+                "ref": "three",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "sink"
+              },
+              {
+                "op": "sub",
+                "ref": "three",
+                "hyp": "3"
+              },
+              {
+                "op": "sub",
+                "ref": "payments",
+                "hyp": "payment"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "you"
+              },
+              {
+                "op": "sub",
+                "ref": "qas",
+                "hyp": "as"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "half"
+              },
+              {
+                "op": "sub",
+                "ref": "halftested",
+                "hyp": "tested"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "use"
+              },
+              {
+                "op": "sub",
+                "ref": "user",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "starts",
+                "hyp": "start"
+              },
+              {
+                "op": "sub",
+                "ref": "dark",
+                "hyp": "dart"
+              },
+              {
+                "op": "sub",
+                "ref": "nudged",
+                "hyp": "nudge"
+              },
+              {
+                "op": "sub",
+                "ref": "stuck",
+                "hyp": "stock"
+              },
+              {
+                "op": "sub",
+                "ref": "overloaded",
+                "hyp": "overrated"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "sink"
+              }
+            ],
+            "seconds": 19.31,
+            "rtf": 0.356
+          },
+          "heavy_noise": {
+            "wer": 0.1329479768786127,
+            "substitutions": 18,
+            "deletions": 0,
+            "insertions": 5,
+            "reference_word_count": 173,
+            "hypothesis_word_count": 178,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "3"
+              },
+              {
+                "op": "sub",
+                "ref": "three",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "of"
+              },
+              {
+                "op": "sub",
+                "ref": "had",
+                "hyp": "have"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "the"
+              },
+              {
+                "op": "sub",
+                "ref": "though",
+                "hyp": "l"
+              },
+              {
+                "op": "sub",
+                "ref": "cards",
+                "hyp": "tard"
+              },
+              {
+                "op": "sub",
+                "ref": "two",
+                "hyp": "2"
+              },
+              {
+                "op": "sub",
+                "ref": "ha",
+                "hyp": "hard"
+              },
+              {
+                "op": "sub",
+                "ref": "three",
+                "hyp": "3"
+              },
+              {
+                "op": "sub",
+                "ref": "payments",
+                "hyp": "payment"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "few"
+              },
+              {
+                "op": "sub",
+                "ref": "qas",
+                "hyp": "as"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "have"
+              },
+              {
+                "op": "sub",
+                "ref": "halftested",
+                "hyp": "tested"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "use"
+              },
+              {
+                "op": "sub",
+                "ref": "user",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "starts",
+                "hyp": "start"
+              },
+              {
+                "op": "sub",
+                "ref": "sprint",
+                "hyp": "spring"
+              },
+              {
+                "op": "sub",
+                "ref": "dark",
+                "hyp": "start"
+              },
+              {
+                "op": "sub",
+                "ref": "nudged",
+                "hyp": "nudge"
+              },
+              {
+                "op": "sub",
+                "ref": "stuck",
+                "hyp": "stop"
+              },
+              {
+                "op": "sub",
+                "ref": "overloaded",
+                "hyp": "overrated"
+              }
+            ],
+            "seconds": 24.04,
+            "rtf": 0.443
+          }
+        }
+      }
+    },
+    {
+      "id": "07-sprint-status-4",
+      "audio_seconds": 52.1,
+      "tiers": {
+        "clean": {
+          "wer": 0.05161290322580645,
+          "substitutions": 7,
+          "deletions": 0,
+          "insertions": 1,
+          "reference_word_count": 155,
+          "hypothesis_word_count": 156,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "4"
+            },
+            {
+              "op": "sub",
+              "ref": "four",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "of"
+            },
+            {
+              "op": "sub",
+              "ref": "four",
+              "hyp": "4"
+            },
+            {
+              "op": "sub",
+              "ref": "screens",
+              "hyp": "screen"
+            },
+            {
+              "op": "sub",
+              "ref": "shipped",
+              "hyp": "ship"
+            },
+            {
+              "op": "sub",
+              "ref": "got",
+              "hyp": "god"
+            },
+            {
+              "op": "sub",
+              "ref": "pulled",
+              "hyp": "cool"
+            }
+          ],
+          "seconds": 20.59,
+          "rtf": 0.395
+        },
+        "light_noise": {
+          "wer": 0.06451612903225806,
+          "substitutions": 9,
+          "deletions": 0,
+          "insertions": 1,
+          "reference_word_count": 155,
+          "hypothesis_word_count": 156,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "4"
+            },
+            {
+              "op": "sub",
+              "ref": "four",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "sink"
+            },
+            {
+              "op": "sub",
+              "ref": "four",
+              "hyp": "4"
+            },
+            {
+              "op": "sub",
+              "ref": "dark",
+              "hyp": "dart"
+            },
+            {
+              "op": "sub",
+              "ref": "screens",
+              "hyp": "screen"
+            },
+            {
+              "op": "sub",
+              "ref": "shipped",
+              "hyp": "shit"
+            },
+            {
+              "op": "sub",
+              "ref": "got",
+              "hyp": "god"
+            },
+            {
+              "op": "sub",
+              "ref": "pulled",
+              "hyp": "called"
+            }
+          ],
+          "seconds": 22.46,
+          "rtf": 0.431
+        },
+        "heavy_noise": {
+          "wer": 0.09032258064516129,
+          "substitutions": 12,
+          "deletions": 0,
+          "insertions": 2,
+          "reference_word_count": 155,
+          "hypothesis_word_count": 157,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "spring"
+            },
+            {
+              "op": "sub",
+              "ref": "sprint",
+              "hyp": "4"
+            },
+            {
+              "op": "sub",
+              "ref": "four",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "of"
+            },
+            {
+              "op": "sub",
+              "ref": "sprint",
+              "hyp": "spring"
+            },
+            {
+              "op": "sub",
+              "ref": "four",
+              "hyp": "4"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "test"
+            },
+            {
+              "op": "sub",
+              "ref": "testings",
+              "hyp": "things"
+            },
+            {
+              "op": "sub",
+              "ref": "dark",
+              "hyp": "start"
+            },
+            {
+              "op": "sub",
+              "ref": "of",
+              "hyp": "on"
+            },
+            {
+              "op": "sub",
+              "ref": "screens",
+              "hyp": "screen"
+            },
+            {
+              "op": "sub",
+              "ref": "shipped",
+              "hyp": "ship"
+            },
+            {
+              "op": "sub",
+              "ref": "got",
+              "hyp": "god"
+            },
+            {
+              "op": "sub",
+              "ref": "pulled",
+              "hyp": "called"
+            }
+          ],
+          "seconds": 19.81,
+          "rtf": 0.38
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.05161290322580645,
+            "substitutions": 7,
+            "deletions": 0,
+            "insertions": 1,
+            "reference_word_count": 155,
+            "hypothesis_word_count": 156,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "4"
+              },
+              {
+                "op": "sub",
+                "ref": "four",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "of"
+              },
+              {
+                "op": "sub",
+                "ref": "four",
+                "hyp": "4"
+              },
+              {
+                "op": "sub",
+                "ref": "screens",
+                "hyp": "screen"
+              },
+              {
+                "op": "sub",
+                "ref": "shipped",
+                "hyp": "ship"
+              },
+              {
+                "op": "sub",
+                "ref": "got",
+                "hyp": "god"
+              },
+              {
+                "op": "sub",
+                "ref": "pulled",
+                "hyp": "cool"
+              }
+            ],
+            "seconds": 20.59,
+            "rtf": 0.395
+          },
+          "light_noise": {
+            "wer": 0.06451612903225806,
+            "substitutions": 9,
+            "deletions": 0,
+            "insertions": 1,
+            "reference_word_count": 155,
+            "hypothesis_word_count": 156,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "4"
+              },
+              {
+                "op": "sub",
+                "ref": "four",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "sink"
+              },
+              {
+                "op": "sub",
+                "ref": "four",
+                "hyp": "4"
+              },
+              {
+                "op": "sub",
+                "ref": "dark",
+                "hyp": "dart"
+              },
+              {
+                "op": "sub",
+                "ref": "screens",
+                "hyp": "screen"
+              },
+              {
+                "op": "sub",
+                "ref": "shipped",
+                "hyp": "shit"
+              },
+              {
+                "op": "sub",
+                "ref": "got",
+                "hyp": "god"
+              },
+              {
+                "op": "sub",
+                "ref": "pulled",
+                "hyp": "called"
+              }
+            ],
+            "seconds": 22.46,
+            "rtf": 0.431
+          },
+          "heavy_noise": {
+            "wer": 0.09032258064516129,
+            "substitutions": 12,
+            "deletions": 0,
+            "insertions": 2,
+            "reference_word_count": 155,
+            "hypothesis_word_count": 157,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "spring"
+              },
+              {
+                "op": "sub",
+                "ref": "sprint",
+                "hyp": "4"
+              },
+              {
+                "op": "sub",
+                "ref": "four",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "of"
+              },
+              {
+                "op": "sub",
+                "ref": "sprint",
+                "hyp": "spring"
+              },
+              {
+                "op": "sub",
+                "ref": "four",
+                "hyp": "4"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "test"
+              },
+              {
+                "op": "sub",
+                "ref": "testings",
+                "hyp": "things"
+              },
+              {
+                "op": "sub",
+                "ref": "dark",
+                "hyp": "start"
+              },
+              {
+                "op": "sub",
+                "ref": "of",
+                "hyp": "on"
+              },
+              {
+                "op": "sub",
+                "ref": "screens",
+                "hyp": "screen"
+              },
+              {
+                "op": "sub",
+                "ref": "shipped",
+                "hyp": "ship"
+              },
+              {
+                "op": "sub",
+                "ref": "got",
+                "hyp": "god"
+              },
+              {
+                "op": "sub",
+                "ref": "pulled",
+                "hyp": "called"
+              }
+            ],
+            "seconds": 19.81,
+            "rtf": 0.38
+          }
+        }
+      }
+    },
+    {
+      "id": "08-sprint-status-5",
+      "audio_seconds": 45.8,
+      "tiers": {
+        "clean": {
+          "wer": 0.03546099290780142,
+          "substitutions": 4,
+          "deletions": 0,
+          "insertions": 1,
+          "reference_word_count": 141,
+          "hypothesis_word_count": 142,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "5"
+            },
+            {
+              "op": "sub",
+              "ref": "five",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "forty",
+              "hyp": "40"
+            },
+            {
+              "op": "sub",
+              "ref": "shipped",
+              "hyp": "ship"
+            }
+          ],
+          "seconds": 26.79,
+          "rtf": 0.585
+        },
+        "light_noise": {
+          "wer": 0.09219858156028368,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 3,
+          "reference_word_count": 141,
+          "hypothesis_word_count": 144,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "5"
+            },
+            {
+              "op": "sub",
+              "ref": "five",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "of"
+            },
+            {
+              "op": "sub",
+              "ref": "forty",
+              "hyp": "40"
+            },
+            {
+              "op": "sub",
+              "ref": "shipped",
+              "hyp": "ship"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "few"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "as"
+            },
+            {
+              "op": "sub",
+              "ref": "qas",
+              "hyp": "we"
+            },
+            {
+              "op": "sub",
+              "ref": "rerunning",
+              "hyp": "running"
+            },
+            {
+              "op": "sub",
+              "ref": "shipped",
+              "hyp": "ship"
+            },
+            {
+              "op": "sub",
+              "ref": "the",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "copy",
+              "hyp": "coffee"
+            },
+            {
+              "op": "sub",
+              "ref": "load",
+              "hyp": "low"
+            }
+          ],
+          "seconds": 14.71,
+          "rtf": 0.321
+        },
+        "heavy_noise": {
+          "wer": 0.12056737588652482,
+          "substitutions": 13,
+          "deletions": 1,
+          "insertions": 3,
+          "reference_word_count": 141,
+          "hypothesis_word_count": 143,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "sprint",
+              "hyp": "spring"
+            },
+            {
+              "op": "sub",
+              "ref": "five",
+              "hyp": "5"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "stages"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "synced"
+            },
+            {
+              "op": "sub",
+              "ref": "forty",
+              "hyp": "40"
+            },
+            {
+              "op": "sub",
+              "ref": "shipped",
+              "hyp": "ship"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "few"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "as"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "we"
+            },
+            {
+              "op": "sub",
+              "ref": "qas",
+              "hyp": "run"
+            },
+            {
+              "op": "sub",
+              "ref": "rerunning",
+              "hyp": "in"
+            },
+            {
+              "op": "sub",
+              "ref": "dark",
+              "hyp": "part"
+            },
+            {
+              "op": "sub",
+              "ref": "the",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "closed",
+              "hyp": "close"
+            },
+            {
+              "op": "del",
+              "ref": "wired",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "up",
+              "hyp": "wider"
+            },
+            {
+              "op": "sub",
+              "ref": "load",
+              "hyp": "low"
+            }
+          ],
+          "seconds": 15.87,
+          "rtf": 0.346
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.03546099290780142,
+            "substitutions": 4,
+            "deletions": 0,
+            "insertions": 1,
+            "reference_word_count": 141,
+            "hypothesis_word_count": 142,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "5"
+              },
+              {
+                "op": "sub",
+                "ref": "five",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "forty",
+                "hyp": "40"
+              },
+              {
+                "op": "sub",
+                "ref": "shipped",
+                "hyp": "ship"
+              }
+            ],
+            "seconds": 26.79,
+            "rtf": 0.585
+          },
+          "light_noise": {
+            "wer": 0.09219858156028368,
+            "substitutions": 10,
+            "deletions": 0,
+            "insertions": 3,
+            "reference_word_count": 141,
+            "hypothesis_word_count": 144,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "5"
+              },
+              {
+                "op": "sub",
+                "ref": "five",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "of"
+              },
+              {
+                "op": "sub",
+                "ref": "forty",
+                "hyp": "40"
+              },
+              {
+                "op": "sub",
+                "ref": "shipped",
+                "hyp": "ship"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "few"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "as"
+              },
+              {
+                "op": "sub",
+                "ref": "qas",
+                "hyp": "we"
+              },
+              {
+                "op": "sub",
+                "ref": "rerunning",
+                "hyp": "running"
+              },
+              {
+                "op": "sub",
+                "ref": "shipped",
+                "hyp": "ship"
+              },
+              {
+                "op": "sub",
+                "ref": "the",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "copy",
+                "hyp": "coffee"
+              },
+              {
+                "op": "sub",
+                "ref": "load",
+                "hyp": "low"
+              }
+            ],
+            "seconds": 14.71,
+            "rtf": 0.321
+          },
+          "heavy_noise": {
+            "wer": 0.12056737588652482,
+            "substitutions": 13,
+            "deletions": 1,
+            "insertions": 3,
+            "reference_word_count": 141,
+            "hypothesis_word_count": 143,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "sprint",
+                "hyp": "spring"
+              },
+              {
+                "op": "sub",
+                "ref": "five",
+                "hyp": "5"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "stages"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "synced"
+              },
+              {
+                "op": "sub",
+                "ref": "forty",
+                "hyp": "40"
+              },
+              {
+                "op": "sub",
+                "ref": "shipped",
+                "hyp": "ship"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "few"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "as"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "we"
+              },
+              {
+                "op": "sub",
+                "ref": "qas",
+                "hyp": "run"
+              },
+              {
+                "op": "sub",
+                "ref": "rerunning",
+                "hyp": "in"
+              },
+              {
+                "op": "sub",
+                "ref": "dark",
+                "hyp": "part"
+              },
+              {
+                "op": "sub",
+                "ref": "the",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "closed",
+                "hyp": "close"
+              },
+              {
+                "op": "del",
+                "ref": "wired",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "up",
+                "hyp": "wider"
+              },
+              {
+                "op": "sub",
+                "ref": "load",
+                "hyp": "low"
+              }
+            ],
+            "seconds": 15.87,
+            "rtf": 0.346
+          }
+        }
+      }
+    },
+    {
+      "id": "09-sprint-status-6",
+      "audio_seconds": 42.7,
+      "tiers": {
+        "clean": {
+          "wer": 0.07575757575757576,
+          "substitutions": 7,
+          "deletions": 0,
+          "insertions": 3,
+          "reference_word_count": 132,
+          "hypothesis_word_count": 135,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "6"
+            },
+            {
+              "op": "sub",
+              "ref": "six",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "chewed",
+              "hyp": "tune"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "all"
+            },
+            {
+              "op": "sub",
+              "ref": "alright",
+              "hyp": "right"
+            },
+            {
+              "op": "sub",
+              "ref": "six",
+              "hyp": "6"
+            },
+            {
+              "op": "sub",
+              "ref": "there",
+              "hyp": "their"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "off"
+            },
+            {
+              "op": "sub",
+              "ref": "after",
+              "hyp": "to"
+            }
+          ],
+          "seconds": 17.97,
+          "rtf": 0.421
+        },
+        "light_noise": {
+          "wer": 0.10606060606060606,
+          "substitutions": 10,
+          "deletions": 1,
+          "insertions": 3,
+          "reference_word_count": 132,
+          "hypothesis_word_count": 134,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "6"
+            },
+            {
+              "op": "sub",
+              "ref": "six",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "sink"
+            },
+            {
+              "op": "sub",
+              "ref": "chewed",
+              "hyp": "should"
+            },
+            {
+              "op": "sub",
+              "ref": "through",
+              "hyp": "brew"
+            },
+            {
+              "op": "sub",
+              "ref": "six",
+              "hyp": "6"
+            },
+            {
+              "op": "del",
+              "ref": "im",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "comfortable",
+              "hyp": "uncomfortable"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "up"
+            },
+            {
+              "op": "sub",
+              "ref": "after",
+              "hyp": "to"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "sink"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "the"
+            },
+            {
+              "op": "sub",
+              "ref": "before",
+              "hyp": "four"
+            }
+          ],
+          "seconds": 13.11,
+          "rtf": 0.307
+        },
+        "heavy_noise": {
+          "wer": 0.11363636363636363,
+          "substitutions": 12,
+          "deletions": 2,
+          "insertions": 1,
+          "reference_word_count": 132,
+          "hypothesis_word_count": 131,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "sprint",
+              "hyp": "spring"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "sync",
+              "hyp": "instinct"
+            },
+            {
+              "op": "sub",
+              "ref": "chewed",
+              "hyp": "should"
+            },
+            {
+              "op": "sub",
+              "ref": "sprint",
+              "hyp": "spring"
+            },
+            {
+              "op": "del",
+              "ref": "fully",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "stable",
+              "hyp": "fullestable"
+            },
+            {
+              "op": "del",
+              "ref": "im",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "comfortable",
+              "hyp": "uncomfortable"
+            },
+            {
+              "op": "sub",
+              "ref": "load",
+              "hyp": "low"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "up"
+            },
+            {
+              "op": "sub",
+              "ref": "after",
+              "hyp": "to"
+            },
+            {
+              "op": "sub",
+              "ref": "sprint",
+              "hyp": "spring"
+            },
+            {
+              "op": "sub",
+              "ref": "p0",
+              "hyp": "t0"
+            },
+            {
+              "op": "sub",
+              "ref": "sprint",
+              "hyp": "spring"
+            }
+          ],
+          "seconds": 15.0,
+          "rtf": 0.351
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.07575757575757576,
+            "substitutions": 7,
+            "deletions": 0,
+            "insertions": 3,
+            "reference_word_count": 132,
+            "hypothesis_word_count": 135,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "6"
+              },
+              {
+                "op": "sub",
+                "ref": "six",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "chewed",
+                "hyp": "tune"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "all"
+              },
+              {
+                "op": "sub",
+                "ref": "alright",
+                "hyp": "right"
+              },
+              {
+                "op": "sub",
+                "ref": "six",
+                "hyp": "6"
+              },
+              {
+                "op": "sub",
+                "ref": "there",
+                "hyp": "their"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "off"
+              },
+              {
+                "op": "sub",
+                "ref": "after",
+                "hyp": "to"
+              }
+            ],
+            "seconds": 17.97,
+            "rtf": 0.421
+          },
+          "light_noise": {
+            "wer": 0.10606060606060606,
+            "substitutions": 10,
+            "deletions": 1,
+            "insertions": 3,
+            "reference_word_count": 132,
+            "hypothesis_word_count": 134,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "6"
+              },
+              {
+                "op": "sub",
+                "ref": "six",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "sink"
+              },
+              {
+                "op": "sub",
+                "ref": "chewed",
+                "hyp": "should"
+              },
+              {
+                "op": "sub",
+                "ref": "through",
+                "hyp": "brew"
+              },
+              {
+                "op": "sub",
+                "ref": "six",
+                "hyp": "6"
+              },
+              {
+                "op": "del",
+                "ref": "im",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "comfortable",
+                "hyp": "uncomfortable"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "up"
+              },
+              {
+                "op": "sub",
+                "ref": "after",
+                "hyp": "to"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "sink"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "the"
+              },
+              {
+                "op": "sub",
+                "ref": "before",
+                "hyp": "four"
+              }
+            ],
+            "seconds": 13.11,
+            "rtf": 0.307
+          },
+          "heavy_noise": {
+            "wer": 0.11363636363636363,
+            "substitutions": 12,
+            "deletions": 2,
+            "insertions": 1,
+            "reference_word_count": 132,
+            "hypothesis_word_count": 131,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "sprint",
+                "hyp": "spring"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "sync",
+                "hyp": "instinct"
+              },
+              {
+                "op": "sub",
+                "ref": "chewed",
+                "hyp": "should"
+              },
+              {
+                "op": "sub",
+                "ref": "sprint",
+                "hyp": "spring"
+              },
+              {
+                "op": "del",
+                "ref": "fully",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "stable",
+                "hyp": "fullestable"
+              },
+              {
+                "op": "del",
+                "ref": "im",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "comfortable",
+                "hyp": "uncomfortable"
+              },
+              {
+                "op": "sub",
+                "ref": "load",
+                "hyp": "low"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "up"
+              },
+              {
+                "op": "sub",
+                "ref": "after",
+                "hyp": "to"
+              },
+              {
+                "op": "sub",
+                "ref": "sprint",
+                "hyp": "spring"
+              },
+              {
+                "op": "sub",
+                "ref": "p0",
+                "hyp": "t0"
+              },
+              {
+                "op": "sub",
+                "ref": "sprint",
+                "hyp": "spring"
+              }
+            ],
+            "seconds": 15.0,
+            "rtf": 0.351
+          }
+        }
+      }
+    },
+    {
+      "id": "10-sprint-status-7",
+      "audio_seconds": 42.5,
+      "tiers": {
+        "clean": {
+          "wer": 0.06870229007633588,
+          "substitutions": 6,
+          "deletions": 0,
+          "insertions": 3,
+          "reference_word_count": 131,
+          "hypothesis_word_count": 134,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "7"
+            },
+            {
+              "op": "sub",
+              "ref": "seven",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "of"
+            },
+            {
+              "op": "sub",
+              "ref": "before",
+              "hyp": "biffle"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "again",
+              "hyp": "game"
+            },
+            {
+              "op": "sub",
+              "ref": "id",
+              "hyp": "i"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "off"
+            },
+            {
+              "op": "sub",
+              "ref": "after",
+              "hyp": "to"
+            }
+          ],
+          "seconds": 14.06,
+          "rtf": 0.331
+        },
+        "light_noise": {
+          "wer": 0.07633587786259542,
+          "substitutions": 7,
+          "deletions": 0,
+          "insertions": 3,
+          "reference_word_count": 131,
+          "hypothesis_word_count": 134,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "7"
+            },
+            {
+              "op": "sub",
+              "ref": "seven",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "a"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "again",
+              "hyp": "game"
+            },
+            {
+              "op": "sub",
+              "ref": "id",
+              "hyp": "i"
+            },
+            {
+              "op": "sub",
+              "ref": "onboarding",
+              "hyp": "unboarding"
+            },
+            {
+              "op": "sub",
+              "ref": "dark",
+              "hyp": "dot"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "up"
+            },
+            {
+              "op": "sub",
+              "ref": "after",
+              "hyp": "to"
+            }
+          ],
+          "seconds": 14.02,
+          "rtf": 0.33
+        },
+        "heavy_noise": {
+          "wer": 0.10687022900763359,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 4,
+          "reference_word_count": 131,
+          "hypothesis_word_count": 135,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "7"
+            },
+            {
+              "op": "sub",
+              "ref": "seven",
+              "hyp": "stage"
+            },
+            {
+              "op": "sub",
+              "ref": "status",
+              "hyp": "of"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "5"
+            },
+            {
+              "op": "sub",
+              "ref": "before",
+              "hyp": "or"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "again",
+              "hyp": "game"
+            },
+            {
+              "op": "sub",
+              "ref": "id",
+              "hyp": "i"
+            },
+            {
+              "op": "sub",
+              "ref": "onboarding",
+              "hyp": "umbodding"
+            },
+            {
+              "op": "sub",
+              "ref": "dark",
+              "hyp": "dot"
+            },
+            {
+              "op": "sub",
+              "ref": "agreed",
+              "hyp": "agree"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "up"
+            },
+            {
+              "op": "sub",
+              "ref": "after",
+              "hyp": "to"
+            },
+            {
+              "op": "sub",
+              "ref": "then",
+              "hyp": "them"
+            }
+          ],
+          "seconds": 17.59,
+          "rtf": 0.414
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.06870229007633588,
+            "substitutions": 6,
+            "deletions": 0,
+            "insertions": 3,
+            "reference_word_count": 131,
+            "hypothesis_word_count": 134,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "7"
+              },
+              {
+                "op": "sub",
+                "ref": "seven",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "of"
+              },
+              {
+                "op": "sub",
+                "ref": "before",
+                "hyp": "biffle"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "again",
+                "hyp": "game"
+              },
+              {
+                "op": "sub",
+                "ref": "id",
+                "hyp": "i"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "off"
+              },
+              {
+                "op": "sub",
+                "ref": "after",
+                "hyp": "to"
+              }
+            ],
+            "seconds": 14.06,
+            "rtf": 0.331
+          },
+          "light_noise": {
+            "wer": 0.07633587786259542,
+            "substitutions": 7,
+            "deletions": 0,
+            "insertions": 3,
+            "reference_word_count": 131,
+            "hypothesis_word_count": 134,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "7"
+              },
+              {
+                "op": "sub",
+                "ref": "seven",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "a"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "again",
+                "hyp": "game"
+              },
+              {
+                "op": "sub",
+                "ref": "id",
+                "hyp": "i"
+              },
+              {
+                "op": "sub",
+                "ref": "onboarding",
+                "hyp": "unboarding"
+              },
+              {
+                "op": "sub",
+                "ref": "dark",
+                "hyp": "dot"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "up"
+              },
+              {
+                "op": "sub",
+                "ref": "after",
+                "hyp": "to"
+              }
+            ],
+            "seconds": 14.02,
+            "rtf": 0.33
+          },
+          "heavy_noise": {
+            "wer": 0.10687022900763359,
+            "substitutions": 10,
+            "deletions": 0,
+            "insertions": 4,
+            "reference_word_count": 131,
+            "hypothesis_word_count": 135,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "7"
+              },
+              {
+                "op": "sub",
+                "ref": "seven",
+                "hyp": "stage"
+              },
+              {
+                "op": "sub",
+                "ref": "status",
+                "hyp": "of"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "5"
+              },
+              {
+                "op": "sub",
+                "ref": "before",
+                "hyp": "or"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "again",
+                "hyp": "game"
+              },
+              {
+                "op": "sub",
+                "ref": "id",
+                "hyp": "i"
+              },
+              {
+                "op": "sub",
+                "ref": "onboarding",
+                "hyp": "umbodding"
+              },
+              {
+                "op": "sub",
+                "ref": "dark",
+                "hyp": "dot"
+              },
+              {
+                "op": "sub",
+                "ref": "agreed",
+                "hyp": "agree"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "up"
+              },
+              {
+                "op": "sub",
+                "ref": "after",
+                "hyp": "to"
+              },
+              {
+                "op": "sub",
+                "ref": "then",
+                "hyp": "them"
+              }
+            ],
+            "seconds": 17.59,
+            "rtf": 0.414
+          }
+        }
+      }
+    },
+    {
+      "id": "11-test-plan-review",
+      "audio_seconds": 46.7,
+      "tiers": {
+        "clean": {
+          "wer": 0.052980132450331126,
+          "substitutions": 5,
+          "deletions": 0,
+          "insertions": 3,
+          "reference_word_count": 151,
+          "hypothesis_word_count": 154,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "okay",
+              "hyp": "ok"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "p"
+            },
+            {
+              "op": "sub",
+              "ref": "p0",
+              "hyp": "zero"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "p"
+            },
+            {
+              "op": "sub",
+              "ref": "p1",
+              "hyp": "one"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "response"
+            },
+            {
+              "op": "sub",
+              "ref": "responsetime",
+              "hyp": "time"
+            },
+            {
+              "op": "sub",
+              "ref": "sounds",
+              "hyp": "sound"
+            }
+          ],
+          "seconds": 14.74,
+          "rtf": 0.316
+        },
+        "light_noise": {
+          "wer": 0.08609271523178808,
+          "substitutions": 9,
+          "deletions": 2,
+          "insertions": 2,
+          "reference_word_count": 151,
+          "hypothesis_word_count": 151,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "held",
+              "hyp": "hell"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "opt"
+            },
+            {
+              "op": "sub",
+              "ref": "after",
+              "hyp": "to"
+            },
+            {
+              "op": "del",
+              "ref": "load",
+              "hyp": null
+            },
+            {
+              "op": "del",
+              "ref": "and",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "performance",
+              "hyp": "lowthanperformance"
+            },
+            {
+              "op": "sub",
+              "ref": "scoped",
+              "hyp": "spoke"
+            },
+            {
+              "op": "sub",
+              "ref": "entry",
+              "hyp": "free"
+            },
+            {
+              "op": "sub",
+              "ref": "zero",
+              "hyp": "0"
+            },
+            {
+              "op": "sub",
+              "ref": "bugs",
+              "hyp": "bums"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "response"
+            },
+            {
+              "op": "sub",
+              "ref": "responsetime",
+              "hyp": "time"
+            },
+            {
+              "op": "sub",
+              "ref": "sounds",
+              "hyp": "sound"
+            }
+          ],
+          "seconds": 15.11,
+          "rtf": 0.324
+        },
+        "heavy_noise": {
+          "wer": 0.059602649006622516,
+          "substitutions": 7,
+          "deletions": 1,
+          "insertions": 1,
+          "reference_word_count": 151,
+          "hypothesis_word_count": 151,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "scoped",
+              "hyp": "spoke"
+            },
+            {
+              "op": "sub",
+              "ref": "work",
+              "hyp": "were"
+            },
+            {
+              "op": "sub",
+              "ref": "zero",
+              "hyp": "0"
+            },
+            {
+              "op": "del",
+              "ref": "or",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "bugs",
+              "hyp": "buns"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "response"
+            },
+            {
+              "op": "sub",
+              "ref": "responsetime",
+              "hyp": "time"
+            },
+            {
+              "op": "sub",
+              "ref": "sounds",
+              "hyp": "sound"
+            },
+            {
+              "op": "sub",
+              "ref": "triage",
+              "hyp": "freeage"
+            }
+          ],
+          "seconds": 16.11,
+          "rtf": 0.345
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.052980132450331126,
+            "substitutions": 5,
+            "deletions": 0,
+            "insertions": 3,
+            "reference_word_count": 151,
+            "hypothesis_word_count": 154,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "okay",
+                "hyp": "ok"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "p"
+              },
+              {
+                "op": "sub",
+                "ref": "p0",
+                "hyp": "zero"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "p"
+              },
+              {
+                "op": "sub",
+                "ref": "p1",
+                "hyp": "one"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "response"
+              },
+              {
+                "op": "sub",
+                "ref": "responsetime",
+                "hyp": "time"
+              },
+              {
+                "op": "sub",
+                "ref": "sounds",
+                "hyp": "sound"
+              }
+            ],
+            "seconds": 14.74,
+            "rtf": 0.316
+          },
+          "light_noise": {
+            "wer": 0.08609271523178808,
+            "substitutions": 9,
+            "deletions": 2,
+            "insertions": 2,
+            "reference_word_count": 151,
+            "hypothesis_word_count": 151,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "held",
+                "hyp": "hell"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "opt"
+              },
+              {
+                "op": "sub",
+                "ref": "after",
+                "hyp": "to"
+              },
+              {
+                "op": "del",
+                "ref": "load",
+                "hyp": null
+              },
+              {
+                "op": "del",
+                "ref": "and",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "performance",
+                "hyp": "lowthanperformance"
+              },
+              {
+                "op": "sub",
+                "ref": "scoped",
+                "hyp": "spoke"
+              },
+              {
+                "op": "sub",
+                "ref": "entry",
+                "hyp": "free"
+              },
+              {
+                "op": "sub",
+                "ref": "zero",
+                "hyp": "0"
+              },
+              {
+                "op": "sub",
+                "ref": "bugs",
+                "hyp": "bums"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "response"
+              },
+              {
+                "op": "sub",
+                "ref": "responsetime",
+                "hyp": "time"
+              },
+              {
+                "op": "sub",
+                "ref": "sounds",
+                "hyp": "sound"
+              }
+            ],
+            "seconds": 15.11,
+            "rtf": 0.324
+          },
+          "heavy_noise": {
+            "wer": 0.059602649006622516,
+            "substitutions": 7,
+            "deletions": 1,
+            "insertions": 1,
+            "reference_word_count": 151,
+            "hypothesis_word_count": 151,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "scoped",
+                "hyp": "spoke"
+              },
+              {
+                "op": "sub",
+                "ref": "work",
+                "hyp": "were"
+              },
+              {
+                "op": "sub",
+                "ref": "zero",
+                "hyp": "0"
+              },
+              {
+                "op": "del",
+                "ref": "or",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "bugs",
+                "hyp": "buns"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "response"
+              },
+              {
+                "op": "sub",
+                "ref": "responsetime",
+                "hyp": "time"
+              },
+              {
+                "op": "sub",
+                "ref": "sounds",
+                "hyp": "sound"
+              },
+              {
+                "op": "sub",
+                "ref": "triage",
+                "hyp": "freeage"
+              }
+            ],
+            "seconds": 16.11,
+            "rtf": 0.345
+          }
+        }
+      }
+    },
+    {
+      "id": "12-uat-kickoff",
+      "audio_seconds": 50.0,
+      "tiers": {
+        "clean": {
+          "wer": 0.03355704697986577,
+          "substitutions": 4,
+          "deletions": 0,
+          "insertions": 1,
+          "reference_word_count": 149,
+          "hypothesis_word_count": 150,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "eight",
+              "hyp": "8"
+            },
+            {
+              "op": "sub",
+              "ref": "two",
+              "hyp": "2"
+            },
+            {
+              "op": "sub",
+              "ref": "and",
+              "hyp": "in"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "to"
+            },
+            {
+              "op": "sub",
+              "ref": "again",
+              "hyp": "gain"
+            }
+          ],
+          "seconds": 13.42,
+          "rtf": 0.268
+        },
+        "light_noise": {
+          "wer": 0.06040268456375839,
+          "substitutions": 7,
+          "deletions": 0,
+          "insertions": 2,
+          "reference_word_count": 149,
+          "hypothesis_word_count": 151,
+          "diffs": [
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "all"
+            },
+            {
+              "op": "sub",
+              "ref": "always",
+              "hyp": "ways"
+            },
+            {
+              "op": "sub",
+              "ref": "eight",
+              "hyp": "8"
+            },
+            {
+              "op": "sub",
+              "ref": "two",
+              "hyp": "2"
+            },
+            {
+              "op": "sub",
+              "ref": "and",
+              "hyp": "in"
+            },
+            {
+              "op": "sub",
+              "ref": "paths",
+              "hyp": "palms"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "to"
+            },
+            {
+              "op": "sub",
+              "ref": "again",
+              "hyp": "gain"
+            },
+            {
+              "op": "sub",
+              "ref": "calls",
+              "hyp": "call"
+            }
+          ],
+          "seconds": 16.82,
+          "rtf": 0.336
+        },
+        "heavy_noise": {
+          "wer": 0.0738255033557047,
+          "substitutions": 10,
+          "deletions": 0,
+          "insertions": 1,
+          "reference_word_count": 149,
+          "hypothesis_word_count": 150,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "is",
+              "hyp": "this"
+            },
+            {
+              "op": "sub",
+              "ref": "eight",
+              "hyp": "8"
+            },
+            {
+              "op": "sub",
+              "ref": "two",
+              "hyp": "2"
+            },
+            {
+              "op": "sub",
+              "ref": "and",
+              "hyp": "in"
+            },
+            {
+              "op": "sub",
+              "ref": "variant",
+              "hyp": "variants"
+            },
+            {
+              "op": "sub",
+              "ref": "paths",
+              "hyp": "pounds"
+            },
+            {
+              "op": "sub",
+              "ref": "prebrief",
+              "hyp": "preread"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "to"
+            },
+            {
+              "op": "sub",
+              "ref": "again",
+              "hyp": "gain"
+            },
+            {
+              "op": "sub",
+              "ref": "at",
+              "hyp": "of"
+            },
+            {
+              "op": "sub",
+              "ref": "calls",
+              "hyp": "call"
+            }
+          ],
+          "seconds": 14.95,
+          "rtf": 0.299
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.03355704697986577,
+            "substitutions": 4,
+            "deletions": 0,
+            "insertions": 1,
+            "reference_word_count": 149,
+            "hypothesis_word_count": 150,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "eight",
+                "hyp": "8"
+              },
+              {
+                "op": "sub",
+                "ref": "two",
+                "hyp": "2"
+              },
+              {
+                "op": "sub",
+                "ref": "and",
+                "hyp": "in"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "to"
+              },
+              {
+                "op": "sub",
+                "ref": "again",
+                "hyp": "gain"
+              }
+            ],
+            "seconds": 13.42,
+            "rtf": 0.268
+          },
+          "light_noise": {
+            "wer": 0.06040268456375839,
+            "substitutions": 7,
+            "deletions": 0,
+            "insertions": 2,
+            "reference_word_count": 149,
+            "hypothesis_word_count": 151,
+            "diffs": [
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "all"
+              },
+              {
+                "op": "sub",
+                "ref": "always",
+                "hyp": "ways"
+              },
+              {
+                "op": "sub",
+                "ref": "eight",
+                "hyp": "8"
+              },
+              {
+                "op": "sub",
+                "ref": "two",
+                "hyp": "2"
+              },
+              {
+                "op": "sub",
+                "ref": "and",
+                "hyp": "in"
+              },
+              {
+                "op": "sub",
+                "ref": "paths",
+                "hyp": "palms"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "to"
+              },
+              {
+                "op": "sub",
+                "ref": "again",
+                "hyp": "gain"
+              },
+              {
+                "op": "sub",
+                "ref": "calls",
+                "hyp": "call"
+              }
+            ],
+            "seconds": 16.82,
+            "rtf": 0.336
+          },
+          "heavy_noise": {
+            "wer": 0.0738255033557047,
+            "substitutions": 10,
+            "deletions": 0,
+            "insertions": 1,
+            "reference_word_count": 149,
+            "hypothesis_word_count": 150,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "is",
+                "hyp": "this"
+              },
+              {
+                "op": "sub",
+                "ref": "eight",
+                "hyp": "8"
+              },
+              {
+                "op": "sub",
+                "ref": "two",
+                "hyp": "2"
+              },
+              {
+                "op": "sub",
+                "ref": "and",
+                "hyp": "in"
+              },
+              {
+                "op": "sub",
+                "ref": "variant",
+                "hyp": "variants"
+              },
+              {
+                "op": "sub",
+                "ref": "paths",
+                "hyp": "pounds"
+              },
+              {
+                "op": "sub",
+                "ref": "prebrief",
+                "hyp": "preread"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "to"
+              },
+              {
+                "op": "sub",
+                "ref": "again",
+                "hyp": "gain"
+              },
+              {
+                "op": "sub",
+                "ref": "at",
+                "hyp": "of"
+              },
+              {
+                "op": "sub",
+                "ref": "calls",
+                "hyp": "call"
+              }
+            ],
+            "seconds": 14.95,
+            "rtf": 0.299
+          }
+        }
+      }
+    },
+    {
+      "id": "13-uat-results",
+      "audio_seconds": 56.8,
+      "tiers": {
+        "clean": {
+          "wer": 0.06557377049180328,
+          "substitutions": 11,
+          "deletions": 0,
+          "insertions": 1,
+          "reference_word_count": 183,
+          "hypothesis_word_count": 184,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "bug",
+              "hyp": "bud"
+            },
+            {
+              "op": "sub",
+              "ref": "at",
+              "hyp": "but"
+            },
+            {
+              "op": "sub",
+              "ref": "fails",
+              "hyp": "fail"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "do"
+            },
+            {
+              "op": "sub",
+              "ref": "core",
+              "hyp": "caught"
+            },
+            {
+              "op": "sub",
+              "ref": "to",
+              "hyp": "at"
+            },
+            {
+              "op": "sub",
+              "ref": "golive",
+              "hyp": "goliv"
+            },
+            {
+              "op": "sub",
+              "ref": "passed",
+              "hyp": "past"
+            },
+            {
+              "op": "sub",
+              "ref": "scheduled",
+              "hyp": "schedule"
+            },
+            {
+              "op": "sub",
+              "ref": "ive",
+              "hyp": "i"
+            },
+            {
+              "op": "sub",
+              "ref": "tracked",
+              "hyp": "track"
+            },
+            {
+              "op": "sub",
+              "ref": "golive",
+              "hyp": "goliv"
+            }
+          ],
+          "seconds": 25.74,
+          "rtf": 0.453
+        },
+        "light_noise": {
+          "wer": 0.06557377049180328,
+          "substitutions": 10,
+          "deletions": 1,
+          "insertions": 1,
+          "reference_word_count": 183,
+          "hypothesis_word_count": 183,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "bug",
+              "hyp": "butt"
+            },
+            {
+              "op": "sub",
+              "ref": "five",
+              "hyp": "5"
+            },
+            {
+              "op": "sub",
+              "ref": "fails",
+              "hyp": "fail"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "do"
+            },
+            {
+              "op": "del",
+              "ref": "core",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "to",
+              "hyp": "quarter"
+            },
+            {
+              "op": "sub",
+              "ref": "golive",
+              "hyp": "golip"
+            },
+            {
+              "op": "sub",
+              "ref": "passed",
+              "hyp": "ask"
+            },
+            {
+              "op": "sub",
+              "ref": "scheduled",
+              "hyp": "schedule"
+            },
+            {
+              "op": "sub",
+              "ref": "ive",
+              "hyp": "i"
+            },
+            {
+              "op": "sub",
+              "ref": "tracked",
+              "hyp": "track"
+            },
+            {
+              "op": "sub",
+              "ref": "golive",
+              "hyp": "golip"
+            }
+          ],
+          "seconds": 19.36,
+          "rtf": 0.341
+        },
+        "heavy_noise": {
+          "wer": 0.08743169398907104,
+          "substitutions": 13,
+          "deletions": 2,
+          "insertions": 1,
+          "reference_word_count": 183,
+          "hypothesis_word_count": 182,
+          "diffs": [
+            {
+              "op": "del",
+              "ref": "bug",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "triage",
+              "hyp": "guttryage"
+            },
+            {
+              "op": "sub",
+              "ref": "rough",
+              "hyp": "rup"
+            },
+            {
+              "op": "sub",
+              "ref": "at",
+              "hyp": "of"
+            },
+            {
+              "op": "sub",
+              "ref": "bugs",
+              "hyp": "bands"
+            },
+            {
+              "op": "sub",
+              "ref": "fails",
+              "hyp": "fail"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "work"
+            },
+            {
+              "op": "del",
+              "ref": "core",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "to",
+              "hyp": "quarter"
+            },
+            {
+              "op": "sub",
+              "ref": "silent",
+              "hyp": "signed"
+            },
+            {
+              "op": "sub",
+              "ref": "golive",
+              "hyp": "golip"
+            },
+            {
+              "op": "sub",
+              "ref": "passed",
+              "hyp": "ask"
+            },
+            {
+              "op": "sub",
+              "ref": "spiky",
+              "hyp": "spiffy"
+            },
+            {
+              "op": "sub",
+              "ref": "ive",
+              "hyp": "i"
+            },
+            {
+              "op": "sub",
+              "ref": "tracked",
+              "hyp": "track"
+            },
+            {
+              "op": "sub",
+              "ref": "golive",
+              "hyp": "golip"
+            }
+          ],
+          "seconds": 18.02,
+          "rtf": 0.317
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.06557377049180328,
+            "substitutions": 11,
+            "deletions": 0,
+            "insertions": 1,
+            "reference_word_count": 183,
+            "hypothesis_word_count": 184,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "bug",
+                "hyp": "bud"
+              },
+              {
+                "op": "sub",
+                "ref": "at",
+                "hyp": "but"
+              },
+              {
+                "op": "sub",
+                "ref": "fails",
+                "hyp": "fail"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "do"
+              },
+              {
+                "op": "sub",
+                "ref": "core",
+                "hyp": "caught"
+              },
+              {
+                "op": "sub",
+                "ref": "to",
+                "hyp": "at"
+              },
+              {
+                "op": "sub",
+                "ref": "golive",
+                "hyp": "goliv"
+              },
+              {
+                "op": "sub",
+                "ref": "passed",
+                "hyp": "past"
+              },
+              {
+                "op": "sub",
+                "ref": "scheduled",
+                "hyp": "schedule"
+              },
+              {
+                "op": "sub",
+                "ref": "ive",
+                "hyp": "i"
+              },
+              {
+                "op": "sub",
+                "ref": "tracked",
+                "hyp": "track"
+              },
+              {
+                "op": "sub",
+                "ref": "golive",
+                "hyp": "goliv"
+              }
+            ],
+            "seconds": 25.74,
+            "rtf": 0.453
+          },
+          "light_noise": {
+            "wer": 0.06557377049180328,
+            "substitutions": 10,
+            "deletions": 1,
+            "insertions": 1,
+            "reference_word_count": 183,
+            "hypothesis_word_count": 183,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "bug",
+                "hyp": "butt"
+              },
+              {
+                "op": "sub",
+                "ref": "five",
+                "hyp": "5"
+              },
+              {
+                "op": "sub",
+                "ref": "fails",
+                "hyp": "fail"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "do"
+              },
+              {
+                "op": "del",
+                "ref": "core",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "to",
+                "hyp": "quarter"
+              },
+              {
+                "op": "sub",
+                "ref": "golive",
+                "hyp": "golip"
+              },
+              {
+                "op": "sub",
+                "ref": "passed",
+                "hyp": "ask"
+              },
+              {
+                "op": "sub",
+                "ref": "scheduled",
+                "hyp": "schedule"
+              },
+              {
+                "op": "sub",
+                "ref": "ive",
+                "hyp": "i"
+              },
+              {
+                "op": "sub",
+                "ref": "tracked",
+                "hyp": "track"
+              },
+              {
+                "op": "sub",
+                "ref": "golive",
+                "hyp": "golip"
+              }
+            ],
+            "seconds": 19.36,
+            "rtf": 0.341
+          },
+          "heavy_noise": {
+            "wer": 0.08743169398907104,
+            "substitutions": 13,
+            "deletions": 2,
+            "insertions": 1,
+            "reference_word_count": 183,
+            "hypothesis_word_count": 182,
+            "diffs": [
+              {
+                "op": "del",
+                "ref": "bug",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "triage",
+                "hyp": "guttryage"
+              },
+              {
+                "op": "sub",
+                "ref": "rough",
+                "hyp": "rup"
+              },
+              {
+                "op": "sub",
+                "ref": "at",
+                "hyp": "of"
+              },
+              {
+                "op": "sub",
+                "ref": "bugs",
+                "hyp": "bands"
+              },
+              {
+                "op": "sub",
+                "ref": "fails",
+                "hyp": "fail"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "work"
+              },
+              {
+                "op": "del",
+                "ref": "core",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "to",
+                "hyp": "quarter"
+              },
+              {
+                "op": "sub",
+                "ref": "silent",
+                "hyp": "signed"
+              },
+              {
+                "op": "sub",
+                "ref": "golive",
+                "hyp": "golip"
+              },
+              {
+                "op": "sub",
+                "ref": "passed",
+                "hyp": "ask"
+              },
+              {
+                "op": "sub",
+                "ref": "spiky",
+                "hyp": "spiffy"
+              },
+              {
+                "op": "sub",
+                "ref": "ive",
+                "hyp": "i"
+              },
+              {
+                "op": "sub",
+                "ref": "tracked",
+                "hyp": "track"
+              },
+              {
+                "op": "sub",
+                "ref": "golive",
+                "hyp": "golip"
+              }
+            ],
+            "seconds": 18.02,
+            "rtf": 0.317
+          }
+        }
+      }
+    },
+    {
+      "id": "14-go-live-readiness",
+      "audio_seconds": 59.4,
+      "tiers": {
+        "clean": {
+          "wer": 0.045454545454545456,
+          "substitutions": 9,
+          "deletions": 0,
+          "insertions": 0,
+          "reference_word_count": 198,
+          "hypothesis_word_count": 198,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "load",
+              "hyp": "low"
+            },
+            {
+              "op": "sub",
+              "ref": "reran",
+              "hyp": "ran"
+            },
+            {
+              "op": "sub",
+              "ref": "been",
+              "hyp": "being"
+            },
+            {
+              "op": "sub",
+              "ref": "briefed",
+              "hyp": "brief"
+            },
+            {
+              "op": "sub",
+              "ref": "launch",
+              "hyp": "launched"
+            },
+            {
+              "op": "sub",
+              "ref": "comms",
+              "hyp": "com"
+            },
+            {
+              "op": "sub",
+              "ref": "scheduled",
+              "hyp": "schedule"
+            },
+            {
+              "op": "sub",
+              "ref": "timed",
+              "hyp": "time"
+            },
+            {
+              "op": "sub",
+              "ref": "date",
+              "hyp": "data"
+            }
+          ],
+          "seconds": 20.06,
+          "rtf": 0.338
+        },
+        "light_noise": {
+          "wer": 0.050505050505050504,
+          "substitutions": 9,
+          "deletions": 0,
+          "insertions": 1,
+          "reference_word_count": 198,
+          "hypothesis_word_count": 199,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "golive",
+              "hyp": "goleg"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "be"
+            },
+            {
+              "op": "sub",
+              "ref": "reran",
+              "hyp": "ran"
+            },
+            {
+              "op": "sub",
+              "ref": "been",
+              "hyp": "being"
+            },
+            {
+              "op": "sub",
+              "ref": "briefed",
+              "hyp": "breathed"
+            },
+            {
+              "op": "sub",
+              "ref": "launch",
+              "hyp": "launched"
+            },
+            {
+              "op": "sub",
+              "ref": "comms",
+              "hyp": "com"
+            },
+            {
+              "op": "sub",
+              "ref": "scheduled",
+              "hyp": "schedule"
+            },
+            {
+              "op": "sub",
+              "ref": "timed",
+              "hyp": "time"
+            },
+            {
+              "op": "sub",
+              "ref": "put",
+              "hyp": "go"
+            }
+          ],
+          "seconds": 23.91,
+          "rtf": 0.403
+        },
+        "heavy_noise": {
+          "wer": 0.11616161616161616,
+          "substitutions": 22,
+          "deletions": 0,
+          "insertions": 1,
+          "reference_word_count": 198,
+          "hypothesis_word_count": 199,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "golive",
+              "hyp": "golden"
+            },
+            {
+              "op": "sub",
+              "ref": "readiness",
+              "hyp": "redness"
+            },
+            {
+              "op": "sub",
+              "ref": "bug",
+              "hyp": "bud"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "addressed",
+              "hyp": "dress"
+            },
+            {
+              "op": "sub",
+              "ref": "reran",
+              "hyp": "be"
+            },
+            {
+              "op": "sub",
+              "ref": "it",
+              "hyp": "ran"
+            },
+            {
+              "op": "sub",
+              "ref": "and",
+              "hyp": "into"
+            },
+            {
+              "op": "sub",
+              "ref": "within",
+              "hyp": "with"
+            },
+            {
+              "op": "sub",
+              "ref": "thresholds",
+              "hyp": "infreshals"
+            },
+            {
+              "op": "sub",
+              "ref": "spiky",
+              "hyp": "sticky"
+            },
+            {
+              "op": "sub",
+              "ref": "pattern",
+              "hyp": "patting"
+            },
+            {
+              "op": "sub",
+              "ref": "help",
+              "hyp": "health"
+            },
+            {
+              "op": "sub",
+              "ref": "been",
+              "hyp": "being"
+            },
+            {
+              "op": "sub",
+              "ref": "briefed",
+              "hyp": "brief"
+            },
+            {
+              "op": "sub",
+              "ref": "flows",
+              "hyp": "clothes"
+            },
+            {
+              "op": "sub",
+              "ref": "launch",
+              "hyp": "launched"
+            },
+            {
+              "op": "sub",
+              "ref": "comms",
+              "hyp": "com"
+            },
+            {
+              "op": "sub",
+              "ref": "scheduled",
+              "hyp": "schedule"
+            },
+            {
+              "op": "sub",
+              "ref": "timed",
+              "hyp": "time"
+            },
+            {
+              "op": "sub",
+              "ref": "this",
+              "hyp": "the"
+            },
+            {
+              "op": "sub",
+              "ref": "go",
+              "hyp": "built"
+            },
+            {
+              "op": "sub",
+              "ref": "from",
+              "hyp": "on"
+            }
+          ],
+          "seconds": 22.3,
+          "rtf": 0.375
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.045454545454545456,
+            "substitutions": 9,
+            "deletions": 0,
+            "insertions": 0,
+            "reference_word_count": 198,
+            "hypothesis_word_count": 198,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "load",
+                "hyp": "low"
+              },
+              {
+                "op": "sub",
+                "ref": "reran",
+                "hyp": "ran"
+              },
+              {
+                "op": "sub",
+                "ref": "been",
+                "hyp": "being"
+              },
+              {
+                "op": "sub",
+                "ref": "briefed",
+                "hyp": "brief"
+              },
+              {
+                "op": "sub",
+                "ref": "launch",
+                "hyp": "launched"
+              },
+              {
+                "op": "sub",
+                "ref": "comms",
+                "hyp": "com"
+              },
+              {
+                "op": "sub",
+                "ref": "scheduled",
+                "hyp": "schedule"
+              },
+              {
+                "op": "sub",
+                "ref": "timed",
+                "hyp": "time"
+              },
+              {
+                "op": "sub",
+                "ref": "date",
+                "hyp": "data"
+              }
+            ],
+            "seconds": 20.06,
+            "rtf": 0.338
+          },
+          "light_noise": {
+            "wer": 0.050505050505050504,
+            "substitutions": 9,
+            "deletions": 0,
+            "insertions": 1,
+            "reference_word_count": 198,
+            "hypothesis_word_count": 199,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "golive",
+                "hyp": "goleg"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "be"
+              },
+              {
+                "op": "sub",
+                "ref": "reran",
+                "hyp": "ran"
+              },
+              {
+                "op": "sub",
+                "ref": "been",
+                "hyp": "being"
+              },
+              {
+                "op": "sub",
+                "ref": "briefed",
+                "hyp": "breathed"
+              },
+              {
+                "op": "sub",
+                "ref": "launch",
+                "hyp": "launched"
+              },
+              {
+                "op": "sub",
+                "ref": "comms",
+                "hyp": "com"
+              },
+              {
+                "op": "sub",
+                "ref": "scheduled",
+                "hyp": "schedule"
+              },
+              {
+                "op": "sub",
+                "ref": "timed",
+                "hyp": "time"
+              },
+              {
+                "op": "sub",
+                "ref": "put",
+                "hyp": "go"
+              }
+            ],
+            "seconds": 23.91,
+            "rtf": 0.403
+          },
+          "heavy_noise": {
+            "wer": 0.11616161616161616,
+            "substitutions": 22,
+            "deletions": 0,
+            "insertions": 1,
+            "reference_word_count": 198,
+            "hypothesis_word_count": 199,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "golive",
+                "hyp": "golden"
+              },
+              {
+                "op": "sub",
+                "ref": "readiness",
+                "hyp": "redness"
+              },
+              {
+                "op": "sub",
+                "ref": "bug",
+                "hyp": "bud"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "addressed",
+                "hyp": "dress"
+              },
+              {
+                "op": "sub",
+                "ref": "reran",
+                "hyp": "be"
+              },
+              {
+                "op": "sub",
+                "ref": "it",
+                "hyp": "ran"
+              },
+              {
+                "op": "sub",
+                "ref": "and",
+                "hyp": "into"
+              },
+              {
+                "op": "sub",
+                "ref": "within",
+                "hyp": "with"
+              },
+              {
+                "op": "sub",
+                "ref": "thresholds",
+                "hyp": "infreshals"
+              },
+              {
+                "op": "sub",
+                "ref": "spiky",
+                "hyp": "sticky"
+              },
+              {
+                "op": "sub",
+                "ref": "pattern",
+                "hyp": "patting"
+              },
+              {
+                "op": "sub",
+                "ref": "help",
+                "hyp": "health"
+              },
+              {
+                "op": "sub",
+                "ref": "been",
+                "hyp": "being"
+              },
+              {
+                "op": "sub",
+                "ref": "briefed",
+                "hyp": "brief"
+              },
+              {
+                "op": "sub",
+                "ref": "flows",
+                "hyp": "clothes"
+              },
+              {
+                "op": "sub",
+                "ref": "launch",
+                "hyp": "launched"
+              },
+              {
+                "op": "sub",
+                "ref": "comms",
+                "hyp": "com"
+              },
+              {
+                "op": "sub",
+                "ref": "scheduled",
+                "hyp": "schedule"
+              },
+              {
+                "op": "sub",
+                "ref": "timed",
+                "hyp": "time"
+              },
+              {
+                "op": "sub",
+                "ref": "this",
+                "hyp": "the"
+              },
+              {
+                "op": "sub",
+                "ref": "go",
+                "hyp": "built"
+              },
+              {
+                "op": "sub",
+                "ref": "from",
+                "hyp": "on"
+              }
+            ],
+            "seconds": 22.3,
+            "rtf": 0.375
+          }
+        }
+      }
+    },
+    {
+      "id": "15-launch-retro",
+      "audio_seconds": 66.1,
+      "tiers": {
+        "clean": {
+          "wer": 0.03017241379310345,
+          "substitutions": 4,
+          "deletions": 0,
+          "insertions": 3,
+          "reference_word_count": 232,
+          "hypothesis_word_count": 235,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "fifteenth",
+              "hyp": "15th"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "rock"
+            },
+            {
+              "op": "sub",
+              "ref": "rocksolid",
+              "hyp": "solid"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "criteria"
+            },
+            {
+              "op": "sub",
+              "ref": "criterion",
+              "hyp": "in"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "road"
+            },
+            {
+              "op": "sub",
+              "ref": "roadmap",
+              "hyp": "map"
+            }
+          ],
+          "seconds": 24.85,
+          "rtf": 0.376
+        },
+        "light_noise": {
+          "wer": 0.07758620689655173,
+          "substitutions": 12,
+          "deletions": 3,
+          "insertions": 3,
+          "reference_word_count": 232,
+          "hypothesis_word_count": 232,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "fifteenth",
+              "hyp": "15th"
+            },
+            {
+              "op": "del",
+              "ref": "day",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "pizza",
+              "hyp": "tapetes"
+            },
+            {
+              "op": "del",
+              "ref": "kind",
+              "hyp": null
+            },
+            {
+              "op": "del",
+              "ref": "of",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "tired",
+              "hyp": "pineio"
+            },
+            {
+              "op": "sub",
+              "ref": "look",
+              "hyp": "looked"
+            },
+            {
+              "op": "sub",
+              "ref": "agreed",
+              "hyp": "agree"
+            },
+            {
+              "op": "sub",
+              "ref": "dark",
+              "hyp": "dart"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "rock"
+            },
+            {
+              "op": "sub",
+              "ref": "rocksolid",
+              "hyp": "solid"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "over"
+            },
+            {
+              "op": "sub",
+              "ref": "overrun",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "you",
+              "hyp": "new"
+            },
+            {
+              "op": "sub",
+              "ref": "flagged",
+              "hyp": "flag"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "criteria"
+            },
+            {
+              "op": "sub",
+              "ref": "criterion",
+              "hyp": "in"
+            },
+            {
+              "op": "sub",
+              "ref": "agreed",
+              "hyp": "agree"
+            }
+          ],
+          "seconds": 45.24,
+          "rtf": 0.684
+        },
+        "heavy_noise": {
+          "wer": 0.07327586206896551,
+          "substitutions": 14,
+          "deletions": 1,
+          "insertions": 2,
+          "reference_word_count": 232,
+          "hypothesis_word_count": 233,
+          "diffs": [
+            {
+              "op": "sub",
+              "ref": "fifteenth",
+              "hyp": "15th"
+            },
+            {
+              "op": "sub",
+              "ref": "the",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "app",
+              "hyp": "battery"
+            },
+            {
+              "op": "sub",
+              "ref": "redesign",
+              "hyp": "design"
+            },
+            {
+              "op": "sub",
+              "ref": "kind",
+              "hyp": "time"
+            },
+            {
+              "op": "sub",
+              "ref": "of",
+              "hyp": "got"
+            },
+            {
+              "op": "sub",
+              "ref": "look",
+              "hyp": "looked"
+            },
+            {
+              "op": "sub",
+              "ref": "agreed",
+              "hyp": "agree"
+            },
+            {
+              "op": "del",
+              "ref": "dark",
+              "hyp": null
+            },
+            {
+              "op": "sub",
+              "ref": "modes",
+              "hyp": "markmoves"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "rock"
+            },
+            {
+              "op": "sub",
+              "ref": "rocksolid",
+              "hyp": "solid"
+            },
+            {
+              "op": "ins",
+              "ref": null,
+              "hyp": "over"
+            },
+            {
+              "op": "sub",
+              "ref": "overrun",
+              "hyp": "a"
+            },
+            {
+              "op": "sub",
+              "ref": "you",
+              "hyp": "new"
+            },
+            {
+              "op": "sub",
+              "ref": "flagged",
+              "hyp": "flag"
+            },
+            {
+              "op": "sub",
+              "ref": "agreed",
+              "hyp": "agree"
+            }
+          ],
+          "seconds": 25.33,
+          "rtf": 0.383
+        }
+      },
+      "engines": {
+        "whisper": {
+          "clean": {
+            "wer": 0.03017241379310345,
+            "substitutions": 4,
+            "deletions": 0,
+            "insertions": 3,
+            "reference_word_count": 232,
+            "hypothesis_word_count": 235,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "fifteenth",
+                "hyp": "15th"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "rock"
+              },
+              {
+                "op": "sub",
+                "ref": "rocksolid",
+                "hyp": "solid"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "criteria"
+              },
+              {
+                "op": "sub",
+                "ref": "criterion",
+                "hyp": "in"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "road"
+              },
+              {
+                "op": "sub",
+                "ref": "roadmap",
+                "hyp": "map"
+              }
+            ],
+            "seconds": 24.85,
+            "rtf": 0.376
+          },
+          "light_noise": {
+            "wer": 0.07758620689655173,
+            "substitutions": 12,
+            "deletions": 3,
+            "insertions": 3,
+            "reference_word_count": 232,
+            "hypothesis_word_count": 232,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "fifteenth",
+                "hyp": "15th"
+              },
+              {
+                "op": "del",
+                "ref": "day",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "pizza",
+                "hyp": "tapetes"
+              },
+              {
+                "op": "del",
+                "ref": "kind",
+                "hyp": null
+              },
+              {
+                "op": "del",
+                "ref": "of",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "tired",
+                "hyp": "pineio"
+              },
+              {
+                "op": "sub",
+                "ref": "look",
+                "hyp": "looked"
+              },
+              {
+                "op": "sub",
+                "ref": "agreed",
+                "hyp": "agree"
+              },
+              {
+                "op": "sub",
+                "ref": "dark",
+                "hyp": "dart"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "rock"
+              },
+              {
+                "op": "sub",
+                "ref": "rocksolid",
+                "hyp": "solid"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "over"
+              },
+              {
+                "op": "sub",
+                "ref": "overrun",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "you",
+                "hyp": "new"
+              },
+              {
+                "op": "sub",
+                "ref": "flagged",
+                "hyp": "flag"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "criteria"
+              },
+              {
+                "op": "sub",
+                "ref": "criterion",
+                "hyp": "in"
+              },
+              {
+                "op": "sub",
+                "ref": "agreed",
+                "hyp": "agree"
+              }
+            ],
+            "seconds": 45.24,
+            "rtf": 0.684
+          },
+          "heavy_noise": {
+            "wer": 0.07327586206896551,
+            "substitutions": 14,
+            "deletions": 1,
+            "insertions": 2,
+            "reference_word_count": 232,
+            "hypothesis_word_count": 233,
+            "diffs": [
+              {
+                "op": "sub",
+                "ref": "fifteenth",
+                "hyp": "15th"
+              },
+              {
+                "op": "sub",
+                "ref": "the",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "app",
+                "hyp": "battery"
+              },
+              {
+                "op": "sub",
+                "ref": "redesign",
+                "hyp": "design"
+              },
+              {
+                "op": "sub",
+                "ref": "kind",
+                "hyp": "time"
+              },
+              {
+                "op": "sub",
+                "ref": "of",
+                "hyp": "got"
+              },
+              {
+                "op": "sub",
+                "ref": "look",
+                "hyp": "looked"
+              },
+              {
+                "op": "sub",
+                "ref": "agreed",
+                "hyp": "agree"
+              },
+              {
+                "op": "del",
+                "ref": "dark",
+                "hyp": null
+              },
+              {
+                "op": "sub",
+                "ref": "modes",
+                "hyp": "markmoves"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "rock"
+              },
+              {
+                "op": "sub",
+                "ref": "rocksolid",
+                "hyp": "solid"
+              },
+              {
+                "op": "ins",
+                "ref": null,
+                "hyp": "over"
+              },
+              {
+                "op": "sub",
+                "ref": "overrun",
+                "hyp": "a"
+              },
+              {
+                "op": "sub",
+                "ref": "you",
+                "hyp": "new"
+              },
+              {
+                "op": "sub",
+                "ref": "flagged",
+                "hyp": "flag"
+              },
+              {
+                "op": "sub",
+                "ref": "agreed",
+                "hyp": "agree"
+              }
+            ],
+            "seconds": 25.33,
+            "rtf": 0.383
+          }
+        }
+      }
+    }
+  ]
+}

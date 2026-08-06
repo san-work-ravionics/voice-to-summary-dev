@@ -1,0 +1,18 @@
+### Topic
+Sprint One Status
+
+### Key Points
+- Onboarding flow development started on track.
+- Payments sandbox environment set up; first smoke tests conducted, noting some flakiness.
+- Dark mode not yet started; planned for post-onboarding phase.
+- Legal review ongoing, awaiting feedback.
+- Analytics events scoped with team.
+
+### Decisions
+- Continue monitoring payments issues.
+- Schedule dark mode implementation following onboarding completion.
+- Maintain focus on analytics scope.
+
+### Actions
+- Person A: Follow up with legal on the review progress.
+- Person B: Coordinate with analytics team regarding event scope.

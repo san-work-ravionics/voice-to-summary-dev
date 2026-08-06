@@ -1,0 +1,14 @@
+## Topic
+UAT kickoff for mobile app redesign project
+
+## Key Points
+- 8 external testers and 2 internal stakeholders confirmed.
+- Full app flow, including payments, tested in dark mode.
+- Support for other languages requested by an internal stakeholder, which was cut from the current release.
+- Testing schedule: weekly testing, daily triage calls starting tomorrow.
+
+## Decisions
+- No decisions made during the meeting.
+
+## Actions
+- None reported.

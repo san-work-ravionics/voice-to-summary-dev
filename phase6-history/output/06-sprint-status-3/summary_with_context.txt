@@ -1,0 +1,22 @@
+## Topic
+Payment sandbox issues
+
+## Key Points
+- Payment sandbox remains broken after three Sprints.
+- QA coverage is low due to limited test cases completed.
+- Escalation to vendor's account manager recommended.
+- User testing begins early in the Sprint.
+- Dark mode development continues.
+- Legal updates stalled; another nudge sent.
+- Analytics team is understaffed; additional engineers needed.
+
+## Decisions
+- Escalate payment sandbox issues to vendor's account manager.
+- Schedule user testing in the first week of the Sprint.
+- Continue dark mode development.
+- Send a second nudge to legal team.
+- Consider freeing up additional resources for analytics team.
+
+## Actions
+- Person A: Escalate payment sandbox issues to vendor's account manager.
+- Person B: Schedule user testing in the first week of the Sprint.

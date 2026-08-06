@@ -1,0 +1,16 @@
+## Topic
+Requirements Review Meeting
+
+## Key Points
+- Requirements prioritization completed; onboarding, flow, rebuild, and payments integration are P0, while visual refresh and dark mode stay P1.
+- Legal and privacy review is marked as a hard gate.
+- Analytics instrumentation is also marked as a hard gate.
+- Localization is cut from this release due to schedule risk.
+- Sprint cadence set to two-week sprints, seven before code freeze, followed by test plan, UAT, and launch preparation.
+- Legal engagement started this week, and analytics scoping request is pending response.
+
+## Decisions
+- No decisions were made during this meeting.
+
+## Actions
+- None reported in this meeting.

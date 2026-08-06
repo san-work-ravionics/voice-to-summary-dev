@@ -1,0 +1,24 @@
+### Topic
+Improving onboarding conversion and giving the app a visual refresh.
+
+### Key Points
+- **High Level Goal**: Improve onboarding conversion and provide a visual refresh.
+- **Engineering Scope**:
+  - Rebuilding the onboarding flow.
+  - Integrating a new payments provider.
+  - Visual refresh with dark mode (stretch goal).
+  - Legal and privacy review.
+  - Analytics instrumentation.
+- **Payments Concerns**: New vendor means lack of sandbox access until integration.
+- **Stacker Holder Question**: Localization included in scope?
+- **Next Steps**:
+  - Settle on localization at the requirements review next week.
+
+### Decisions
+- No major decisions made during the meeting.
+
+### Actions
+- Person A: Push to get stacker holder access provisioned this week.
+- Person A: Engage legal early to avoid bottlenecks later.
+- Person A: Loop analytics and start scoping events.
+- Person A: Bring localization decision to requirements review next week.

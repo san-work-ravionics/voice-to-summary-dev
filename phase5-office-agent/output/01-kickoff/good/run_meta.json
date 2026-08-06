@@ -1,0 +1,12 @@
+{
+  "condition": "good",
+  "elapsed_s": 9.805896997451782,
+  "turns": 3,
+  "tool_calls": [
+    "write_minutes_docx",
+    "write_minutes_docx",
+    "write_action_tracker_xlsx"
+  ],
+  "fell_back_to_local": false,
+  "fallback_note": null
+}

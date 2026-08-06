@@ -1,0 +1,13 @@
+### Topic
+Payment Sandbox Stability
+
+### Key Points
+- Plumbing repair completed after three visits.
+- Payment sandbox issues have worsened; vendor sandbox instability is ongoing.
+- Vendor sandbox stability must be ensured before the end of the sprint to avoid delaying the payment sign-off.
+
+### Decisions
+- No immediate decision made regarding payment sandbox stability.
+
+### Actions
+- Person A: Regroup in two weeks.

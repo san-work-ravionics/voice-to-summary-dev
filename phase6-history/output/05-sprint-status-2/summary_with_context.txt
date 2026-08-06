@@ -1,0 +1,16 @@
+## Topic
+Payment sandbox stability
+
+## Key Points
+- Payment sandbox issues have become more severe.
+- Vendor sandbox instability has caused partial blocking of QA progress.
+- The team prefers delaying the payment sign-off due to lack of stabilization over rushing it without thorough testing.
+- Legal review remains ongoing but no answers have been received.
+- Analytics scoping request is still pending.
+
+## Decisions
+- Regrouping in two weeks to address the payment sandbox stability concerns.
+
+## Actions
+- Person A: No action required.
+- Person B: Chase analytics team regarding the scoping request.

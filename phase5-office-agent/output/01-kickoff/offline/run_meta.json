@@ -1,0 +1,8 @@
+{
+  "condition": "offline",
+  "elapsed_s": 2796.5457198619843,
+  "turns": 0,
+  "tool_calls": [],
+  "fell_back_to_local": true,
+  "fallback_note": "Copilot unavailable (simulated offline) \u2014 falling back to on-device"
+}

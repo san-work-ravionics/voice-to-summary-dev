@@ -1,0 +1,32 @@
+[
+  {
+    "id": "payments-vendor-integration#2",
+    "source": "payments-vendor-integration",
+    "text": "## Integration Approach\n1. Sandbox environment provisioning (target: week 1).\n2. SDK integration into the payments module.\n3. Webhook-based reconciliation for payment status updates (avoids polling).\n4. Staging certification against Meridian's test suite (target: week 4-6).\n5. Production cutover only after QA sign-off on the full test suite,\n   including failure-mode handling (declined payments, webhook retries,\n   timeout handling).",
+    "score": 4.781218431235053
+  },
+  {
+    "id": "product-requirements#7",
+    "source": "product-requirements",
+    "text": "### Analytics Instrumentation\nFunnel events for the new onboarding flow are instrumented through the\ninternal **Compass Analytics** platform. Minimum required events: flow start,\neach step completion, permission-prompt shown/accepted/declined, flow\ncomplete.",
+    "score": 4.287422402224076
+  },
+  {
+    "id": "product-requirements#0",
+    "source": "product-requirements",
+    "text": "## Product Requirements Document \u2014 Mobile App Redesign",
+    "score": 3.245202753219086
+  },
+  {
+    "id": "product-requirements#9",
+    "source": "product-requirements",
+    "text": "## Success Metrics\n- Onboarding completion rate \u2265 85% (baseline: 60%).\n- Payments integration live with zero Sev-1 incidents in first 30 days.\n- Dark mode available on 100% of screens at launch.",
+    "score": 3.190777565635259
+  },
+  {
+    "id": "product-requirements#4",
+    "source": "product-requirements",
+    "text": "### Payments Integration\nNew payments provider: **Meridian Pay**, selected for regional payout support\nand lower per-transaction fees than the incumbent processor. Sandbox access\nmust be provisioned in week 1 so integration risk surfaces early. Target:\ncertification complete within 6 weeks of kickoff.",
+    "score": 2.7878309475500753
+  }
+]

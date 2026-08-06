@@ -1,0 +1,14 @@
+### Topic
+Sprint 2 stage for mobile app redesign
+
+### Key Points
+- Plumbing repair completed after three visits.
+- Payment sandbox issues persistently unstable during this sprint.
+- Vendor sandbox instability affecting QA progress.
+- Potential delay in payment sign-off due to untested code.
+
+### Decisions
+- No immediate decision made regarding payment sign-off stability.
+
+### Actions
+- Person A: Regroup in two weeks.

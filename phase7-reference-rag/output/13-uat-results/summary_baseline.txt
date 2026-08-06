@@ -1,0 +1,19 @@
+### Topic
+UAT Results and Bud Triage Meeting
+
+### Key Points
+- **Positive UAT Results**: The mobile app redesign received overall positive feedback.
+- **Bugs Identified**:
+  - **P1 Bug**: Payment system fails silently on a specific card type under an edge case.
+  - **P2 & P3 Bugs**: Cosmetic issues found across various parts of the app.
+- **Launch Issue**: The P1 bug blocks the launch due to its critical nature regarding payment functionality.
+- **Load Test Issues**: The load test exceeded past targets, slowing down under a specific spiky load pattern.
+- **Fix Schedule**: The issue related to slow performance under the spiky load pattern will be addressed immediately.
+
+### Decisions
+- **Fix Cycle**: Address the P1 bug within this week.
+- **Goliv Readiness Review**: Conduct the readiness review after fixing the P1 bug.
+
+### Actions
+- **Person A**: Address the P1 bug in the current sprint.
+- **Person B**: Coordinate with Goliv for the readiness review post-fixing the P1 bug.

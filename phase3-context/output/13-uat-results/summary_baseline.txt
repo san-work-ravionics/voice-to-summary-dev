@@ -1,0 +1,20 @@
+### Topic
+UAT Results and Bud Triage Meeting
+
+### Key Points
+- The UAT process was successful.
+- Only minor bugs were found, including a P1 issue in payments.
+- The P1 bug prevents the application from launching.
+- Load testing showed past the target concurrency level.
+- A specific spike in load caused slowdowns.
+- The fix for the slow-down is scheduled.
+
+### Decisions
+- Address the P1 issue immediately.
+- Schedule the load test fix for next week.
+- Close the localization backlog item.
+
+### Actions
+- Person A: Address the P1 issue immediately.
+- Person B: Schedule the load test fix for next week.
+- Person A: Close the localization backlog item.

@@ -1,0 +1,15 @@
+## Topic
+Revisions to the mobile app redesign project scope
+
+## Key Points
+- The primary goals are improving onboarding conversion and giving the app a visual refresh within five months.
+- The engineering scope includes rebuilding the onboarding flow, integrating a new payments provider, and a visual refresh with dark mode.
+- Legal and privacy review, along with analytics instrumentation, are required but not included in the initial scope.
+- Access to the new payments provider must be obtained by the end of the week.
+- Localization is still under consideration and will be addressed at the requirements review scheduled for next week.
+
+## Decisions
+- No decisions were made during this meeting.
+
+## Actions
+- None reported in this meeting.

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "payments-vendor-integration#2",
+    "source": "payments-vendor-integration",
+    "text": "## Integration Approach\n1. Sandbox environment provisioning (target: week 1).\n2. SDK integration into the payments module.\n3. Webhook-based reconciliation for payment status updates (avoids polling).\n4. Staging certification against Meridian's test suite (target: week 4-6).\n5. Production cutover only after QA sign-off on the full test suite,\n   including failure-mode handling (declined payments, webhook retries,\n   timeout handling).",
+    "score": 5.499762151389986
+  },
+  {
+    "id": "product-requirements#0",
+    "source": "product-requirements",
+    "text": "## Product Requirements Document \u2014 Mobile App Redesign",
+    "score": 3.245202753219086
+  },
+  {
+    "id": "product-requirements#7",
+    "source": "product-requirements",
+    "text": "### Analytics Instrumentation\nFunnel events for the new onboarding flow are instrumented through the\ninternal **Compass Analytics** platform. Minimum required events: flow start,\neach step completion, permission-prompt shown/accepted/declined, flow\ncomplete.",
+    "score": 2.220466379717644
+  },
+  {
+    "id": "product-requirements#6",
+    "source": "product-requirements",
+    "text": "### Legal / Privacy\nUpdated consent language for notification permissions requires legal\nsign-off. Privacy review must confirm the release aligns with the company's\nSOC 2 Type II commitments before launch.",
+    "score": 2.1450867444376365
+  },
+  {
+    "id": "design-spec#1",
+    "source": "design-spec",
+    "text": "## Dark Mode\nImplemented via the Aurora Design System's semantic color tokens (e.g.\n`surface.primary`, `text.onSurface`) rather than hardcoded per-screen colors,\nso a single token-file change propagates everywhere. All screens must meet\nWCAG 2.1 AA contrast ratios in both light and dark themes before sign-off \u2014\nthis is a launch blocker, not a nice-to-have.",
+    "score": 2.030730407743958
+  }
+]

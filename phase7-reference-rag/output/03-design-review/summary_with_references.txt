@@ -1,0 +1,15 @@
+## Topic
+Visual Refresh & Onboarding
+
+## Key Points
+- The onboarding completion rate is currently 60%, targeting an improvement to 85%+
+- Funnel events for the new onboarding flow are instrumented through Compass Analytics
+- WCAG 2.1 AA contrast ratios must be met in both light and dark themes before sign-off
+
+## Decisions
+- Promote dark mode from stretch to committed P1 scope
+- Payment sandbox access came through; integration work will begin next Monday
+
+## Actions
+- Person A: Update backlog priority for the onboarding improvements
+- Person B: Confirm that WCAG 2.1 AA contrast ratios are validated and meet requirements

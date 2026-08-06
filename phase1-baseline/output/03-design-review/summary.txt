@@ -1,0 +1,16 @@
+### Topic
+Design Review Meeting for Mobile App Redesign Project
+
+### Key Points
+- Person A: Tried the new coffee blend and found it "dangerously good."
+- Person A: The onboarding flow looks great and is cleaner with fewer steps.
+- Person A: Pushed for dark mode not being a stretch goal; agreed to commit it as a P1 scope.
+- Person A: Accessibility check on dark mode confirmed contrast ratios meet standards.
+- Person A: Payment sandbox access provisioned successfully.
+
+### Decisions
+- Dark mode will be promoted from stretch to committed P1 scope.
+- Sprint one starts on Monday.
+
+### Actions
+- Person A: Update the backlog priority for the payment sandbox access.

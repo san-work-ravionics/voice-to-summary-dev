@@ -1,0 +1,16 @@
+## Topic
+Payment sandbox stability and timeline adjustments
+
+## Key Points
+- Payment sandbox instability is affecting progress.
+- Sprint 2 may need to be delayed due to lack of stabilization.
+- Internal build for dark mode is on track.
+- Legal review remains pending.
+- Analytics scoping request is still outstanding.
+
+## Decisions
+- Regrouping in two weeks to address issues.
+
+## Actions
+- Person A: Review and update legal review status.
+- Person B: Follow up on analytics scoping request.

@@ -1,0 +1,16 @@
+### Topic
+Payment Sandbox
+
+### Key Points
+- Payment sandbox remains broken after three Sprints.
+- QA team has completed only half of their test cases.
+- The team should escalate further to the vendor’s account manager.
+- User testing begins early in the sprint.
+
+### Decisions
+- Escalate to the vendor’s account manager regarding the payment sandbox issue.
+- Schedule user testing during the current sprint.
+
+### Actions
+- Person A: Escalate to the vendor’s account manager regarding the payment sandbox issue.
+- Person B: Schedule user testing during the current sprint.

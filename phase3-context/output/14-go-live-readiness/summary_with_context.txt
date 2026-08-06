@@ -1,0 +1,19 @@
+## Topic
+Agreeing on Project Goal, Scoping Workstreams, and Assigning Responsibilities
+
+## Key Points
+- Payments P1 bug fixed and retested, passing clean.
+- Low test caveat addressed; within thresholds under spiky pattern.
+- Help center articles updated for support readiness.
+- Marketing has launched a com schedule for the release.
+- Vendor escalation and extra contractor cost pushed project over budget by a meaningful amount.
+- Budget issue needs to be reported to finance immediately after launch.
+- Agree to proceed with launch.
+
+## Decisions
+- Proceed with launch based on all green statuses.
+- Report vendor escalation and extra contractor cost to finance immediately after launch.
+
+## Actions
+- Person A: Confirm launch data is confirmed.
+- Person B: Contact finance to report vendor escalation and extra contractor cost immediately after launch.

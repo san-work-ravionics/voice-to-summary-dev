@@ -1,0 +1,21 @@
+## Topic
+Improving onboarding conversion and refreshing the app's visual design with a hard launch target of 5 months from kickoff.
+
+## Key Points
+- The product requirements document specifies improving onboarding conversion and achieving a 85%+ completion rate.
+- Compass Analytics is used for funnel event instrumentation.
+- Meridian Pay is selected as the new payments provider due to its regional payout support and lower transaction fees compared to the incumbent processor.
+- Legal and privacy reviews are necessary for the project.
+- Analytics instrumentation will run alongside the project.
+- The onboarding flow redesign involves reducing the number of screens from 7 to 4, implementing progressive disclosure, and ensuring every OS-level permission prompt is preceded by an in-app explainer.
+- Localization is not included in the initial scope.
+
+## Decisions
+- Access to Meridian Pay's sandbox environment will be provided on day one.
+- Legal engagement will begin early to avoid bottlenecks later in the process.
+- Scoping of analytics events will commence.
+
+## Actions
+- Person A: Pushes to get Meridian Pay's sandbox provisioned this week.
+- Person A: Engages with legal early to ensure smooth integration.
+- Person A: Loops in analytics to start scoping events.

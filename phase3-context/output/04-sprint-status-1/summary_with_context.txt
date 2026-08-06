@@ -1,0 +1,16 @@
+## Topic
+Agreeing on Project Goal, Scoping Workstreams, and Assigning Responsibilities
+
+## Key Points
+- The project goal was set to "rebuild the onboarding flow" during the first sprint.
+- The development of the onboarding flow is on track.
+- Smoke tests for the payments integration were conducted, indicating some issues but not alarming.
+- Dark mode functionality is planned for post-onboarding.
+- The legal review is ongoing and awaiting feedback from the legal department.
+- Analytics events are being scoped with the team this week.
+
+## Decisions
+- No decisions made at this meeting.
+
+## Actions
+- None.

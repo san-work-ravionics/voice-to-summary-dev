@@ -1,0 +1,31 @@
+## Topic
+Agreeing on Project Goal, Scoping Workstreams, and Assigning Responsibilities
+
+## Key Points
+- Payment sandbox issue resolved, but QA coverage remains low.
+- Escalating to vendor's account manager regarding payment sandbox issues.
+- Starting user testing during Sprint 4.
+- Dark mode development continues on schedule.
+- No updates on legal review status.
+- Analytics integration needs additional support.
+
+## Decisions
+- Escalate payment sandbox issues to vendor's account manager.
+- Start user testing in Sprint 4.
+- Continue dark mode development.
+- Send a second nudge to legal team.
+
+## Actions
+- Person A: Escalate payment sandbox issues to vendor's account manager.
+- Person B: Start user testing in Sprint 4.
+- Person A: Continue dark mode development.
+- Person B: Send a second nudge to legal team.
+
+## Checklist Coverage
+- Not covered: Onboarding flow status — not mentioned in the transcript
+- Covered: Payments integration status — "All right, Sprint 3, payment sandbox, still the same story?"
+- Covered: Design updates (e.g. dark mode) — "Dark mode?"
+- Covered: Legal / privacy approval — "Legal, any movement?"
+- Covered: Analytics instrumentation — "And analytics, still stock?"
+- Not covered: Budget or cost impact — not mentioned in the transcript
+- Not covered: Next meeting / follow-up schedule — not mentioned in the transcript

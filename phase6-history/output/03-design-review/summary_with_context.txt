@@ -1,0 +1,15 @@
+## Topic
+Design review meeting for the mobile app redesign project
+
+## Key Points
+- Mockups of the onboarding flow look great, cleaner and with fewer steps.
+- Dark mode is promoted from stretch to committed P1 scope due to push from stakeholders.
+- Accessibility check on dark mode confirmed with valid contrast ratios.
+- Payment sandbox access provisioned successfully; integration work can begin next Monday.
+
+## Decisions
+- No decisions were made at this meeting.
+
+## Actions
+- Person A: Update the backlog priority for the accessibility check on dark mode.
+- Person B: Confirm the availability of payment sandbox access for integration work.

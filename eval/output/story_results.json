@@ -1,0 +1,1649 @@
+{
+  "generated_at": "2026-08-06T05:39:11.394525+00:00",
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "meetings": [
+    {
+      "slug": "01-kickoff",
+      "label": "Project Kickoff",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Push to get provisions for accessing the new payments provider on day one.",
+              "Person A: Engage legal early to avoid bottlenecks later.",
+              "Person A: Loop analytics and begin scoping events.",
+              "Person A: Bring localization decision to requirements review next week."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures key points from the transcript without inventing any information.",
+          "completeness": 3,
+          "completeness_notes": "Substantive points and decisions are included, but some details are omitted due to brevity.",
+          "conciseness": 2,
+          "conciseness_notes": "The summary is concise but lacks detail compared to the original transcript.",
+          "unsupported_claims": [],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures key points from the transcript without inventing any information.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"Substantive points and decisions are included, but some details are omitted due to brevity.\",\n  \"conciseness\": 2,\n  \"conciseness_notes\": \"The summary is concise but lacks detail compared to the original transcript.\",\n  \"unsupported_claims\": []\n}\n```",
+          "parse_error": false
+        },
+        "continuity": null
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 2
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": true
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "None reported in this meeting."
+            ],
+            "violations": [
+              "None reported in this meeting."
+            ],
+            "compliant": false
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures the key points and decisions from the transcript.",
+          "completeness": 3,
+          "completeness_notes": "The summary covers the main topics and decisions without omitting any significant details.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary is concise while maintaining clarity and avoiding unnecessary repetition.",
+          "unsupported_claims": [],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures the key points and decisions from the transcript.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"The summary covers the main topics and decisions without omitting any significant details.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise while maintaining clarity and avoiding unnecessary repetition.\",\n  \"unsupported_claims\": []\n}\n```",
+          "parse_error": false
+        },
+        "continuity": null
+      }
+    },
+    {
+      "slug": "02-requirements-review",
+      "label": "Requirements Review",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "None"
+            ],
+            "violations": [
+              "None"
+            ],
+            "compliant": false
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures most of the key points from the transcript.",
+          "completeness": 4,
+          "completeness_notes": "All substantive points and decisions from the transcript are included in the summary.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary is concise without being redundant or including unnecessary information.",
+          "unsupported_claims": [],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures most of the key points from the transcript.\",\n  \"completeness\": 4,\n  \"completeness_notes\": \"All substantive points and decisions from the transcript are included in the summary.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise without being redundant or including unnecessary information.\",\n  \"unsupported_claims\": []\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 4,
+          "continuity_notes": "The summary accurately reflects that the discussion about localization being out of scope continues from the previous meeting.",
+          "raw": "{\"continuity\": 4, \"continuity_notes\": \"The summary accurately reflects that the discussion about localization being out of scope continues from the previous meeting.\"}",
+          "parse_error": false
+        }
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 2
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": true
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "None reported in this meeting."
+            ],
+            "violations": [
+              "None reported in this meeting."
+            ],
+            "compliant": false
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately reflects the key points and decisions from the transcript.",
+          "completeness": 4,
+          "completeness_notes": "All substantive points and decisions from the transcript are included in the summary.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary is concise without any redundant information.",
+          "unsupported_claims": [],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately reflects the key points and decisions from the transcript.\",\n  \"completeness\": 4,\n  \"completeness_notes\": \"All substantive points and decisions from the transcript are included in the summary.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise without any redundant information.\",\n  \"unsupported_claims\": []\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 4,
+          "continuity_notes": "The summary accurately reflects that the discussion about localization being cut from the release is a continuation of the earlier decision regarding the lack of decisions made during the meeting.",
+          "raw": "{\"continuity\": 4, \"continuity_notes\": \"The summary accurately reflects that the discussion about localization being cut from the release is a continuation of the earlier decision regarding the lack of decisions made during the meeting.\"}",
+          "parse_error": false
+        }
+      }
+    },
+    {
+      "slug": "03-design-review",
+      "label": "Design Review",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Update backlog priority based on accessibility check results.",
+              "Person B: Provision payment sandbox access."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures all key points from the transcript.",
+          "completeness": 3,
+          "completeness_notes": "The summary covers most of the substantive points and decisions presented in the transcript.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary is concise without being redundant or adding unnecessary information.",
+          "unsupported_claims": [],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures all key points from the transcript.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"The summary covers most of the substantive points and decisions presented in the transcript.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise without being redundant or adding unnecessary information.\",\n  \"unsupported_claims\": []\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 4,
+          "continuity_notes": "The summary accurately reflects that the decision to prioritize dark mode as a P1 scope continues from the previous requirements review meeting.",
+          "raw": "{\"continuity\": 4, \"continuity_notes\": \"The summary accurately reflects that the decision to prioritize dark mode as a P1 scope continues from the previous requirements review meeting.\"}",
+          "parse_error": false
+        }
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 2
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": true
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Update the backlog priority for the accessibility check on dark mode.",
+              "Person B: Confirm the availability of payment sandbox access for integration work."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures all the key points from the transcript.",
+          "completeness": 3,
+          "completeness_notes": "The summary includes most of the substantive points and decisions from the transcript, though it omits some details about the actions taken.",
+          "conciseness": 2,
+          "conciseness_notes": "The summary is somewhat redundant and contains unnecessary information, making it less concise compared to the original transcript.",
+          "unsupported_claims": [],
+          "raw": "{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures all the key points from the transcript.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"The summary includes most of the substantive points and decisions from the transcript, though it omits some details about the actions taken.\",\n  \"conciseness\": 2,\n  \"conciseness_notes\": \"The summary is somewhat redundant and contains unnecessary information, making it less concise compared to the original transcript.\",\n  \"unsupported_claims\": []\n}",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 4,
+          "continuity_notes": "The summary accurately reflects that the discussion about payment sandbox access was a continuation of a previous topic (design review for the mobile app redesign project). The summary also mentions that the decision to promote dark mode from stretch to committed P1 scope was escalated from a previous meeting.",
+          "raw": "{\"continuity\": 4, \"continuity_notes\": \"The summary accurately reflects that the discussion about payment sandbox access was a continuation of a previous topic (design review for the mobile app redesign project). The summary also mentions that the decision to promote dark mode from stretch to committed P1 scope was escalated from a previous meeting.\"}",
+          "parse_error": false
+        }
+      }
+    },
+    {
+      "slug": "04-sprint-status-1",
+      "label": "Sprint 1 Status",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Schedule follow-up meetings with legal once they've received their feedback.",
+              "Person B: Coordinate with the analytics team to finalize event scope before the next sprint."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately reflects the key points of the transcript without inventing any new information.",
+          "completeness": 3,
+          "completeness_notes": "The summary captures all the substantive points mentioned in the transcript, including the actions and decisions.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary is concise and does not include unnecessary details or redundant information.",
+          "unsupported_claims": [],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately reflects the key points of the transcript without inventing any new information.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"The summary captures all the substantive points mentioned in the transcript, including the actions and decisions.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise and does not include unnecessary details or redundant information.\",\n  \"unsupported_claims\": []\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 4,
+          "continuity_notes": "The summary accurately reflects that the discussion about dark mode is a continuation of the previous requirements review, which was held earlier.",
+          "raw": "{\"continuity\": 4, \"continuity_notes\": \"The summary accurately reflects that the discussion about dark mode is a continuation of the previous requirements review, which was held earlier.\"}",
+          "parse_error": false
+        }
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 2
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": true
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Update the backlog priority for the accessibility check on dark mode.",
+              "Person B: Confirm the availability of payment sandbox access for integration work."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures all the key points from the transcript, including the status updates, decisions, and actions.",
+          "completeness": 3,
+          "completeness_notes": "The summary includes most of the substantive points from the transcript, but misses some details like the specific issues with the payments integration and the legal review timeline.",
+          "conciseness": 2,
+          "conciseness_notes": "The summary is somewhat redundant due to its length, which could be reduced without losing important information.",
+          "unsupported_claims": [],
+          "raw": "{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures all the key points from the transcript, including the status updates, decisions, and actions.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"The summary includes most of the substantive points from the transcript, but misses some details like the specific issues with the payments integration and the legal review timeline.\",\n  \"conciseness\": 2,\n  \"conciseness_notes\": \"The summary is somewhat redundant due to its length, which could be reduced without losing important information.\",\n  \"unsupported_claims\": []\n}",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 4,
+          "continuity_notes": "The summary accurately reflects that the discussion about dark mode is a continuation of the previous requirement review, which was held earlier.",
+          "raw": "{\"continuity\": 4, \"continuity_notes\": \"The summary accurately reflects that the discussion about dark mode is a continuation of the previous requirement review, which was held earlier.\"}",
+          "parse_error": false
+        }
+      }
+    },
+    {
+      "slug": "05-sprint-status-2",
+      "label": "Sprint 2 Status",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Regroup in two weeks."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures key events and decisions but omits some details.",
+          "completeness": 4,
+          "completeness_notes": "Substantive points and decisions are included, though some minor details are omitted.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary is concise without being redundant or irrelevant.",
+          "unsupported_claims": [
+            "Payment sandbox issues persistently unstable during this sprint."
+          ],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures key events and decisions but omits some details.\",\n  \"completeness\": 4,\n  \"completeness_notes\": \"Substantive points and decisions are included, though some minor details are omitted.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise without being redundant or irrelevant.\",\n  \"unsupported_claims\": [\n    \"Payment sandbox issues persistently unstable during this sprint.\"\n  ]\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 4,
+          "continuity_notes": "The summary accurately reflects that the discussion about payment sandbox issues continues from the previous meeting.",
+          "raw": "{\"continuity\": 4, \"continuity_notes\": \"The summary accurately reflects that the discussion about payment sandbox issues continues from the previous meeting.\"}",
+          "parse_error": false
+        }
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 2
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": true
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: No action required.",
+              "Person B: Chase analytics team regarding the scoping request."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures all the key points and decisions from the transcript.",
+          "completeness": 4,
+          "completeness_notes": "All substantive points and decisions from the transcript are included in the summary.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary is concise and does not include unnecessary details or filler content.",
+          "unsupported_claims": [],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures all the key points and decisions from the transcript.\",\n  \"completeness\": 4,\n  \"completeness_notes\": \"All substantive points and decisions from the transcript are included in the summary.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise and does not include unnecessary details or filler content.\",\n  \"unsupported_claims\": []\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 4,
+          "continuity_notes": "The summary accurately reflects that the discussion about payment sandbox stability continues from the previous meeting, as indicated by phrases like 'payment sandbox issues have become more severe' and 'Vendor sandbox instability has caused partial blocking of QA progress.'",
+          "raw": "{\"continuity\": 4, \"continuity_notes\": \"The summary accurately reflects that the discussion about payment sandbox stability continues from the previous meeting, as indicated by phrases like 'payment sandbox issues have become more severe' and 'Vendor sandbox instability has caused partial blocking of QA progress.'\"}",
+          "parse_error": false
+        }
+      }
+    },
+    {
+      "slug": "06-sprint-status-3",
+      "label": "Sprint 3 Status",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Escalate to the vendor\u2019s account manager regarding the payment sandbox issue.",
+              "Person B: Schedule user testing during the current sprint."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures key points and decisions from the transcript.",
+          "completeness": 4,
+          "completeness_notes": "All substantive points and decisions from the transcript are included in the summary.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary is concise without unnecessary details or filler.",
+          "unsupported_claims": [],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures key points and decisions from the transcript.\",\n  \"completeness\": 4,\n  \"completeness_notes\": \"All substantive points and decisions from the transcript are included in the summary.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise without unnecessary details or filler.\",\n  \"unsupported_claims\": []\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 4,
+          "continuity_notes": "The summary accurately reflects that the payment sandbox issue continues as described in the prior meetings, including the decision to escalate to the vendor's account manager.",
+          "raw": "{\"continuity\": 4, \"continuity_notes\": \"The summary accurately reflects that the payment sandbox issue continues as described in the prior meetings, including the decision to escalate to the vendor's account manager.\"}",
+          "parse_error": false
+        }
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 2
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": true
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Escalate payment sandbox issues to vendor's account manager.",
+              "Person B: Schedule user testing in the first week of the Sprint."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures all key points and decisions from the transcript.",
+          "completeness": 4,
+          "completeness_notes": "All substantive points and commitments from the transcript are included in the summary.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary is concise without being redundant or including unnecessary information.",
+          "unsupported_claims": [],
+          "raw": "{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures all key points and decisions from the transcript.\",\n  \"completeness\": 4,\n  \"completeness_notes\": \"All substantive points and commitments from the transcript are included in the summary.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise without being redundant or including unnecessary information.\",\n  \"unsupported_claims\": []\n}",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 4,
+          "continuity_notes": "The summary accurately reflects that the discussion about payment sandbox issues is a continuation of the previous topic, as indicated by the transcript calling back to the earlier mention of payment sandbox issues.",
+          "raw": "{\"continuity\": 4, \"continuity_notes\": \"The summary accurately reflects that the discussion about payment sandbox issues is a continuation of the previous topic, as indicated by the transcript calling back to the earlier mention of payment sandbox issues.\"}",
+          "parse_error": false
+        }
+      }
+    },
+    {
+      "slug": "07-sprint-status-4",
+      "label": "Sprint 4 Status",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Discuss payments status with vendor.",
+              "Person B: Review dark mode updates and ensure all features are functional."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 3,
+          "faithfulness_notes": "The summary accurately captures key events and actions but omits details about the sprint stages and specific tasks.",
+          "completeness": 4,
+          "completeness_notes": "All substantive points and decisions from the transcript are included, though some details are omitted.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary efficiently conveys the essential information without unnecessary repetition.",
+          "unsupported_claims": [],
+          "raw": "```json\n{\n  \"faithfulness\": 3,\n  \"faithfulness_notes\": \"The summary accurately captures key events and actions but omits details about the sprint stages and specific tasks.\",\n  \"completeness\": 4,\n  \"completeness_notes\": \"All substantive points and decisions from the transcript are included, though some details are omitted.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary efficiently conveys the essential information without unnecessary repetition.\",\n  \"unsupported_claims\": []\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately captures the progression of events since the previous meeting, including the escalation of payment issues, the shipping of dark mode screens, and the receipt of feedback from legal. It also includes the actions taken by the participants.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately captures the progression of events since the previous meeting, including the escalation of payment issues, the shipping of dark mode screens, and the receipt of feedback from legal. It also includes the actions taken by the participants.\"}",
+          "parse_error": false
+        }
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 2
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": true
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Escalated payment sandbox issues to vendor's account manager.",
+              "Person B: Scheduled user testing for the first week of the Sprint."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 3,
+          "faithfulness_notes": "The summary accurately captures key events and actions but omits details about the podcast recommendation.",
+          "completeness": 4,
+          "completeness_notes": "All substantive points and decisions from the transcript are included, though some details are omitted.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary efficiently conveys the main points without unnecessary repetition.",
+          "unsupported_claims": [
+            "I did. The last few episodes were the best of the season honestly."
+          ],
+          "raw": "```json\n{\n  \"faithfulness\": 3,\n  \"faithfulness_notes\": \"The summary accurately captures key events and actions but omits details about the podcast recommendation.\",\n  \"completeness\": 4,\n  \"completeness_notes\": \"All substantive points and decisions from the transcript are included, though some details are omitted.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary efficiently conveys the main points without unnecessary repetition.\",\n  \"unsupported_claims\": [\n    \"I did. The last few episodes were the best of the season honestly.\"\n  ]\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the Sprint 4 status continues from the previous Sprint 3, including the escalation of payment sandbox issues and the scheduling of user testing.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the Sprint 4 status continues from the previous Sprint 3, including the escalation of payment sandbox issues and the scheduling of user testing.\"}",
+          "parse_error": false
+        }
+      }
+    },
+    {
+      "slug": "08-sprint-status-5",
+      "label": "Sprint 5 Status",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Make sure load testing is scheduled for the test plan review two weeks out."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 3,
+          "faithfulness_notes": "The summary accurately reflects the key points of the transcript but omits some details.",
+          "completeness": 2,
+          "completeness_notes": "Some important information about the actions taken is missing.",
+          "conciseness": 3,
+          "conciseness_notes": "The summary is concise but could be more detailed without losing clarity.",
+          "unsupported_claims": [
+            "I'll make sure it's on the list for the test plan review later"
+          ],
+          "raw": "```json\n{\n  \"faithfulness\": 3,\n  \"faithfulness_notes\": \"The summary accurately reflects the key points of the transcript but omits some details.\",\n  \"completeness\": 2,\n  \"completeness_notes\": \"Some important information about the actions taken is missing.\",\n  \"conciseness\": 3,\n  \"conciseness_notes\": \"The summary is concise but could be more detailed without losing clarity.\",\n  \"unsupported_claims\": [\n    \"I'll make sure it's on the list for the test plan review later\"\n  ]\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the discussion about scheduling load testing for two weeks out continues from the previous meeting.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the discussion about scheduling load testing for two weeks out continues from the previous meeting.\"}",
+          "parse_error": false
+        }
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 2
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": true
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Escalating payment sandbox issues to vendor's account manager.",
+              "Person B: Scheduling user testing for the first week of Sprint 6."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 3,
+          "faithfulness_notes": "The summary accurately captures most of the key points and decisions from the transcript but omits some details.",
+          "completeness": 4,
+          "completeness_notes": "All substantive points and decisions from the transcript are included in the summary.",
+          "conciseness": 2,
+          "conciseness_notes": "The summary is concise but includes unnecessary details, making it somewhat redundant.",
+          "unsupported_claims": [
+            "Person A: Escalating payment sandbox issues to vendor's account manager."
+          ],
+          "raw": "{\n  \"faithfulness\": 3,\n  \"faithfulness_notes\": \"The summary accurately captures most of the key points and decisions from the transcript but omits some details.\",\n  \"completeness\": 4,\n  \"completeness_notes\": \"All substantive points and decisions from the transcript are included in the summary.\",\n  \"conciseness\": 2,\n  \"conciseness_notes\": \"The summary is concise but includes unnecessary details, making it somewhat redundant.\",\n  \"unsupported_claims\": [\n    \"Person A: Escalating payment sandbox issues to vendor's account manager.\"\n  ]\n}",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the current meeting continues the discussion about the payment sandbox issues by mentioning their escalation to the vendor's account manager.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the current meeting continues the discussion about the payment sandbox issues by mentioning their escalation to the vendor's account manager.\"}",
+          "parse_error": false
+        }
+      }
+    },
+    {
+      "slug": "09-sprint-status-6",
+      "label": "Sprint 6 Status",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Draft load testing plans.",
+              "Person B: Run load testing off to code freeze."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures key points but omits some details.",
+          "completeness": 3,
+          "completeness_notes": "Substantive points and decisions are included, but there is some repetition.",
+          "conciseness": 2,
+          "conciseness_notes": "Redundant information is present, leading to a less concise summary.",
+          "unsupported_claims": [
+            "Classic puppy behavior."
+          ],
+          "raw": "{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures key points but omits some details.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"Substantive points and decisions are included, but there is some repetition.\",\n  \"conciseness\": 2,\n  \"conciseness_notes\": \"Redundant information is present, leading to a less concise summary.\",\n  \"unsupported_claims\": [\n    \"Classic puppy behavior.\"\n  ]\n}",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the discussion continues from the previous sprint by mentioning the status of payments and load testing.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the discussion continues from the previous sprint by mentioning the status of payments and load testing.\"}",
+          "parse_error": false
+        }
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 2
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": true
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Escalated payment sandbox issues to vendor's account manager.",
+              "Person B: Scheduled user testing for the first week of Sprint 6."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures the key points and decisions from the transcript.",
+          "completeness": 3,
+          "completeness_notes": "The summary includes most of the substantive points and decisions but misses some details like the escalation of payment sandbox issues and the scheduling of user testing.",
+          "conciseness": 2,
+          "conciseness_notes": "The summary is somewhat redundant and lacks clarity, making it difficult to follow the conversation flow.",
+          "unsupported_claims": [
+            "Person A: Escalated payment sandbox issues to vendor's account manager."
+          ],
+          "raw": "{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures the key points and decisions from the transcript.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"The summary includes most of the substantive points and decisions but misses some details like the escalation of payment sandbox issues and the scheduling of user testing.\",\n  \"conciseness\": 2,\n  \"conciseness_notes\": \"The summary is somewhat redundant and lacks clarity, making it difficult to follow the conversation flow.\",\n  \"unsupported_claims\": [\n    \"Person A: Escalated payment sandbox issues to vendor's account manager.\"\n  ]\n}",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the discussion continues from the previous sprint by mentioning ongoing load testing and confirming the status of regression tests.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the discussion continues from the previous sprint by mentioning ongoing load testing and confirming the status of regression tests.\"}",
+          "parse_error": false
+        }
+      }
+    },
+    {
+      "slug": "10-sprint-status-7",
+      "label": "Sprint 7 Status",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Schedule the formal test plan review for immediate execution following the load test.",
+              "Person B: Prepare for UAT after the formal test plan review."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures the key points and decisions from the transcript.",
+          "completeness": 3,
+          "completeness_notes": "The summary includes most of the substantive points and decisions but omits some details about actions and specific individuals involved.",
+          "conciseness": 2,
+          "conciseness_notes": "The summary is concise but lacks detail compared to the original transcript.",
+          "unsupported_claims": [
+            "Person A: Schedule the formal test plan review for immediate execution following the load test."
+          ],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures the key points and decisions from the transcript.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"The summary includes most of the substantive points and decisions but omits some details about actions and specific individuals involved.\",\n  \"conciseness\": 2,\n  \"conciseness_notes\": \"The summary is concise but lacks detail compared to the original transcript.\",\n  \"unsupported_claims\": [\n    \"Person A: Schedule the formal test plan review for immediate execution following the load test.\"\n  ]\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the discussion about the Sprint 7 status continues from the previous meetings without any gaps or inconsistencies.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the discussion about the Sprint 7 status continues from the previous meetings without any gaps or inconsistencies.\"}",
+          "parse_error": false
+        }
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 2
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": true
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "None reported."
+            ],
+            "violations": [
+              "None reported."
+            ],
+            "compliant": false
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures the key points and decisions from the transcript.",
+          "completeness": 3,
+          "completeness_notes": "The summary includes most of the substantive points and decisions but misses some details about the actions taken during the sprint.",
+          "conciseness": 2,
+          "conciseness_notes": "The summary is concise but lacks detail compared to the original transcript.",
+          "unsupported_claims": [],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures the key points and decisions from the transcript.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"The summary includes most of the substantive points and decisions but misses some details about the actions taken during the sprint.\",\n  \"conciseness\": 2,\n  \"conciseness_notes\": \"The summary is concise but lacks detail compared to the original transcript.\",\n  \"unsupported_claims\": []\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the current meeting continues the discussion about the Sprint 7 status and actions, which aligns with the historical context provided.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the current meeting continues the discussion about the Sprint 7 status and actions, which aligns with the historical context provided.\"}",
+          "parse_error": false
+        }
+      }
+    },
+    {
+      "slug": "11-test-plan-review",
+      "label": "Test Plan Review",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Start recruiting testers for UAT next week."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures all the key points from the transcript.",
+          "completeness": 3,
+          "completeness_notes": "The summary includes most of the substantive points but misses some details like the exact timing of the UAT start date.",
+          "conciseness": 2,
+          "conciseness_notes": "The summary is concise but lacks detail compared to the original transcript.",
+          "unsupported_claims": [
+            "UAT starts in two weeks."
+          ],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures all the key points from the transcript.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"The summary includes most of the substantive points but misses some details like the exact timing of the UAT start date.\",\n  \"conciseness\": 2,\n  \"conciseness_notes\": \"The summary is concise but lacks detail compared to the original transcript.\",\n  \"unsupported_claims\": [\n    \"UAT starts in two weeks.\"\n  ]\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 1,
+          "continuity_notes": "The summary accurately reflects that the current meeting continues the discussion started in previous meetings by reviewing the test plan.",
+          "raw": "{\"continuity\": 1, \"continuity_notes\": \"The summary accurately reflects that the current meeting continues the discussion started in previous meetings by reviewing the test plan.\"}",
+          "parse_error": false
+        }
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A**:",
+              "Recruit testers for UAT starting this week",
+              "Person B**:",
+              "Start recruiting testers for UAT starting this week"
+            ],
+            "violations": [
+              "Person A**:",
+              "Recruit testers for UAT starting this week",
+              "Person B**:",
+              "Start recruiting testers for UAT starting this week"
+            ],
+            "compliant": false
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately reflects the key points of the transcript without inventing any new information.",
+          "completeness": 3,
+          "completeness_notes": "The summary captures all the substantive points and decisions from the transcript but omits some details due to brevity.",
+          "conciseness": 2,
+          "conciseness_notes": "The summary is concise but includes redundant information as it aims to cover the entire content within a limited space.",
+          "unsupported_claims": [
+            "I'll start on that this week."
+          ],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately reflects the key points of the transcript without inventing any new information.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"The summary captures all the substantive points and decisions from the transcript but omits some details due to brevity.\",\n  \"conciseness\": 2,\n  \"conciseness_notes\": \"The summary is concise but includes redundant information as it aims to cover the entire content within a limited space.\",\n  \"unsupported_claims\": [\n    \"I'll start on that this week.\"\n  ]\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the current meeting continues the discussion started in the previous meetings by addressing the upcoming User Acceptance Testing (UAT) schedule.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the current meeting continues the discussion started in the previous meetings by addressing the upcoming User Acceptance Testing (UAT) schedule.\"}",
+          "parse_error": false
+        }
+      }
+    },
+    {
+      "slug": "12-uat-kickoff",
+      "label": "UAT Kickoff",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Confirm the status of the external testers and internal stakeholders for the upcoming week.",
+              "Person B: Schedule daily triage calls starting tomorrow."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures key points but omits some details.",
+          "completeness": 3,
+          "completeness_notes": "Substantive points and decisions are included, but some minor details are missing.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary is concise without being redundant or irrelevant.",
+          "unsupported_claims": [
+            "One of the internal stakeholders asked to gain about support for other languages."
+          ],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures key points but omits some details.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"Substantive points and decisions are included, but some minor details are missing.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise without being redundant or irrelevant.\",\n  \"unsupported_claims\": [\n    \"One of the internal stakeholders asked to gain about support for other languages.\"\n  ]\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the current meeting continues the discussion started in previous meetings by addressing the confirmation of testers and the scope of the UAT.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the current meeting continues the discussion started in previous meetings by addressing the confirmation of testers and the scope of the UAT.\"}",
+          "parse_error": false
+        }
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Recruit testers for UAT starting this week.",
+              "Person B: Start recruiting testers for UAT starting this week."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures key details from the transcript but omits some specific actions.",
+          "completeness": 3,
+          "completeness_notes": "The summary reflects the substantive points and decisions from the transcript, though it lacks detailed information about specific actions.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary is concise without being redundant or irrelevant, effectively conveying the essential information.",
+          "unsupported_claims": [
+            "Person A: Recruit testers for UAT starting this week."
+          ],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures key details from the transcript but omits some specific actions.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"The summary reflects the substantive points and decisions from the transcript, though it lacks detailed information about specific actions.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise without being redundant or irrelevant, effectively conveying the essential information.\",\n  \"unsupported_claims\": [\n    \"Person A: Recruit testers for UAT starting this week.\"\n  ]\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the current meeting continues the discussion started in previous meetings, specifically addressing the recruitment of testers and the scope of the UAT.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the current meeting continues the discussion started in previous meetings, specifically addressing the recruitment of testers and the scope of the UAT.\"}",
+          "parse_error": false
+        }
+      }
+    },
+    {
+      "slug": "13-uat-results",
+      "label": "UAT Results / Bug Triage",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Address the P1 bug immediately.",
+              "Person B: Schedule the fix for next week.",
+              "Person A: Conduct the Goliv readiness review after addressing the P1 bug."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures the key points and decisions from the transcript.",
+          "completeness": 4,
+          "completeness_notes": "All substantive points and decisions from the transcript are included in the summary.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary is concise without any redundant information.",
+          "unsupported_claims": [],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures the key points and decisions from the transcript.\",\n  \"completeness\": 4,\n  \"completeness_notes\": \"All substantive points and decisions from the transcript are included in the summary.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise without any redundant information.\",\n  \"unsupported_claims\": []\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the current meeting continues the discussion started in earlier meetings by addressing the P1 bug and scheduling the fix for next week.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the current meeting continues the discussion started in earlier meetings by addressing the P1 bug and scheduling the fix for next week.\"}",
+          "parse_error": false
+        }
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 2
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": true
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Recruit testers for UAT starting this week.",
+              "Person B: Start recruiting testers for UAT starting this week."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures the key points and decisions from the transcript.",
+          "completeness": 4,
+          "completeness_notes": "All substantive points and decisions from the transcript are included in the summary.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary is concise without being redundant or adding unnecessary information.",
+          "unsupported_claims": [],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures the key points and decisions from the transcript.\",\n  \"completeness\": 4,\n  \"completeness_notes\": \"All substantive points and decisions from the transcript are included in the summary.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise without being redundant or adding unnecessary information.\",\n  \"unsupported_claims\": []\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the current meeting continues the discussion of UAT results and Bud Triage, which was initiated in the previous meeting.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the current meeting continues the discussion of UAT results and Bud Triage, which was initiated in the previous meeting.\"}",
+          "parse_error": false
+        }
+      }
+    },
+    {
+      "slug": "14-go-live-readiness",
+      "label": "Go-Live Readiness Review",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Confirm launch data.",
+              "Person B: Call launch."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures all key points and decisions from the transcript.",
+          "completeness": 3,
+          "completeness_notes": "The summary reflects all substantive points and decisions without omitting any significant details.",
+          "conciseness": 2,
+          "conciseness_notes": "The summary is concise yet covers all essential information efficiently.",
+          "unsupported_claims": [],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures all key points and decisions from the transcript.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"The summary reflects all substantive points and decisions without omitting any significant details.\",\n  \"conciseness\": 2,\n  \"conciseness_notes\": \"The summary is concise yet covers all essential information efficiently.\",\n  \"unsupported_claims\": []\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the discussion about the payments fire drill and vendor escalation is a continuation of the previous discussions about these topics.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the discussion about the payments fire drill and vendor escalation is a continuation of the previous discussions about these topics.\"}",
+          "parse_error": false
+        }
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 2
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": true
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Not applicable (launch confirmation).",
+              "Person B: Report the vendor escalation and extra contractor cost to finance immediately after launch."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures the key points of the transcript without inventing any information.",
+          "completeness": 3,
+          "completeness_notes": "The summary includes most of the substantive points and decisions from the transcript, although it omits some details about the specific actions taken.",
+          "conciseness": 4,
+          "conciseness_notes": "The summary is concise and covers the main points efficiently, avoiding unnecessary repetition.",
+          "unsupported_claims": [],
+          "raw": "{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures the key points of the transcript without inventing any information.\",\n  \"completeness\": 3,\n  \"completeness_notes\": \"The summary includes most of the substantive points and decisions from the transcript, although it omits some details about the specific actions taken.\",\n  \"conciseness\": 4,\n  \"conciseness_notes\": \"The summary is concise and covers the main points efficiently, avoiding unnecessary repetition.\",\n  \"unsupported_claims\": []\n}",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the current meeting continues the discussion about the payments fire drill and its impact on the project budget, which was escalated earlier.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the current meeting continues the discussion about the payments fire drill and its impact on the project budget, which was escalated earlier.\"}",
+          "parse_error": false
+        }
+      }
+    },
+    {
+      "slug": "15-launch-retro",
+      "label": "Launch Retro",
+      "baseline": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 3
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 3
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": false
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Write a lesson learned on vendor stability for future payments providers.",
+              "Person B: Watch the post-launch analytics dashboard closely for the next two weeks."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures all the key points from the transcript.",
+          "completeness": 4,
+          "completeness_notes": "All substantive points, decisions, and commitments mentioned in the transcript are reflected in the summary.",
+          "conciseness": 3,
+          "conciseness_notes": "The summary is concise without being redundant or including unnecessary information.",
+          "unsupported_claims": [],
+          "raw": "```json\n{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures all the key points from the transcript.\",\n  \"completeness\": 4,\n  \"completeness_notes\": \"All substantive points, decisions, and commitments mentioned in the transcript are reflected in the summary.\",\n  \"conciseness\": 3,\n  \"conciseness_notes\": \"The summary is concise without being redundant or including unnecessary information.\",\n  \"unsupported_claims\": []\n}\n```",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the current meeting continues the discussion about the launch and its aftermath, including the ongoing challenges with vendor stability and the need for formalizing this as a criterion for future projects.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the current meeting continues the discussion about the launch and its aftermath, including the ongoing challenges with vendor stability and the need for formalizing this as a criterion for future projects.\"}",
+          "parse_error": false
+        }
+      },
+      "with_context": {
+        "layer1": {
+          "schema": {
+            "sections": {
+              "Topic": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Key Points": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Decisions": {
+                "present": true,
+                "heading_level": 2
+              },
+              "Actions": {
+                "present": true,
+                "heading_level": 2
+              }
+            },
+            "all_sections_present": true,
+            "heading_level_matches_spec": true
+          },
+          "actions": {
+            "checked": true,
+            "bullets": [
+              "Person A: Write a lesson learned on vendor stability.",
+              "Person B: Monitor the post-launch analytics dashboard for the next two weeks."
+            ],
+            "violations": [],
+            "compliant": true
+          }
+        },
+        "layer2": {
+          "faithfulness": 4,
+          "faithfulness_notes": "The summary accurately captures all the key points, decisions, and actions mentioned in the transcript.",
+          "completeness": 4,
+          "completeness_notes": "All substantive points, decisions, and commitments from the transcript are reflected in the summary.",
+          "conciseness": 3,
+          "conciseness_notes": "The summary is concise without being redundant or including unnecessary information.",
+          "unsupported_claims": [],
+          "raw": "{\n  \"faithfulness\": 4,\n  \"faithfulness_notes\": \"The summary accurately captures all the key points, decisions, and actions mentioned in the transcript.\",\n  \"completeness\": 4,\n  \"completeness_notes\": \"All substantive points, decisions, and commitments from the transcript are reflected in the summary.\",\n  \"conciseness\": 3,\n  \"conciseness_notes\": \"The summary is concise without being redundant or including unnecessary information.\",\n  \"unsupported_claims\": []\n}",
+          "parse_error": false
+        },
+        "continuity": {
+          "continuity": 5,
+          "continuity_notes": "The summary accurately reflects that the discussion about vendor stability continues from the previous meeting, specifically mentioning that it should be a formal criterion for future payments providers.",
+          "raw": "{\"continuity\": 5, \"continuity_notes\": \"The summary accurately reflects that the discussion about vendor stability continues from the previous meeting, specifically mentioning that it should be a formal criterion for future payments providers.\"}",
+          "parse_error": false
+        }
+      }
+    }
+  ]
+}

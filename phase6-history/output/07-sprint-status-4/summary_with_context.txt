@@ -1,0 +1,17 @@
+## Topic
+Payments integration and dark mode updates
+
+## Key Points
+- Payments integration completed with vendor's engineering team.
+- Onboarding process tested and completion rate improved significantly.
+- Dark mode screens shipped in the current Sprint; rest in progress.
+- Legal team responded positively to the second nudge.
+- Additional engineer allocated for analytics instrumentation work.
+- Project timeline nearing freeze point, focusing closely on payments.
+
+## Decisions
+- No explicit decisions were made.
+
+## Actions
+- Person A: Escalated payment sandbox issues to vendor's account manager.
+- Person B: Scheduled user testing for the first week of the Sprint.

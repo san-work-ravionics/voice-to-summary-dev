@@ -1,0 +1,24 @@
+## Topic
+Agreeing on Project Goal, Scoping Workstreams, and Assigning Responsibilities
+
+## Key Points
+- Payments integration completed; ETA next week.
+- Onboarding testing complete; completion rate improved significantly.
+- Dark mode screens shipped this sprint; rest in progress.
+- Legal response received; minor edits required.
+- Analytics instrumentation work started this week.
+
+## Decisions
+- No decisions made at this meeting.
+
+## Actions
+- None.
+
+## Checklist Coverage
+- Covered: Onboarding flow status — "Onboarding?"
+- Covered: Payments integration status — "Sprint 4, big question first, payments after the escalation."
+- Covered: Design updates (e.g. dark mode) — "Dark mode?"
+- Covered: Legal / privacy approval — "Legal."
+- Covered: Analytics instrumentation — "And the extra engineer for analytics?"
+- Not covered: Budget or cost impact — not mentioned in the transcript
+- Not covered: Next meeting / follow-up schedule — not mentioned in the transcript

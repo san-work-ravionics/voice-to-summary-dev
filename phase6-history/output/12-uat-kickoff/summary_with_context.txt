@@ -1,0 +1,16 @@
+### Topic
+UAT kickoff meeting for the mobile app redesign project.
+
+### Key Points
+- External testers have been recruited and confirmed for next week.
+- Internal stakeholders are also confirmed for next week.
+- The scope includes the full app flow, including payments in the dark mode variant.
+- Support for other languages requested by an internal stakeholder is explicitly cut from this release.
+- Testing will begin next week with daily triage calls starting tomorrow.
+
+### Decisions
+- No explicit decisions were made.
+
+### Actions
+- Person A: Recruit testers for UAT starting this week.
+- Person B: Start recruiting testers for UAT starting this week.

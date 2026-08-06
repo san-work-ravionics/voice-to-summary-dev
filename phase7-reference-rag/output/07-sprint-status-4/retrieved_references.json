@@ -1,0 +1,32 @@
+[
+  {
+    "id": "product-requirements#9",
+    "source": "product-requirements",
+    "text": "## Success Metrics\n- Onboarding completion rate \u2265 85% (baseline: 60%).\n- Payments integration live with zero Sev-1 incidents in first 30 days.\n- Dark mode available on 100% of screens at launch.",
+    "score": 4.756350299655187
+  },
+  {
+    "id": "payments-vendor-integration#2",
+    "source": "payments-vendor-integration",
+    "text": "## Integration Approach\n1. Sandbox environment provisioning (target: week 1).\n2. SDK integration into the payments module.\n3. Webhook-based reconciliation for payment status updates (avoids polling).\n4. Staging certification against Meridian's test suite (target: week 4-6).\n5. Production cutover only after QA sign-off on the full test suite,\n   including failure-mode handling (declined payments, webhook retries,\n   timeout handling).",
+    "score": 3.805745040191867
+  },
+  {
+    "id": "product-requirements#4",
+    "source": "product-requirements",
+    "text": "### Payments Integration\nNew payments provider: **Meridian Pay**, selected for regional payout support\nand lower per-transaction fees than the incumbent processor. Sandbox access\nmust be provisioned in week 1 so integration risk surfaces early. Target:\ncertification complete within 6 weeks of kickoff.",
+    "score": 3.6939290326116985
+  },
+  {
+    "id": "product-requirements#1",
+    "source": "product-requirements",
+    "text": "## Goals\nImprove onboarding conversion and refresh the app's visual design, with a hard\nlaunch target of 5 months from kickoff. Current onboarding completion rate is\n60%; this release targets 85%+.",
+    "score": 3.662262287679934
+  },
+  {
+    "id": "design-spec#3",
+    "source": "design-spec",
+    "text": "## Component Inventory\nScreens affected: Welcome, Sign Up, Permission Explainer, Confirmation. All\nfour must ship with dark-mode variants at launch \u2014 partial dark-mode coverage\nis not acceptable per the PRD's \"100% of screens\" success metric.",
+    "score": 3.485028934506454
+  }
+]

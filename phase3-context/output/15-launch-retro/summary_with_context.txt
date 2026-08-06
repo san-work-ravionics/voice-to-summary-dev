@@ -1,0 +1,13 @@
+## Topic
+Setting the high-level goal and scoping the engineering workstreams
+
+## Key Points
+- Agree on the project's goal: "rebuild the onboarding flow, integrate a new payments provider, a visual refresh with dark mode as a stretch goal"
+- Scope the workstreams: rebuilding the onboarding flow, integrating a new payments provider, a visual refresh with dark mode as a stretch goal
+- Settle who's driving each one: Person A will lead the onboarding flow, Person B will lead the payments integration, and both will collaborate on the visual refresh
+
+## Decisions
+- No decisions made at this meeting
+
+## Actions
+- None

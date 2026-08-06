@@ -1,0 +1,30 @@
+## Topic
+Setting the high-level goal and scoping the engineering workstreams
+
+## Key Points
+- Project: Mobile App Redesign
+- Goal: To finalize the onboarding flow, integrate a new payments provider, implement a visual refresh with dark mode as a stretch goal, complete legal/privacy review, and instrument analytics.
+- Workstreams completed:
+  - Onboarding
+  - Payments
+  - Dark Mode
+  - Legal/Privacy
+  - Analytics
+- Next steps:
+  - Formal Test Plan Review
+  - User Acceptance Testing (UAT)
+
+## Decisions
+- No decisions made at this meeting.
+
+## Actions
+- None.
+
+## Checklist Coverage
+- Covered: Onboarding flow status — "Onboarding, payments, dark mode, legal, and analytics are all complete."
+- Covered: Payments integration status — "Onboarding, payments, dark mode, legal, and analytics are all complete."
+- Covered: Design updates (e.g. dark mode) — "Onboarding, payments, dark mode, legal, and analytics are all complete."
+- Covered: Legal / privacy approval — "Onboarding, payments, dark mode, legal, and analytics are all complete."
+- Covered: Analytics instrumentation — "Onboarding, payments, dark mode, legal, and analytics are all complete."
+- Not covered: Budget or cost impact — not mentioned in the transcript
+- Not covered: Next meeting / follow-up schedule — not mentioned in the transcript

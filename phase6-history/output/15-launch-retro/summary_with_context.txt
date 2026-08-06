@@ -1,0 +1,21 @@
+## Topic
+Launch Retro
+
+## Key Points
+- Launch went smoothly with no major incidents.
+- Early adoption numbers look positive.
+- Dark mode received positive feedback.
+- Onboarding completion increased significantly.
+- Payments have been stable since launch.
+- Vendor instability caused delays and budget overruns.
+- Vendor stability should be a criterion for future payments providers.
+- Localization request is logged for the next roadmap cycle.
+- Post-launch analytics dashboard is live and will be monitored closely.
+
+## Decisions
+- Vendor stability should be a formal criterion for selecting future payments providers.
+- Vendor escalation and extra contractor costs will be reported to finance immediately after launch.
+
+## Actions
+- Person A: Write a lesson learned on vendor stability.
+- Person B: Monitor the post-launch analytics dashboard for the next two weeks.

@@ -1,0 +1,11 @@
+{
+  "condition": "degraded",
+  "elapsed_s": 14.110821723937988,
+  "turns": 2,
+  "tool_calls": [
+    "write_minutes_docx",
+    "write_action_tracker_xlsx"
+  ],
+  "fell_back_to_local": false,
+  "fallback_note": null
+}
