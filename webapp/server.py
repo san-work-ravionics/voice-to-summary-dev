@@ -9,9 +9,6 @@ import urllib.parse
 import uuid
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CUSTOM_AUDIO_DIR = os.path.join(PROJECT_ROOT, "custom", "audio")
-CUSTOM_OUTPUT_DIR = os.path.join(PROJECT_ROOT, "custom", "output")
-AUDIO_EXTENSIONS = {".wav", ".mp3", ".m4a", ".ogg", ".flac"}
 
 sys.path.insert(0, PROJECT_ROOT)
 from app_logging import get_logger  # noqa: E402
@@ -20,20 +17,8 @@ from run_history import read_history  # noqa: E402
 
 logger = get_logger("webapp")
 
-# New audio dropped in custom/audio/ is arbitrary, real content — it doesn't
-# belong to the scripted "Mobile App Redesign" kickoff meeting, so
-# phase3-context's MEETING_CONTEXT and phase2-checklist/phase4-assistant's
-# CHECKLIST (both hardcoded to that scenario) would not apply. Run
-# phase1-baseline's plain baseline pipeline instead.
-sys.path.insert(0, os.path.join(PROJECT_ROOT, "phase1-baseline", "src"))
 sys.path.insert(0, os.path.join(PROJECT_ROOT, "phase8-voice-query", "src"))
 from query_history import read_history as read_voice_query_history  # noqa: E402
-
-# filename -> "processing" | "done" | "error:<message>"
-JOBS = {}
-# filename -> "transcribing" | "summarizing", present only while processing
-JOB_STAGE = {}
-JOBS_LOCK = threading.Lock()
 
 # --- Scenario pipelines (phase1-baseline, phase2-checklist, phase3-context,
 # phase4-assistant, phase6-history): triggered + monitored from the Pipeline
@@ -311,77 +296,6 @@ def _pipeline_status(scenario_id):
     }
 
 
-def _safe_filename(filename):
-    if not filename or not isinstance(filename, str):
-        return None
-    if "/" in filename or "\\" in filename or filename in (".", ".."):
-        return None
-    return filename
-
-
-def _stem(filename):
-    return os.path.splitext(filename)[0]
-
-
-def _output_dir(filename):
-    return os.path.join(CUSTOM_OUTPUT_DIR, _stem(filename))
-
-
-def _status_for(filename):
-    with JOBS_LOCK:
-        job_status = JOBS.get(filename)
-    if job_status:
-        return job_status
-    summary_path = os.path.join(_output_dir(filename), "summary.txt")
-    return "done" if os.path.exists(summary_path) else "not_run"
-
-
-def _stage_for(filename):
-    with JOBS_LOCK:
-        return JOB_STAGE.get(filename)
-
-
-def _run_pipeline_async(filename, provider=None, engine=None):
-    with JOBS_LOCK:
-        if JOBS.get(filename) == "processing":
-            return False
-        JOBS[filename] = "processing"
-        JOB_STAGE[filename] = "transcribing"
-
-    def work():
-        try:
-            from summarize import summarize
-            from transcribe import transcribe
-
-            audio_path = os.path.join(CUSTOM_AUDIO_DIR, filename)
-            out_dir = _output_dir(filename)
-            os.makedirs(out_dir, exist_ok=True)
-
-            text = transcribe(audio_path, engine=engine)
-            with open(os.path.join(out_dir, "transcript.txt"), "w") as f:
-                f.write(text)
-
-            with JOBS_LOCK:
-                JOB_STAGE[filename] = "summarizing"
-
-            summary = summarize(text, provider=provider)
-            with open(os.path.join(out_dir, "summary.txt"), "w") as f:
-                f.write(summary)
-
-            with JOBS_LOCK:
-                JOBS[filename] = "done"
-                JOB_STAGE.pop(filename, None)
-            logger.info("custom-audio %s: done", filename)
-        except Exception as exc:  # noqa: BLE001 - surface any failure to the UI
-            logger.exception("custom-audio %s: failed", filename)
-            with JOBS_LOCK:
-                JOBS[filename] = f"error:{exc}"
-                JOB_STAGE.pop(filename, None)
-
-    threading.Thread(target=work, daemon=True).start()
-    return True
-
-
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=PROJECT_ROOT, **kwargs)
@@ -398,10 +312,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         if parsed.path == "/healthz":
             return self._send_json({"status": "ok"})
-        if parsed.path == "/api/custom-audio":
-            return self._handle_list_audio()
-        if parsed.path == "/api/run-status":
-            return self._handle_run_status(urllib.parse.parse_qs(parsed.query))
         if parsed.path == "/api/pipeline/status":
             return self._handle_pipeline_status()
         if parsed.path == "/api/eval/history":
@@ -414,48 +324,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
-        if parsed.path == "/api/run-pipeline":
-            return self._handle_run_pipeline()
         if parsed.path == "/api/pipeline/run":
             return self._handle_pipeline_run()
         if parsed.path == "/api/voice-query":
             return self._handle_voice_query_start(urllib.parse.parse_qs(parsed.query))
         self.send_error(404)
-
-    def _handle_list_audio(self):
-        os.makedirs(CUSTOM_AUDIO_DIR, exist_ok=True)
-        files = []
-        for name in sorted(os.listdir(CUSTOM_AUDIO_DIR)):
-            if os.path.splitext(name)[1].lower() not in AUDIO_EXTENSIONS:
-                continue
-            status = _status_for(name)
-            entry = {
-                "filename": name,
-                "audio_url": f"/custom/audio/{urllib.parse.quote(name)}",
-                "status": "error" if status.startswith("error") else status,
-            }
-            if status == "processing":
-                entry["stage"] = _stage_for(name)
-            if status == "done":
-                stem_q = urllib.parse.quote(_stem(name))
-                entry["transcript_url"] = f"/custom/output/{stem_q}/transcript.txt"
-                entry["summary_url"] = f"/custom/output/{stem_q}/summary.txt"
-            if status.startswith("error"):
-                entry["error"] = status.split(":", 1)[1]
-            files.append(entry)
-        self._send_json({"files": files})
-
-    def _handle_run_status(self, query):
-        filename = _safe_filename((query.get("filename") or [""])[0])
-        if not filename:
-            return self._send_json({"error": "invalid filename"}, status=400)
-        status = _status_for(filename)
-        payload = {"status": "error" if status.startswith("error") else status}
-        if status == "processing":
-            payload["stage"] = _stage_for(filename)
-        if status.startswith("error"):
-            payload["error"] = status.split(":", 1)[1]
-        self._send_json(payload)
 
     def _handle_pipeline_status(self):
         self._send_json({"pipelines": [_pipeline_status(sid) for sid in SCENARIO_ORDER]})
@@ -499,29 +372,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         records = read_history(scenario_id)
         records.sort(key=lambda r: r.get("timestamp", 0))
         self._send_json({"records": records})
-
-    def _handle_run_pipeline(self):
-        length = int(self.headers.get("Content-Length") or 0)
-        raw_body = self.rfile.read(length) if length else b"{}"
-        try:
-            data = json.loads(raw_body or b"{}")
-        except json.JSONDecodeError:
-            return self._send_json({"error": "invalid JSON"}, status=400)
-
-        filename = _safe_filename(data.get("filename"))
-        if not filename or not os.path.exists(os.path.join(CUSTOM_AUDIO_DIR, filename)):
-            return self._send_json({"error": "file not found"}, status=404)
-
-        provider = data.get("provider")
-        if provider not in (None, "local", "mistral", "claude"):
-            return self._send_json({"error": "invalid provider"}, status=400)
-
-        engine = data.get("engine")
-        if engine not in (None, "whisper", "voxtral"):
-            return self._send_json({"error": "invalid engine"}, status=400)
-
-        started = _run_pipeline_async(filename, provider=provider, engine=engine)
-        self._send_json({"status": "started" if started else "already_processing"})
 
     def _handle_voice_query_start(self, query):
         content_type = (self.headers.get("Content-Type") or "audio/webm").split(";")[0].strip()
@@ -569,8 +419,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 
 def main():
-    os.makedirs(CUSTOM_AUDIO_DIR, exist_ok=True)
-    os.makedirs(CUSTOM_OUTPUT_DIR, exist_ok=True)
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8743
     socketserver.ThreadingTCPServer.allow_reuse_address = True
     with socketserver.ThreadingTCPServer(("", port), Handler) as httpd:

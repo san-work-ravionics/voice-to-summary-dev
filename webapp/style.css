@@ -190,6 +190,15 @@ body {
 .scenario-card h3 { margin: 0 0 6px; font-size: 15px; }
 .scenario-card p { margin: 0; font-size: 13px; color: var(--text-secondary); }
 
+.scenario-card-link { border-style: dashed; }
+.scenario-link-note {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--seq-500);
+}
+
 /* Detail view */
 .back-link {
   background: none; border: none; cursor: pointer;
@@ -267,15 +276,21 @@ body {
   color: var(--text-secondary); margin: 20px 0 8px;
 }
 
-.eval-table-wrap { overflow-x: auto; margin-bottom: 24px; }
+.eval-table-wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 290px;
+  margin-bottom: 24px;
+  border: 1px solid var(--seq-500);
+  border-radius: 10px;
+}
 table.eval-table {
   border-collapse: collapse;
   width: 100%;
   font-size: 13px;
   background: var(--surface-1);
-  border: 1px solid var(--seq-500);
-  border-radius: 10px;
-  overflow: hidden;
+  border: none;
+  border-radius: 0;
 }
 table.eval-table th, table.eval-table td {
   text-align: left;
@@ -286,6 +301,8 @@ table.eval-table th, table.eval-table td {
 table.eval-table th {
   font-size: 11px; text-transform: uppercase; letter-spacing: .03em;
   color: var(--text-muted); font-weight: 600;
+  position: sticky; top: 0; z-index: 1;
+  background: var(--surface-1);
 }
 table.eval-table tr:last-child td { border-bottom: none; }
 /* Stronger divider between per-recording engine groups (Whisper/Voxtral rows
@@ -387,25 +404,7 @@ table.summary-table th:nth-child(9), table.summary-table td:nth-child(9) { width
   color: var(--text-secondary); white-space: pre-wrap;
 }
 
-/* Custom audio page */
 .custom-intro { font-size: 13px; color: var(--text-secondary); margin: 0 0 18px; max-width: 720px; }
-.custom-empty {
-  border: 1px dashed var(--border); border-radius: 12px;
-  padding: 24px; text-align: center; color: var(--text-muted); font-size: 13px;
-}
-.custom-item {
-  border: 1px solid var(--seq-500);
-  background: var(--surface-1);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-.custom-item-head {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; margin-bottom: 10px; flex-wrap: wrap;
-}
-.custom-item-head h4 { margin: 0; font-size: 14.5px; }
-.custom-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .provider-select {
   font: inherit; font-size: 13px;
   padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border);
@@ -417,7 +416,6 @@ table.summary-table th:nth-child(9), table.summary-table td:nth-child(9) { width
   background: var(--seq-500); color: #fff; cursor: pointer;
 }
 .run-btn:disabled { opacity: .55; cursor: default; }
-.custom-item audio { width: 100%; display: block; margin-bottom: 10px; }
 .custom-processing-note { font-size: 12.5px; color: var(--text-muted); margin-top: 4px; }
 
 /* Voice Query page */
@@ -557,6 +555,96 @@ table.summary-table th:nth-child(9), table.summary-table td:nth-child(9) { width
   margin: 2px 0 14px;
   line-height: 1.5;
 }
+/* Concepts page */
+.concepts-overview {
+  margin-bottom: 28px;
+}
+.concepts-overview h2 {
+  font-size: 22px;
+  margin: 0 0 12px;
+}
+.concepts-overview p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin: 0 0 10px;
+}
+.concepts-section {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  background: var(--surface-1);
+}
+.concepts-section > summary {
+  cursor: pointer;
+  font-size: 14.5px;
+  font-weight: 600;
+  padding: 14px 16px;
+  color: var(--text-primary);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.concepts-section > summary::-webkit-details-marker { display: none; }
+.concepts-section > summary::before {
+  content: "\25B6";
+  font-size: 18px;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+.concepts-section[open] > summary::before {
+  content: "\25BC";
+}
+.concepts-section[open] > summary {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+}
+.concepts-grid {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.concepts-phase {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.concepts-phase:nth-last-child(-n+2) { border-bottom: none; }
+.concepts-phase:nth-child(odd) { border-right: 1px solid var(--border); }
+.concepts-phase strong { color: var(--text-primary); }
+@media (max-width: 600px) {
+  .concepts-grid { grid-template-columns: 1fr; }
+  .concepts-phase:nth-child(odd) { border-right: none; }
+  .concepts-phase:last-child { border-bottom: none; }
+  .concepts-phase:nth-last-child(2) { border-bottom: 1px solid var(--border); }
+}
+.concepts-dl {
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 6px 16px;
+  align-items: baseline;
+}
+@media (max-width: 600px) {
+  .concepts-dl { grid-template-columns: 1fr; gap: 2px 0; }
+  .concepts-term { margin-top: 8px; }
+}
+.concepts-term {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.concepts-def {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
 .roadmap-details { margin: 14px 0; }
 .roadmap-details > summary {
   cursor: pointer;
@@ -593,6 +681,23 @@ table.summary-table th:nth-child(9), table.summary-table td:nth-child(9) { width
 }
 
 /* Story page */
+.story-table-wrap { max-height: none; }
+table.story-table th.story-th-group {
+  text-align: center;
+  border-bottom: 1px solid var(--gridline);
+}
+.story-row { cursor: pointer; transition: background 0.1s; }
+.story-row:hover { background: var(--page-plane); }
+.story-row-active { background: var(--page-plane); font-weight: 600; }
+.story-note-badge {
+  display: inline-block;
+  color: var(--seq-500);
+  font-weight: 700;
+  font-size: 14px;
+}
+#story-detail.hidden { display: none; }
+#story-detail { margin-top: 16px; }
+
 .story-verdict {
   border-left: 3px solid var(--seq-500);
   background: var(--surface-1);

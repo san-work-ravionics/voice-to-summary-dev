@@ -13,10 +13,10 @@
   <aside id="sidebar" class="sidebar">
     <div class="brand">Voice to Summary</div>
     <nav class="side-nav">
-      <button class="nav-item" data-page="roadmap" aria-pressed="true">Roadmap</button>
+      <button class="nav-item" data-page="concepts" aria-pressed="true">Concepts</button>
+      <button class="nav-item" data-page="roadmap" aria-pressed="false">Roadmap</button>
       <button class="nav-item" data-page="scenarios" aria-pressed="false">Scenarios</button>
       <button class="nav-item" data-page="story" aria-pressed="false">Story</button>
-      <button class="nav-item" data-page="custom" aria-pressed="false">Custom Audio</button>
       <button class="nav-item" data-page="pipeline" aria-pressed="false">Pipeline</button>
       <button class="nav-item" data-page="voicequery" aria-pressed="false">Voice Query</button>
       <button class="nav-item" data-page="evaluation" aria-pressed="false">Evaluation</button>
@@ -24,7 +24,11 @@
   </aside>
 
   <main class="app-main">
-    <section id="roadmap-page" class="page">
+    <section id="concepts-page" class="page">
+      <div id="concepts-root"></div>
+    </section>
+
+    <section id="roadmap-page" class="page hidden">
       <div id="roadmap-root"></div>
     </section>
 
@@ -39,10 +43,6 @@
 
     <section id="story-page" class="page hidden">
       <div id="story-root"></div>
-    </section>
-
-    <section id="custom-page" class="page hidden">
-      <div id="custom-root"></div>
     </section>
 
     <section id="pipeline-page" class="page hidden">

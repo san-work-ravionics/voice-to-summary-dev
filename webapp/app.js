@@ -443,6 +443,27 @@ async function renderEvalSummaryTable() {
   }
 }
 
+const SCENARIO_LINKS = [
+  {
+    title: "Phase 5 — Office Agent",
+    description: "Claude tool-use agent writes Word/Excel docs under simulated network conditions.",
+    page: "roadmap",
+    note: "See Roadmap → Phase 5",
+  },
+  {
+    title: "Phase 6 — Meeting History (15 meetings)",
+    description: "A full project lifecycle tracked across 15 meetings with running context carried forward.",
+    page: "story",
+    note: "See Story page",
+  },
+  {
+    title: "Phase 8 — Voice Query",
+    description: "Ask a spoken question and get a text answer drawn from all past meetings and summaries.",
+    page: "voicequery",
+    note: "See Voice Query page",
+  },
+];
+
 function renderScenarioGrid() {
   const grid = document.getElementById("scenario-grid");
   grid.innerHTML = "";
@@ -451,6 +472,15 @@ function renderScenarioGrid() {
     card.className = "scenario-card";
     card.innerHTML = `<h3>${scenario.title}</h3><p>${scenario.description}</p>`;
     card.addEventListener("click", () => showScenarioDetail(scenario));
+    grid.appendChild(card);
+  }
+  for (const link of SCENARIO_LINKS) {
+    const card = document.createElement("button");
+    card.className = "scenario-card scenario-card-link";
+    card.innerHTML = `<h3>${link.title}</h3><p>${link.description}</p><span class="scenario-link-note">${link.note} &rarr;</span>`;
+    card.addEventListener("click", () => {
+      document.querySelector(`.nav-item[data-page="${link.page}"]`).click();
+    });
     grid.appendChild(card);
   }
 }
@@ -944,154 +974,6 @@ function renderProviderComparisonSection(records) {
   `;
 }
 
-// ---------- Custom Audio page ----------
-let customPollTimer = null;
-let customListPollTimer = null;
-
-async function fetchCustomAudioList() {
-  const res = await fetch("/api/custom-audio");
-  if (!res.ok) throw new Error(`Failed to load custom audio list: ${res.status}`);
-  return res.json();
-}
-
-function customStatusPill(status) {
-  const map = {
-    not_run: { cls: "neutral", label: "Not run yet" },
-    processing: { cls: "processing", label: "Processing…" },
-    done: { cls: "good", label: "Done" },
-    error: { cls: "critical", label: "Error" },
-  };
-  const { cls, label } = map[status] || map.not_run;
-  return `<span class="status-pill"><span class="status-dot ${cls}"></span>${label}</span>`;
-}
-
-async function renderCustomItemOutputs(container, file) {
-  const [transcriptText, summaryText] = await Promise.all([
-    fetchText(file.transcript_url),
-    fetchText(file.summary_url),
-  ]);
-  const keyPoints = extractKeyPoints(summaryText);
-  const blockId = `custom-full-${file.filename.replace(/\W/g, "_")}`;
-  container.innerHTML = `
-    <div class="transcript-block">
-      <h4>Transcript</h4>
-      <div class="transcript-text">${escapeHtml(transcriptText)}</div>
-    </div>
-    <div class="variant-block">
-      <h4>Summary</h4>
-      <div class="key-points">
-        <div class="key-points-label">Key Points</div>
-        <ul>${keyPoints.map((k) => `<li>${escapeHtml(k)}</li>`).join("") || "<li>(none extracted)</li>"}</ul>
-      </div>
-      <button class="full-toggle" data-target="${blockId}">Show full output ▾</button>
-      <div class="full-text hidden" id="${blockId}">${renderMarkdownLite(summaryText)}</div>
-    </div>
-  `;
-  container.querySelector(".full-toggle").addEventListener("click", (e) => {
-    const target = document.getElementById(e.target.dataset.target);
-    const isHidden = target.classList.toggle("hidden");
-    e.target.textContent = isHidden ? "Show full output ▾" : "Hide full output ▴";
-  });
-}
-
-function renderCustomAudioList(data) {
-  const root = document.getElementById("custom-root");
-  root.innerHTML = `<p class="custom-intro">Files dropped into <code>custom/audio/</code> show up here automatically. Click "Run pipeline" to transcribe and summarize a new one (runs the plain Phase 2 baseline pipeline — no scripted meeting context/checklist applies to real audio).</p>`;
-
-  if (!data.files.length) {
-    root.innerHTML += `<div class="custom-empty">No audio files found yet. Copy a .wav/.mp3/.m4a/.ogg/.flac file into <code>custom/audio/</code> and it'll appear here within a few seconds.</div>`;
-    return;
-  }
-
-  for (const file of data.files) {
-    const item = document.createElement("div");
-    item.className = "custom-item";
-    item.innerHTML = `
-      <div class="custom-item-head">
-        <h4>${escapeHtml(file.filename)}</h4>
-        ${customStatusPill(file.status)}
-      </div>
-      <audio controls src="${file.audio_url}"></audio>
-      <div class="custom-actions"></div>
-      <div class="custom-outputs"></div>
-    `;
-    root.appendChild(item);
-
-    const actions = item.querySelector(".custom-actions");
-    const outputs = item.querySelector(".custom-outputs");
-
-    if (file.status === "not_run" || file.status === "error") {
-      const engineSelect = document.createElement("select");
-      engineSelect.className = "provider-select";
-      engineSelect.title = "Speech-to-text engine";
-      engineSelect.innerHTML = `
-        <option value="whisper">Whisper (base)</option>
-        <option value="voxtral">Voxtral Mini 3B (slow)</option>
-      `;
-      const select = document.createElement("select");
-      select.className = "provider-select";
-      select.title = "Summarization model";
-      select.innerHTML = `
-        <option value="local">Local (Qwen2.5)</option>
-        <option value="mistral">Local (Mistral 7B)</option>
-        <option value="claude">Claude (Haiku 4.5)</option>
-      `;
-      const btn = document.createElement("button");
-      btn.className = "run-btn";
-      btn.textContent = file.status === "error" ? "Retry pipeline" : "Run pipeline";
-      btn.addEventListener("click", () => triggerRun(file.filename, btn, select.value, engineSelect.value));
-      actions.appendChild(engineSelect);
-      actions.appendChild(select);
-      actions.appendChild(btn);
-      if (file.status === "error") {
-        actions.insertAdjacentHTML("beforeend", `<div class="custom-processing-note">Last error: ${escapeHtml(file.error || "unknown")}</div>`);
-      }
-    } else if (file.status === "processing") {
-      actions.innerHTML = `<button class="run-btn" disabled>Processing…</button>
-        <div class="custom-processing-note">Transcribing + summarizing — first run also loads Whisper and the local LLM, can take a couple of minutes.</div>`;
-    } else if (file.status === "done") {
-      renderCustomItemOutputs(outputs, file);
-    }
-  }
-}
-
-async function refreshCustomAudioList() {
-  try {
-    const data = await fetchCustomAudioList();
-    renderCustomAudioList(data);
-  } catch (err) {
-    document.getElementById("custom-root").innerHTML =
-      `<p>Could not load custom audio list (${escapeHtml(err.message)}). Make sure you're running <code>python webapp/server.py</code>, not a plain static server.</p>`;
-  }
-}
-
-async function triggerRun(filename, btn, provider, engine) {
-  btn.disabled = true;
-  btn.textContent = "Starting…";
-  try {
-    await fetch("/api/run-pipeline", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ filename, provider, engine }),
-    });
-  } finally {
-    refreshCustomAudioList();
-  }
-}
-
-function startCustomPagePolling() {
-  stopCustomPagePolling();
-  refreshCustomAudioList();
-  customListPollTimer = setInterval(refreshCustomAudioList, 4000);
-}
-
-function stopCustomPagePolling() {
-  if (customListPollTimer) {
-    clearInterval(customListPollTimer);
-    customListPollTimer = null;
-  }
-}
-
 // ---------- Pipeline page ----------
 const PIPELINE_META = {
   "phase1-baseline": { desc: "Transcript in, structured summary out. No extra grounding." },
@@ -1389,51 +1271,25 @@ function renderVariantChecks(weekProbeEntry, variantKey) {
   return html;
 }
 
-function deltaCell(b, c) {
-  if (b === null || b === undefined || c === null || c === undefined) {
-    return `<span class="score-num">—</span>`;
-  }
-  let cls = "neutral", arrow = "=";
-  if (c > b) { cls = "good"; arrow = "▲"; }
-  else if (c < b) { cls = "critical"; arrow = "▼"; }
-  return `<span class="score-num">${b}</span> <span class="delta-arrow ${cls}">${arrow}</span> <span class="score-num">${c}</span>`;
+function storyMeetingTableRow(meeting, texts, evalEntry) {
+  const bl = evalEntry ? evalEntry.baseline.layer2 : null;
+  const cl = evalEntry ? evalEntry.with_context.layer2 : null;
+  const bCont = evalEntry && evalEntry.baseline.continuity ? evalEntry.baseline.continuity.continuity : null;
+  const cCont = evalEntry && evalEntry.with_context.continuity ? evalEntry.with_context.continuity.continuity : null;
+  const hasNote = !!STORY_CURATOR_NOTES[meeting.slug];
+
+  return `<tr class="story-row" data-slug="${meeting.slug}">
+    <td>${escapeHtml(meeting.label)}${hasNote ? ' <span class="story-note-badge" title="Has human review note">*</span>' : ""}</td>
+    <td>${bl ? bl.faithfulness : "—"}</td>
+    <td>${bl ? bl.completeness : "—"}</td>
+    <td>${bCont !== null ? bCont : "—"}</td>
+    <td>${cl ? cl.faithfulness : "—"}</td>
+    <td>${cl ? cl.completeness : "—"}</td>
+    <td>${cCont !== null ? cCont : "—"}</td>
+  </tr>`;
 }
 
-function renderStoryScoreTable(results) {
-  let html = `
-    <div class="eval-table-wrap">
-      <table class="eval-table">
-        <thead>
-          <tr>
-            <th>Meeting</th>
-            <th>Faithfulness (B &rarr; C)</th>
-            <th>Completeness (B &rarr; C)</th>
-            <th>Conciseness (B &rarr; C)</th>
-            <th>Continuity (B &rarr; C)</th>
-          </tr>
-        </thead>
-        <tbody>
-  `;
-  for (const m of results.meetings) {
-    const bl = m.baseline.layer2;
-    const cl = m.with_context.layer2;
-    const bCont = m.baseline.continuity ? m.baseline.continuity.continuity : null;
-    const cCont = m.with_context.continuity ? m.with_context.continuity.continuity : null;
-    html += `
-      <tr>
-        <td>${m.label}</td>
-        <td>${deltaCell(bl.faithfulness, cl.faithfulness)}</td>
-        <td>${deltaCell(bl.completeness, cl.completeness)}</td>
-        <td>${deltaCell(bl.conciseness, cl.conciseness)}</td>
-        <td>${deltaCell(bCont, cCont)}</td>
-      </tr>
-    `;
-  }
-  html += `</tbody></table></div>`;
-  return html;
-}
-
-function renderStoryMeeting(meeting, texts, evalEntry, probeEntry) {
+function renderStoryMeetingDetail(meeting, texts, evalEntry, probeEntry) {
   const { transcriptText, baselineText, contextText } = texts;
   const baselineKP = extractKeyPoints(baselineText);
   const contextKP = extractKeyPoints(contextText);
@@ -1456,48 +1312,44 @@ function renderStoryMeeting(meeting, texts, evalEntry, probeEntry) {
     : "";
 
   return `
-    <div class="story-meeting">
-      <div class="story-meeting-head"><h3>${meeting.label}</h3></div>
-
-      <div class="audio-block">
-        <div class="block-label">Recording</div>
-        <audio controls src="${meeting.audio}"></audio>
-        <a class="audio-link" href="${meeting.audio}" download>Download audio</a>
-      </div>
-
-      <button class="full-toggle" data-target="${transcriptId}">Show transcript &#9662;</button>
-      <div class="transcript-block hidden" id="${transcriptId}">
-        <h4>Transcript</h4>
-        <div class="transcript-text">${escapeHtml(transcriptText)}</div>
-      </div>
-
-      <div class="compare-grid">
-        <div class="compare-col">
-          <h5>Baseline (isolated)</h5>
-          <div class="score-row">${scoreLine(bl, bCont)}</div>
-          <div class="key-points">
-            <div class="key-points-label">Key Points</div>
-            <ul>${baselineKP.map((k) => `<li>${escapeHtml(k)}</li>`).join("") || "<li>(none extracted)</li>"}</ul>
-          </div>
-          <div class="full-text">${renderMarkdownLite(baselineText)}</div>
-          ${claimsBlock(bClaims)}
-          ${renderVariantChecks(probeEntry, "baseline")}
-        </div>
-        <div class="compare-col">
-          <h5>With Context + History</h5>
-          <div class="score-row">${scoreLine(cl, cCont)}</div>
-          <div class="key-points">
-            <div class="key-points-label">Key Points</div>
-            <ul>${contextKP.map((k) => `<li>${escapeHtml(k)}</li>`).join("") || "<li>(none extracted)</li>"}</ul>
-          </div>
-          <div class="full-text">${renderMarkdownLite(contextText)}</div>
-          ${claimsBlock(cClaims)}
-          ${renderVariantChecks(probeEntry, "with_context")}
-        </div>
-      </div>
-
-      ${STORY_CURATOR_NOTES[meeting.slug] ? `<div class="curator-note"><strong>Human review note:</strong> ${escapeHtml(STORY_CURATOR_NOTES[meeting.slug])}</div>` : ""}
+    <div class="audio-block">
+      <div class="block-label">Recording</div>
+      <audio controls src="${meeting.audio}"></audio>
+      <a class="audio-link" href="${meeting.audio}" download>Download audio</a>
     </div>
+
+    <button class="full-toggle" data-target="${transcriptId}">Show transcript &#9662;</button>
+    <div class="transcript-block hidden" id="${transcriptId}">
+      <h4>Transcript</h4>
+      <div class="transcript-text">${escapeHtml(transcriptText)}</div>
+    </div>
+
+    <div class="compare-grid">
+      <div class="compare-col">
+        <h5>Baseline (isolated)</h5>
+        <div class="score-row">${scoreLine(bl, bCont)}</div>
+        <div class="key-points">
+          <div class="key-points-label">Key Points</div>
+          <ul>${baselineKP.map((k) => `<li>${escapeHtml(k)}</li>`).join("") || "<li>(none extracted)</li>"}</ul>
+        </div>
+        <div class="full-text">${renderMarkdownLite(baselineText)}</div>
+        ${claimsBlock(bClaims)}
+        ${renderVariantChecks(probeEntry, "baseline")}
+      </div>
+      <div class="compare-col">
+        <h5>With Context + History</h5>
+        <div class="score-row">${scoreLine(cl, cCont)}</div>
+        <div class="key-points">
+          <div class="key-points-label">Key Points</div>
+          <ul>${contextKP.map((k) => `<li>${escapeHtml(k)}</li>`).join("") || "<li>(none extracted)</li>"}</ul>
+        </div>
+        <div class="full-text">${renderMarkdownLite(contextText)}</div>
+        ${claimsBlock(cClaims)}
+        ${renderVariantChecks(probeEntry, "with_context")}
+      </div>
+    </div>
+
+    ${STORY_CURATOR_NOTES[meeting.slug] ? `<div class="curator-note"><strong>Human review note:</strong> ${escapeHtml(STORY_CURATOR_NOTES[meeting.slug])}</div>` : ""}
   `;
 }
 
@@ -1526,15 +1378,14 @@ async function renderStoryPage() {
       </div>
     `;
 
-    html += results
-      ? renderStoryScoreTable(results)
-      : `<p class="eval-note">Could not load eval/output/story_results.json — run <code>python eval/story_judge.py</code> to generate scores. Showing recordings/transcripts/summaries without scores.</p>`;
-
+    if (!results) {
+      html += `<p class="eval-note">Could not load eval/output/story_results.json — run <code>python eval/story_judge.py</code> to generate scores.</p>`;
+    }
     if (!probes) {
       html += `<p class="eval-note">Could not load eval/output/story_probes.json — run <code>python eval/story_probes.py</code> to generate targeted checks.</p>`;
     }
 
-    const meetingsHtml = await Promise.all(STORY_MEETINGS.map(async (meeting) => {
+    const meetingData = await Promise.all(STORY_MEETINGS.map(async (meeting) => {
       const [transcriptText, baselineText, contextText] = await Promise.all([
         fetchText(meeting.transcript),
         fetchText(meeting.baseline),
@@ -1542,16 +1393,59 @@ async function renderStoryPage() {
       ]);
       const evalEntry = results ? results.meetings.find((m) => m.slug === meeting.slug) : null;
       const probeEntry = probes ? probes.meetings.find((w) => w.slug === meeting.slug) : null;
-      return renderStoryMeeting(meeting, { transcriptText, baselineText, contextText }, evalEntry, probeEntry);
+      return { meeting, texts: { transcriptText, baselineText, contextText }, evalEntry, probeEntry };
     }));
 
-    root.innerHTML = html + meetingsHtml.join("");
+    html += `
+      <p class="eval-note">Click a row to expand recording, transcript, and full summaries. <span class="story-note-badge">*</span> = has a human review note.</p>
+      <div class="eval-table-wrap story-table-wrap">
+        <table class="eval-table story-table">
+          <thead>
+            <tr>
+              <th rowspan="2">Meeting</th>
+              <th colspan="3" class="story-th-group">Baseline</th>
+              <th colspan="3" class="story-th-group">With Context</th>
+            </tr>
+            <tr>
+              <th>Faith.</th><th>Compl.</th><th>Contin.</th>
+              <th>Faith.</th><th>Compl.</th><th>Contin.</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+    for (const d of meetingData) {
+      html += storyMeetingTableRow(d.meeting, d.texts, d.evalEntry);
+    }
+    html += `</tbody></table></div>`;
+    html += `<div id="story-detail"></div>`;
 
-    root.querySelectorAll(".full-toggle").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const target = document.getElementById(btn.dataset.target);
-        const isHidden = target.classList.toggle("hidden");
-        btn.innerHTML = isHidden ? "Show transcript &#9662;" : "Hide transcript &#9652;";
+    root.innerHTML = html;
+
+    root.querySelectorAll(".story-row").forEach((row) => {
+      row.addEventListener("click", () => {
+        const slug = row.dataset.slug;
+        const d = meetingData.find((m) => m.meeting.slug === slug);
+        const detail = document.getElementById("story-detail");
+        const alreadyOpen = detail.dataset.slug === slug && !detail.classList.contains("hidden");
+        if (alreadyOpen) {
+          detail.classList.add("hidden");
+          detail.dataset.slug = "";
+          row.classList.remove("story-row-active");
+          return;
+        }
+        root.querySelectorAll(".story-row-active").forEach((r) => r.classList.remove("story-row-active"));
+        row.classList.add("story-row-active");
+        detail.dataset.slug = slug;
+        detail.classList.remove("hidden");
+        detail.innerHTML = `<div class="story-meeting"><div class="story-meeting-head"><h3>${d.meeting.label}</h3></div>${renderStoryMeetingDetail(d.meeting, d.texts, d.evalEntry, d.probeEntry)}</div>`;
+        detail.querySelectorAll(".full-toggle").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const target = document.getElementById(btn.dataset.target);
+            const isHidden = target.classList.toggle("hidden");
+            btn.innerHTML = isHidden ? "Show transcript &#9662;" : "Hide transcript &#9652;";
+          });
+        });
+        detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
       });
     });
   } catch (err) {
@@ -2299,12 +2193,70 @@ function renderPhase7(historyRecords) {
   return html;
 }
 
-function renderPhase8() {
-  return `
+function renderPhase8(voiceQueryRecords) {
+  let html = `
     <h3 class="eval-section-header">Phase 8 — Voice Interface for Querying the Content</h3>
     <p class="eval-note"><strong>Goal:</strong> ask a spoken question, get a text answer grounded in everything this project has produced. <strong>Built by:</strong> <code>phase8-voice-query/</code> — TF-IDF retrieval over stored transcripts/summaries (no vector DB, no new dependency), answered with the same provider-swappable backend every other phase uses.</p>
-    <p class="eval-note">End-to-end latency and Grounding Score are measured per query (<code>output/query-N/{timing,grounding}.json</code>), not aggregated here since queries are ad hoc rather than a fixed scripted batch like Phases 1-4. Try it on the <strong>Voice Query</strong> page, or see <a href="/phase8-voice-query/README.md">phase8-voice-query/README.md</a> for the retrieval/grounding methodology.</p>
   `;
+
+  const records = voiceQueryRecords || [];
+  if (!records.length) {
+    html += `<p class="eval-note">No queries logged yet — try it on the <strong>Voice Query</strong> page, or see <a href="/phase8-voice-query/README.md">phase8-voice-query/README.md</a> for the retrieval/grounding methodology.</p>`;
+    return html;
+  }
+
+  const groundingScores = records.map((r) => r.grounding?.score).filter((s) => s != null);
+  const avgGrounding = groundingScores.length ? groundingScores.reduce((a, b) => a + b, 0) / groundingScores.length : null;
+  const latencies = records.map((r) => r.timing?.total_s).filter((s) => s != null);
+  const avgLatency = latencies.length ? latencies.reduce((a, b) => a + b, 0) / latencies.length : null;
+
+  html += statRow([
+    statTile(records.length, "Queries"),
+    statTile(avgGrounding != null ? `${Math.round(avgGrounding * 100)}%` : "—", "Avg grounding"),
+    statTile(avgLatency != null ? `${avgLatency.toFixed(1)}s` : "—", "Avg latency"),
+  ]);
+
+  html += `
+    <h4 class="eval-subsection-header">Query history</h4>
+    <div class="eval-table-wrap">
+      <table class="eval-table">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Provider</th>
+            <th>Retrieval</th>
+            <th>Question</th>
+            <th>Grounding</th>
+            <th>Latency</th>
+            <th>Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+  for (const r of records) {
+    const grounding = r.grounding || {};
+    const groundingPct = grounding.score != null ? `${Math.round(grounding.score * 100)}%` : "n/a";
+    const groundingLabel = grounding.abstained ? `${groundingPct} (abstained)` : groundingPct;
+    const when = r.timestamp ? new Date(r.timestamp * 1000).toLocaleString() : "—";
+    const question = r.question && r.question.length > 70 ? `${r.question.slice(0, 67)}...` : (r.question || "");
+    const timing = r.timing || {};
+    const latency = timing.total_s != null ? `${timing.total_s.toFixed(2)}s` : "—";
+    const cost = r.cost_usd ? `$${r.cost_usd.toFixed(4)}` : (r.cost_usd === 0 ? "free" : "—");
+    html += `
+      <tr>
+        <td>${when}</td>
+        <td>${escapeHtml(r.provider || "")}</td>
+        <td>${escapeHtml(r.retrieval_method || "tfidf")}</td>
+        <td>${escapeHtml(question)}</td>
+        <td>${groundingLabel}</td>
+        <td>${latency}</td>
+        <td>${cost}</td>
+      </tr>
+    `;
+  }
+  html += `</tbody></table></div>`;
+  html += `<p class="eval-note">End-to-end latency and Grounding Score are measured per query. Try it on the <strong>Voice Query</strong> page, or see <a href="/phase8-voice-query/README.md">phase8-voice-query/README.md</a> for the retrieval/grounding methodology.</p>`;
+  return html;
 }
 
 const ROADMAP_TABS = [
@@ -2335,7 +2287,7 @@ async function renderRoadmapPage() {
   const root = document.getElementById("roadmap-root");
   root.innerHTML = "<p>Loading…</p>";
 
-  const [transcriptionData, results, extraction, storyResults, storyProbes, phase1History, phase2History, phase5History, phase7History] = await Promise.all([
+  const [transcriptionData, results, extraction, storyResults, storyProbes, phase1History, phase2History, phase5History, phase7History, voiceQueryHistory] = await Promise.all([
     fetchJsonOrNull("/eval/output/transcription_quality.json"),
     fetchJsonOrNull("/eval/output/results.json"),
     fetchJsonOrNull("/eval/output/extraction_efficiency.json"),
@@ -2345,6 +2297,7 @@ async function renderRoadmapPage() {
     fetchJsonOrNull("/api/eval/history?scenario=phase2-checklist"),
     fetchJsonOrNull("/api/eval/history?scenario=phase5-office-agent"),
     fetchJsonOrNull("/api/eval/history?scenario=phase7-reference-rag"),
+    fetchJsonOrNull("/api/voice-query/history"),
   ]);
 
   const panelContent = {
@@ -2356,7 +2309,7 @@ async function renderRoadmapPage() {
     phase5: renderPhase5(phase5History?.records),
     phase6: renderPhase6(storyResults, storyProbes),
     phase7: renderPhase7(phase7History?.records),
-    phase8: renderPhase8(),
+    phase8: renderPhase8(voiceQueryHistory?.records),
   };
 
   let html = `<p class="custom-intro">Each tab below is scored from the same eval outputs shown on the Evaluation and Story pages, regrouped by roadmap phase instead of by scenario — see <a href="/ROADMAP.md">ROADMAP.md</a> for the narrative version.</p>`;
@@ -2612,13 +2565,108 @@ function stopVoiceQueryPolling() {
   }
 }
 
+// ---------- Concepts page ----------
+function renderConceptsPage() {
+  const root = document.getElementById("concepts-root");
+  root.innerHTML = `
+    <div class="concepts-overview">
+      <h2>Voice to Summary</h2>
+      <p>Meetings produce decisions, action items, and context that teams rely on — but writing those up is slow, inconsistent, and often skipped. This project turns a meeting recording into a structured written summary automatically: Topic, Key Points, Decisions, and Actions with owners — ready to share, file, or feed into project tracking.</p>
+      <p>Everything runs on your own machine. No recording or transcript is sent to the cloud, no subscription is needed, and there are no per-meeting costs. The system is built in eight progressive phases, each adding one capability so you can see exactly what each layer contributes.</p>
+    </div>
+
+    <details class="concepts-section" open>
+      <summary>Phases</summary>
+      <div class="concepts-grid">
+        <div class="concepts-phase"><strong>1. Baseline</strong> — Turn a recording into a structured summary: Topic, Key Points, Decisions, Actions</div>
+        <div class="concepts-phase"><strong>2. Checklist</strong> — Verify that all required agenda topics were actually discussed</div>
+        <div class="concepts-phase"><strong>3. Context</strong> — Feed project background into the summary for sharper, more relevant output</div>
+        <div class="concepts-phase"><strong>4. Assistant</strong> — An AI note-taker joins the call; the summary correctly separates its remarks from the real discussion</div>
+        <div class="concepts-phase"><strong>5. Office Agent</strong> — Auto-generate Word and Excel deliverables from the summary, even on spotty network</div>
+        <div class="concepts-phase"><strong>6. History</strong> — Track a 15-meeting project lifecycle with running context carried across meetings</div>
+        <div class="concepts-phase"><strong>7. Reference RAG</strong> — Pull in facts from project documents (PRD, design specs) to enrich the summary</div>
+        <div class="concepts-phase"><strong>8. Voice Query</strong> — Ask a spoken question and get a text answer drawn from all past meetings</div>
+      </div>
+    </details>
+
+    <details class="concepts-section">
+      <summary>Core Concepts</summary>
+      <div class="concepts-dl">
+        <div class="concepts-term">Speech Recognition</div>
+        <div class="concepts-def">Converts the audio recording into a text transcript using Whisper, running entirely on-device. No audio leaves the machine.</div>
+
+        <div class="concepts-term">Summarization</div>
+        <div class="concepts-def">A small language model reads the transcript and produces the structured summary. Runs locally by default; optionally swappable to a cloud model for comparison.</div>
+
+        <div class="concepts-term">Checklist Coverage</div>
+        <div class="concepts-def">Automatically checks whether each expected agenda topic was actually discussed, using keyword matching rather than AI guesswork.</div>
+
+        <div class="concepts-term">Context Injection</div>
+        <div class="concepts-def">Gives the summarizer background about the project (participants, goals, prior decisions) so the output reflects what matters, not just what was said.</div>
+
+        <div class="concepts-term">RAG (Retrieval)</div>
+        <div class="concepts-def">Pulls in relevant excerpts from past meetings or project documents before summarizing, so the output connects to the broader project story.</div>
+
+        <div class="concepts-term">Privacy</div>
+        <div class="concepts-def">All speaker names are replaced with Person A / Person B. No personally identifiable information appears in any output.</div>
+      </div>
+    </details>
+
+    <details class="concepts-section">
+      <summary>Technical Stack</summary>
+      <div class="concepts-dl">
+        <div class="concepts-term">Language</div>
+        <div class="concepts-def">Python 3</div>
+
+        <div class="concepts-term">Speech-to-text</div>
+        <div class="concepts-def">OpenAI Whisper (local, <code>base</code> model) · Voxtral Mini 3B (optional)</div>
+
+        <div class="concepts-term">Summarization LLM</div>
+        <div class="concepts-def"><code>Qwen/Qwen2.5-1.5B-Instruct</code> (default, on-device) · Mistral 7B (local) · Claude Haiku 4.5 (API)</div>
+
+        <div class="concepts-term">Audio</div>
+        <div class="concepts-def"><code>pydub</code> + <code>ffmpeg</code> for processing · <code>pyttsx3</code> for TTS demo recordings</div>
+
+        <div class="concepts-term">Web UI</div>
+        <div class="concepts-def">Framework-free HTML/CSS/JS · Python stdlib <code>http.server</code> — zero frontend dependencies</div>
+
+        <div class="concepts-term">Dependencies</div>
+        <div class="concepts-def"><code>torch</code>, <code>accelerate</code>, <code>transformers</code>, <code>openai-whisper</code>, <code>pydub</code>, <code>pyttsx3</code></div>
+
+        <div class="concepts-term">Infrastructure</div>
+        <div class="concepts-def">Runs entirely offline after one-time model downloads (~3GB). No API keys required for the default local configuration.</div>
+      </div>
+    </details>
+
+    <details class="concepts-section">
+      <summary>Evaluation Methodology</summary>
+      <div class="concepts-dl">
+        <div class="concepts-term">Two-layer design</div>
+        <div class="concepts-def">Layer 1 is deterministic (no AI opinion): schema compliance, heading format, action-bullet prefixes, transcription accuracy, extraction recall/precision. Layer 2 is AI-judged: faithfulness, completeness, conciseness on a 1-5 scale.</div>
+
+        <div class="concepts-term">Transcription accuracy</div>
+        <div class="concepts-def">Word Error Rate (WER) measured across clean, light-noise, and heavy-noise audio. Target: 5-8% for domain speech.</div>
+
+        <div class="concepts-term">Action Extraction</div>
+        <div class="concepts-def">How many real commitments the summary captured (recall) and how many listed actions are real vs invented (precision) — scored deterministically, not by AI opinion.</div>
+
+        <div class="concepts-term">Grounding Score</div>
+        <div class="concepts-def">For summaries enriched with reference documents, measures what fraction of the new content traces back to the source material.</div>
+
+        <div class="concepts-term">Known limitation</div>
+        <div class="concepts-def">The same small model that writes the summary also judges it in the default config — it tends to rate itself generously. Deterministic checks (Layer 1) are more trustworthy.</div>
+      </div>
+    </details>
+  `;
+}
+
 // ---------- Nav ----------
 function setupNav() {
   const navItems = document.querySelectorAll(".nav-item");
   const pages = {
+    concepts: document.getElementById("concepts-page"),
     scenarios: document.getElementById("scenarios-page"),
     story: document.getElementById("story-page"),
-    custom: document.getElementById("custom-page"),
     pipeline: document.getElementById("pipeline-page"),
     voicequery: document.getElementById("voicequery-page"),
     evaluation: document.getElementById("evaluation-page"),
@@ -2635,6 +2683,10 @@ function setupNav() {
       // Always re-render on nav click, not just the first visit — both pages
       // can change from Pipeline-triggered runs (phase6-history/phase1-4 scenarios re-summarized,
       // new judged runs added to history) after the first time you look.
+      if (item.dataset.page === "concepts") {
+        renderConceptsPage();
+      }
+
       if (item.dataset.page === "evaluation") {
         renderEvaluationPage();
       }
@@ -2645,12 +2697,6 @@ function setupNav() {
 
       if (item.dataset.page === "roadmap") {
         renderRoadmapPage();
-      }
-
-      if (item.dataset.page === "custom") {
-        startCustomPagePolling();
-      } else {
-        stopCustomPagePolling();
       }
 
       if (item.dataset.page === "pipeline") {
@@ -2674,7 +2720,7 @@ function setupDrawer() {
   toggle.addEventListener("click", () => sidebar.classList.toggle("collapsed"));
 }
 
-renderRoadmapPage();
+renderConceptsPage();
 renderTechSummary();
 renderEvalSummaryTable();
 renderScenarioGrid();
