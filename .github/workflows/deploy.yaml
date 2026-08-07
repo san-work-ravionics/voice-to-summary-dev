@@ -86,7 +86,7 @@ jobs:
         run: |
           SSH="ssh -o StrictHostKeyChecking=no"
           HOST="ubuntu@${{ secrets.VTS_EC2_IP }}"
-          sync_dir() { [ -d "$1" ] && rsync -av --update -e "$SSH" "$1/" "$HOST:$2/"; }
+          sync_dir() { if [ -d "$1" ]; then rsync -av --update -e "$SSH" "$1/" "$HOST:$2/"; fi; }
           sync_dir audio-generation/output  /opt/vts/audio/output
           sync_dir phase1-baseline/output   /opt/vts/phase1/output
           sync_dir phase2-checklist/output  /opt/vts/phase2/output
