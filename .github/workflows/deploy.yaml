@@ -1,0 +1,162 @@
+name: Build and Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+    steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf \
+            /usr/share/dotnet \
+            /usr/local/lib/android \
+            /opt/ghc \
+            /opt/hostedtoolcache \
+            /usr/local/share/boost \
+            /usr/local/share/powershell \
+            /usr/local/.ghcup \
+            /usr/share/swift \
+            /usr/lib/jvm \
+            "$AGENT_TOOLSDIRECTORY"
+          sudo apt-get clean
+          df -h
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set image reference
+        id: meta
+        run: |
+          IMAGE="ghcr.io/${{ github.repository }}/vts:${{ github.sha }}"
+          echo "image=${IMAGE}" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image }}
+            ghcr.io/${{ github.repository }}/vts:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ${{ needs.build-and-push.outputs.image }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Ensure data directories on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.VTS_EC2_IP }} \
+            "sudo mkdir -p /opt/vts/{audio/output,phase1/output,phase2/output,phase3/output,phase4/output,phase5/output,phase6/output,phase7/output,phase8/output,eval/output,logs,run_status,cache} \
+             && sudo chown -R ubuntu:ubuntu /opt/vts"
+
+      - name: Sync phase outputs + eval data to EC2
+        run: |
+          SSH="ssh -o StrictHostKeyChecking=no"
+          HOST="ubuntu@${{ secrets.VTS_EC2_IP }}"
+          sync_dir() { [ -d "$1" ] && rsync -av --update -e "$SSH" "$1/" "$HOST:$2/"; }
+          sync_dir audio-generation/output  /opt/vts/audio/output
+          sync_dir phase1-baseline/output   /opt/vts/phase1/output
+          sync_dir phase2-checklist/output  /opt/vts/phase2/output
+          sync_dir phase3-context/output    /opt/vts/phase3/output
+          sync_dir phase4-assistant/output  /opt/vts/phase4/output
+          sync_dir phase5-office-agent/output /opt/vts/phase5/output
+          sync_dir phase6-history/output    /opt/vts/phase6/output
+          sync_dir phase7-reference-rag/output /opt/vts/phase7/output
+          sync_dir eval/output              /opt/vts/eval/output
+
+      - name: Stop old container and free disk
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.VTS_EC2_IP }} \
+            "docker stop vts 2>/dev/null || true \
+             && docker rm vts 2>/dev/null || true \
+             && docker image prune -af \
+             && df -h"
+
+      - name: Pull image on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.VTS_EC2_IP }} \
+            "echo '${{ secrets.GHCR_PAT }}' | docker login ghcr.io -u ${{ github.actor }} --password-stdin \
+             && docker pull '${{ env.IMAGE }}'"
+
+      - name: Start container on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.VTS_EC2_IP }} \
+            "docker run -d \
+              --name vts \
+              --restart unless-stopped \
+              -p 8743:8743 \
+              -e SUMMARY_PROVIDER=claude \
+              -e ANTHROPIC_API_KEY='${{ secrets.ANTHROPIC_API_KEY }}' \
+              -e VTS_AUTH=google \
+              -e VTS_JWT_SECRET='${{ secrets.VTS_JWT_SECRET }}' \
+              -e VTS_BASE_URL='${{ secrets.VTS_BASE_URL }}' \
+              -e GOOGLE_CLIENT_ID='${{ secrets.GOOGLE_CLIENT_ID }}' \
+              -e GOOGLE_CLIENT_SECRET='${{ secrets.GOOGLE_CLIENT_SECRET }}' \
+              -v /opt/vts/audio/output:/app/audio-generation/output:ro \
+              -v /opt/vts/phase1/output:/app/phase1-baseline/output:ro \
+              -v /opt/vts/phase2/output:/app/phase2-checklist/output:ro \
+              -v /opt/vts/phase3/output:/app/phase3-context/output:ro \
+              -v /opt/vts/phase4/output:/app/phase4-assistant/output:ro \
+              -v /opt/vts/phase5/output:/app/phase5-office-agent/output:ro \
+              -v /opt/vts/phase6/output:/app/phase6-history/output:ro \
+              -v /opt/vts/phase7/output:/app/phase7-reference-rag/output:ro \
+              -v /opt/vts/phase8/output:/app/phase8-voice-query/output \
+              -v /opt/vts/eval/output:/app/eval/output:ro \
+              -v /opt/vts/logs:/app/logs \
+              -v /opt/vts/run_status:/app/webapp/.run_status \
+              -v vts_cache:/cache \
+              --memory 900m \
+              --log-driver awslogs \
+              --log-opt awslogs-region=ap-south-1 \
+              --log-opt awslogs-group=/vts/app \
+              --log-opt awslogs-stream=vts-container \
+              '${{ env.IMAGE }}'"
+
+      - name: Health check
+        run: |
+          echo "Waiting for /healthz..."
+          for i in $(seq 1 30); do
+            if ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.VTS_EC2_IP }} \
+              "curl -sf http://localhost:8743/healthz" > /dev/null 2>&1; then
+              echo "VtS is up."
+              exit 0
+            fi
+            sleep 6
+          done
+          echo "Health check timed out after 3 minutes."
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.VTS_EC2_IP }} \
+            "docker logs vts --tail 40" || true
+          exit 1

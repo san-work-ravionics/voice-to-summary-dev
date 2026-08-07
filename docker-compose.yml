@@ -10,6 +10,11 @@ services:
       - CLAUDE_MODEL=${CLAUDE_MODEL:-}
       - MISTRAL_MODEL=${MISTRAL_MODEL:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - VTS_AUTH=${VTS_AUTH:-}
+      - VTS_JWT_SECRET=${VTS_JWT_SECRET:-}
+      - VTS_BASE_URL=${VTS_BASE_URL:-}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
     volumes:
       # Bind-mounted (not named volumes) so the container reads/writes the
       # exact same directories a local `python vN/src/main.py` run would —

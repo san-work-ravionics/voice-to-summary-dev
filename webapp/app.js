@@ -2330,6 +2330,12 @@ const VOICE_QUERY_STAGE_LABELS = {
   done: "Done",
 };
 
+const VOICE_QUERY_PROVIDER_HINTS = {
+  claude: { text: "~15–30 s (transcribe ~10 s + retrieve <1 s + API answer ~5 s)", slow: false },
+  local:  { text: "~3–5 min (transcribe ~10 s + model load ~2 min + generate ~1 min)", slow: true },
+  mistral:{ text: "~5–10 min (transcribe ~10 s + model load ~3 min + generate ~2 min)", slow: true },
+};
+
 let voiceQueryMediaRecorder = null;
 let voiceQueryChunks = [];
 let voiceQueryPollTimer = null;
@@ -2343,8 +2349,8 @@ function renderVoiceQueryPage() {
       <a href="/phase8-voice-query/README.md">phase8-voice-query/README.md</a>.</p>
     <div class="voicequery-controls">
       <select id="voicequery-provider" class="provider-select">
-        <option value="local">Local (Qwen2.5)</option>
-        <option value="mistral">Local (Mistral 7B)</option>
+        <option value="local" class="option-slow">Local (Qwen2.5)</option>
+        <option value="mistral" class="option-slow">Local (Mistral 7B)</option>
         <option value="claude">Claude (Haiku 4.5)</option>
       </select>
       <select id="voicequery-retrieval" class="provider-select">
@@ -2354,6 +2360,7 @@ function renderVoiceQueryPage() {
       <button id="voicequery-record-btn" class="run-btn">Start recording</button>
       <span id="voicequery-rec-status" class="voicequery-status"></span>
     </div>
+    <div id="voicequery-provider-hint" class="voicequery-provider-hint"></div>
     <div id="voicequery-progress" class="custom-processing-note"></div>
     <div id="voicequery-result"></div>
     <div class="block-label">Progress across providers</div>
@@ -2368,7 +2375,25 @@ function renderVoiceQueryPage() {
     }
   });
 
+  const providerSelect = document.getElementById("voicequery-provider");
+  providerSelect.addEventListener("change", updateVoiceQueryProviderHint);
+  updateVoiceQueryProviderHint();
+
   renderVoiceQueryHistory();
+}
+
+function updateVoiceQueryProviderHint() {
+  const el = document.getElementById("voicequery-provider-hint");
+  if (!el) return;
+  const provider = document.getElementById("voicequery-provider").value;
+  const hint = VOICE_QUERY_PROVIDER_HINTS[provider];
+  if (hint) {
+    el.textContent = `Estimated processing time: ${hint.text}`;
+    el.className = `voicequery-provider-hint${hint.slow ? " slow" : ""}`;
+  } else {
+    el.textContent = "";
+    el.className = "voicequery-provider-hint";
+  }
 }
 
 async function renderVoiceQueryHistory() {
@@ -2519,7 +2544,15 @@ function pollVoiceQuery(job) {
       renderVoiceQueryHistory();
     } else if (data.status === "error") {
       clearInterval(voiceQueryPollTimer);
-      status.textContent = `Error: ${data.error || "unknown"}`;
+      const err = data.error || "unknown";
+      const isOOM = /killed|memoryerror|out of memory|signal 9/i.test(err);
+      if (isOOM) {
+        status.textContent = "";
+        const resultEl = document.getElementById("voicequery-result");
+        resultEl.innerHTML = `<div class="voicequery-oom-hint">FAISS retrieval ran out of memory on this server. Try again with <strong>TF-IDF</strong> retrieval, which uses much less memory.</div>`;
+      } else {
+        status.textContent = `Error: ${err}`;
+      }
       btn.disabled = false;
       btn.textContent = "Start recording";
     }
@@ -2720,9 +2753,43 @@ function setupDrawer() {
   toggle.addEventListener("click", () => sidebar.classList.toggle("collapsed"));
 }
 
-renderConceptsPage();
-renderTechSummary();
-renderEvalSummaryTable();
-renderScenarioGrid();
-setupNav();
-setupDrawer();
+// --- Auth ---
+// Adds Bearer token to API fetches when auth is enabled (VTS_AUTH=google on
+// the server). On localhost, auth is disabled and this is a no-op.
+const _origFetch = window.fetch;
+window.fetch = function(url, opts = {}) {
+  const token = localStorage.getItem("vts_token");
+  if (token && typeof url === "string" && url.startsWith("/api/")) {
+    opts.headers = { ...(opts.headers || {}), "Authorization": `Bearer ${token}` };
+  }
+  return _origFetch.call(this, url, opts);
+};
+
+async function checkAuth() {
+  try {
+    const res = await _origFetch("/api/auth/enabled");
+    const data = await res.json();
+    if (!data.enabled) return;
+  } catch { return; }
+
+  const token = localStorage.getItem("vts_token");
+  if (token) {
+    try {
+      const res = await _origFetch("/auth/check", {
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      if (res.ok) return;
+    } catch { /* fall through to login */ }
+    localStorage.removeItem("vts_token");
+  }
+  window.location.href = "/auth/login";
+}
+
+checkAuth().then(() => {
+  renderConceptsPage();
+  renderTechSummary();
+  renderEvalSummaryTable();
+  renderScenarioGrid();
+  setupNav();
+  setupDrawer();
+});

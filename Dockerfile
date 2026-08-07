@@ -26,6 +26,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install torch==2.8.0 --extra-index-url https://download.pytorch.org/whl/cpu \
     && pip install -r requirements.txt
 
+RUN python -c "import whisper; whisper.load_model('base')"
+
 COPY . .
 
 # Model caches (Whisper + Hugging Face) live under /cache so a mounted

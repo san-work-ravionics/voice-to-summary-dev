@@ -1,3 +1,6 @@
+import datetime
+import hashlib
+import hmac
 import http.server
 import json
 import os
@@ -19,6 +22,62 @@ logger = get_logger("webapp")
 
 sys.path.insert(0, os.path.join(PROJECT_ROOT, "phase8-voice-query", "src"))
 from query_history import read_history as read_voice_query_history  # noqa: E402
+
+# --- Google OAuth (disabled locally, enabled via VTS_AUTH=google) -----------
+VTS_AUTH = os.environ.get("VTS_AUTH", "")
+VTS_JWT_SECRET = os.environ.get("VTS_JWT_SECRET", "")
+VTS_BASE_URL = os.environ.get("VTS_BASE_URL", "")
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+JWT_EXPIRY_HOURS = 24
+AUTH_ENABLED = VTS_AUTH.lower() == "google"
+
+
+def _jwt_encode(payload, secret):
+    import base64 as b64
+    header = b64.urlsafe_b64encode(json.dumps({"alg": "HS256", "typ": "JWT"}).encode()).rstrip(b"=")
+    body = b64.urlsafe_b64encode(json.dumps(payload).encode()).rstrip(b"=")
+    signing_input = header + b"." + body
+    sig = hmac.new(secret.encode(), signing_input, hashlib.sha256).digest()
+    sig_b64 = b64.urlsafe_b64encode(sig).rstrip(b"=")
+    return (signing_input + b"." + sig_b64).decode()
+
+
+def _jwt_decode(token, secret):
+    import base64 as b64
+    parts = token.split(".")
+    if len(parts) != 3:
+        return None
+    signing_input = (parts[0] + "." + parts[1]).encode()
+    expected_sig = hmac.new(secret.encode(), signing_input, hashlib.sha256).digest()
+    def _pad(s):
+        return s + "=" * (-len(s) % 4)
+    try:
+        actual_sig = b64.urlsafe_b64decode(_pad(parts[2]))
+    except Exception:
+        return None
+    if not hmac.compare_digest(expected_sig, actual_sig):
+        return None
+    try:
+        payload = json.loads(b64.urlsafe_b64decode(_pad(parts[1])))
+    except Exception:
+        return None
+    if payload.get("exp", 0) < datetime.datetime.utcnow().timestamp():
+        return None
+    return payload
+
+
+def _create_token(email):
+    exp = datetime.datetime.utcnow() + datetime.timedelta(hours=JWT_EXPIRY_HOURS)
+    return _jwt_encode({"sub": email, "exp": exp.timestamp()}, VTS_JWT_SECRET)
+
+
+def _verify_token(token):
+    if not token or not VTS_JWT_SECRET:
+        return None
+    payload = _jwt_decode(token, VTS_JWT_SECRET)
+    return payload.get("sub") if payload else None
+
 
 # --- Scenario pipelines (phase1-baseline, phase2-checklist, phase3-context,
 # phase4-assistant, phase6-history): triggered + monitored from the Pipeline
@@ -140,8 +199,12 @@ def _start_voice_query(audio_path, provider=None, retrieval=None):
                 logger.info("voice-query %s: done\n--- stdout ---\n%s", job_id, stdout)
             else:
                 job["status"] = "error"
-                lines = [l for l in (stderr or "").strip().splitlines() if l]
-                job["error"] = lines[-1] if lines else f"exited with code {proc.returncode}"
+                stderr_text = (stderr or "").strip()
+                lines = [l for l in stderr_text.splitlines() if l]
+                if proc.returncode == -9 or "MemoryError" in stderr_text:
+                    job["error"] = "Out of memory — process was killed (signal 9)"
+                else:
+                    job["error"] = lines[-1] if lines else f"exited with code {proc.returncode}"
                 logger.error(
                     "voice-query %s: failed (exit %s)\n--- stdout ---\n%s\n--- stderr ---\n%s",
                     job_id, proc.returncode, stdout, stderr,
@@ -308,10 +371,114 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_redirect(self, url):
+        self.send_response(302)
+        self.send_header("Location", url)
+        self.end_headers()
+
+    def _send_html(self, html, status=200):
+        body = html.encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _get_bearer_token(self):
+        auth = self.headers.get("Authorization", "")
+        if auth.startswith("Bearer "):
+            return auth[7:]
+        return None
+
+    def _check_auth(self):
+        if not AUTH_ENABLED:
+            return True
+        token = self._get_bearer_token()
+        return _verify_token(token) is not None
+
+    def _handle_auth_login(self):
+        callback = VTS_BASE_URL.rstrip("/") + "/auth/callback"
+        url = (
+            "https://accounts.google.com/o/oauth2/v2/auth?"
+            "response_type=code&"
+            f"client_id={GOOGLE_CLIENT_ID}&"
+            f"redirect_uri={urllib.parse.quote(callback, safe='')}&"
+            "scope=openid%20email%20profile&"
+            "access_type=offline"
+        )
+        return self._send_redirect(url)
+
+    def _handle_auth_callback(self, query):
+        code = (query.get("code") or [None])[0]
+        if not code:
+            return self._send_json({"error": "no code"}, status=400)
+
+        callback = VTS_BASE_URL.rstrip("/") + "/auth/callback"
+        try:
+            import urllib.request
+            data = urllib.parse.urlencode({
+                "code": code,
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_CLIENT_SECRET,
+                "redirect_uri": callback,
+                "grant_type": "authorization_code",
+            }).encode()
+            req = urllib.request.Request("https://oauth2.googleapis.com/token", data=data,
+                                        headers={"Content-Type": "application/x-www-form-urlencoded"})
+            with urllib.request.urlopen(req) as resp:
+                tokens = json.loads(resp.read())
+        except Exception as exc:
+            logger.error("OAuth token exchange failed: %s", exc)
+            return self._send_json({"error": "token exchange failed"}, status=400)
+
+        id_token = tokens.get("id_token")
+        if not id_token:
+            return self._send_json({"error": "no id_token"}, status=400)
+
+        import base64 as b64
+        try:
+            payload_b64 = id_token.split(".")[1]
+            payload_b64 += "=" * (-len(payload_b64) % 4)
+            id_payload = json.loads(b64.urlsafe_b64decode(payload_b64))
+        except Exception:
+            return self._send_json({"error": "invalid id_token"}, status=400)
+
+        email = id_payload.get("email")
+        if not email:
+            return self._send_json({"error": "no email in token"}, status=400)
+
+        jwt_token = _create_token(email)
+        logger.info("auth: login %s", email)
+        self._send_html(f"""<!doctype html><html><head><title>Redirecting…</title></head>
+<body><script>
+localStorage.setItem("vts_token", {json.dumps(jwt_token)});
+window.location.href = "/webapp/index.html";
+</script></body></html>""")
+
+    def _handle_auth_check(self):
+        token = self._get_bearer_token()
+        email = _verify_token(token)
+        if email:
+            return self._send_json({"authenticated": True, "email": email})
+        return self._send_json({"authenticated": False}, status=401)
+
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
+
         if parsed.path == "/healthz":
             return self._send_json({"status": "ok"})
+        if parsed.path == "/auth/login":
+            return self._handle_auth_login()
+        if parsed.path == "/auth/callback":
+            return self._handle_auth_callback(urllib.parse.parse_qs(parsed.query))
+        if parsed.path == "/auth/check":
+            return self._handle_auth_check()
+        if parsed.path == "/api/auth/enabled":
+            return self._send_json({"enabled": AUTH_ENABLED})
+
+        if parsed.path.startswith("/api/") and not self._check_auth():
+            return self._send_json({"error": "unauthorized"}, status=401)
+
         if parsed.path == "/api/pipeline/status":
             return self._handle_pipeline_status()
         if parsed.path == "/api/eval/history":
@@ -324,6 +491,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
+
+        if parsed.path.startswith("/api/") and not self._check_auth():
+            return self._send_json({"error": "unauthorized"}, status=401)
+
         if parsed.path == "/api/pipeline/run":
             return self._handle_pipeline_run()
         if parsed.path == "/api/voice-query":

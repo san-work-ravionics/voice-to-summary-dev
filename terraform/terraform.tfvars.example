@@ -1,0 +1,4 @@
+# Copy this file to terraform.tfvars and fill in the values.
+# terraform.tfvars is gitignored — never commit it.
+
+# alert_email = "contact@ravionics.nl"
