@@ -465,6 +465,8 @@ window.location.href = "/webapp/index.html";
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
 
+        if parsed.path == "/":
+            return self._send_redirect("/webapp/index.html")
         if parsed.path == "/healthz":
             return self._send_json({"status": "ok"})
         if parsed.path == "/auth/login":
