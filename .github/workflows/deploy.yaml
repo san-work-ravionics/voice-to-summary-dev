@@ -120,8 +120,11 @@ jobs:
               -p 8743:8743 \
               -e SUMMARY_PROVIDER=claude \
               -e ANTHROPIC_API_KEY='${{ secrets.ANTHROPIC_API_KEY }}' \
+              -e VTS_AUTH=google \
               -e VTS_JWT_SECRET='${{ secrets.VTS_JWT_SECRET }}' \
               -e VTS_BASE_URL='${{ secrets.VTS_BASE_URL }}' \
+              -e GOOGLE_CLIENT_ID='${{ secrets.GOOGLE_CLIENT_ID }}' \
+              -e GOOGLE_CLIENT_SECRET='${{ secrets.GOOGLE_CLIENT_SECRET }}' \
               -v /opt/vts/audio/output:/app/audio-generation/output:ro \
               -v /opt/vts/phase1/output:/app/phase1-baseline/output:ro \
               -v /opt/vts/phase2/output:/app/phase2-checklist/output:ro \
@@ -135,7 +138,6 @@ jobs:
               -v /opt/vts/logs:/app/logs \
               -v /opt/vts/run_status:/app/webapp/.run_status \
               -v vts_cache:/cache \
-              --memory 900m \
               --log-driver awslogs \
               --log-opt awslogs-region=ap-south-1 \
               --log-opt awslogs-group=/vts/app \
