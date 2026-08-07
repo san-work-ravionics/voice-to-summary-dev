@@ -2549,7 +2549,7 @@ function pollVoiceQuery(job) {
       if (isOOM) {
         status.textContent = "";
         const resultEl = document.getElementById("voicequery-result");
-        resultEl.innerHTML = `<div class="voicequery-oom-hint">FAISS retrieval ran out of memory on this server. Try again with <strong>TF-IDF</strong> retrieval, which uses much less memory.</div>`;
+        resultEl.innerHTML = `<div class="voicequery-oom-hint">Voice query ran out of memory on this server. This feature requires at least 2 GB RAM (currently 914 MB).</div>`;
       } else {
         status.textContent = `Error: ${err}`;
       }
