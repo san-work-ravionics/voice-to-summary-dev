@@ -359,6 +359,93 @@ def _pipeline_status(scenario_id):
     }
 
 
+DEMO_MEETING = "01-kickoff"
+DEMO_OUTPUTS = {
+    "phase1_summary": os.path.join(PROJECT_ROOT, "phase1-baseline", "output", DEMO_MEETING, "summary.txt"),
+    "phase2_summary": os.path.join(PROJECT_ROOT, "phase2-checklist", "output", DEMO_MEETING, "summary.txt"),
+    "phase3_baseline": os.path.join(PROJECT_ROOT, "phase3-context", "output", DEMO_MEETING, "summary_baseline.txt"),
+    "phase3_context": os.path.join(PROJECT_ROOT, "phase3-context", "output", DEMO_MEETING, "summary_with_context.txt"),
+}
+DEMO_AUDIO = f"/audio-generation/output/{DEMO_MEETING}/recording.wav"
+
+
+def _parse_summary_sections(text):
+    sections = {}
+    current_heading = None
+    current_lines = []
+    for line in text.split("\n"):
+        stripped = line.strip()
+        heading_match = None
+        if stripped.startswith("##"):
+            heading_match = stripped.lstrip("#").strip()
+        if heading_match:
+            if current_heading:
+                sections[current_heading] = "\n".join(current_lines)
+            current_heading = heading_match.lower()
+            current_lines = []
+        else:
+            current_lines.append(line)
+    if current_heading:
+        sections[current_heading] = "\n".join(current_lines)
+    return sections
+
+
+def _extract_bullets(section_text):
+    bullets = []
+    for line in section_text.split("\n"):
+        stripped = line.strip()
+        m = None
+        if stripped.startswith("- "):
+            m = stripped[2:]
+        elif stripped.startswith("* "):
+            m = stripped[2:]
+        if m:
+            m = m.lstrip("*").strip()
+            if m.endswith(":"):
+                continue
+            if m:
+                bullets.append(m)
+    return bullets
+
+
+def _build_demo_data():
+    result = {"audio": DEMO_AUDIO, "meeting": DEMO_MEETING}
+
+    for key, path in DEMO_OUTPUTS.items():
+        try:
+            with open(path) as f:
+                text = f.read()
+        except FileNotFoundError:
+            result[key] = None
+            continue
+        sections = _parse_summary_sections(text)
+        result[key] = {
+            "topic": sections.get("topic", "").strip(),
+            "key_points": _extract_bullets(sections.get("key points", "")),
+            "decisions": _extract_bullets(sections.get("decisions", "")),
+            "actions": _extract_bullets(sections.get("actions", "")),
+        }
+        if "checklist coverage" in sections:
+            result[key]["checklist_coverage"] = sections["checklist coverage"].strip()
+
+    vq_history_path = os.path.join(PROJECT_ROOT, "phase8-voice-query", "output", "query_history.jsonl")
+    qa_pairs = []
+    try:
+        with open(vq_history_path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                rec = json.loads(line)
+                if rec.get("answer") and not rec["answer"].startswith("I couldn't find"):
+                    qa_pairs.append({"q": rec["question"], "a": rec["answer"]})
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+    result["voice_query_history"] = qa_pairs
+
+    return result
+
+
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=PROJECT_ROOT, **kwargs)
@@ -481,6 +568,8 @@ window.location.href = "/webapp/index.html";
         if parsed.path.startswith("/api/") and not self._check_auth():
             return self._send_json({"error": "unauthorized"}, status=401)
 
+        if parsed.path == "/api/demo/data":
+            return self._handle_demo_data()
         if parsed.path == "/api/pipeline/status":
             return self._handle_pipeline_status()
         if parsed.path == "/api/eval/history":
@@ -502,6 +591,9 @@ window.location.href = "/webapp/index.html";
         if parsed.path == "/api/voice-query":
             return self._handle_voice_query_start(urllib.parse.parse_qs(parsed.query))
         self.send_error(404)
+
+    def _handle_demo_data(self):
+        self._send_json(_build_demo_data())
 
     def _handle_pipeline_status(self):
         self._send_json({"pipelines": [_pipeline_status(sid) for sid in SCENARIO_ORDER]})

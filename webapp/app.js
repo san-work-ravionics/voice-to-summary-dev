@@ -2694,8 +2694,116 @@ function renderConceptsPage() {
 }
 
 // ---------- Demo Journey page ----------
-function renderDemoPage() {
+
+const DEMO_FALLBACK_CHECKLIST = [
+  "Get payment provider access provisioned this week",
+  "Engage legal early to avoid bottlenecks",
+  "Loop analytics team and scope tracking events",
+  "Bring localization decision to requirements review",
+];
+
+const DEMO_FALLBACK_KEY_POINTS = [
+  "High-level goal is to improve onboarding conversion and provide a visual refresh, targeting launch in five months.",
+  "Engineering scope includes rebuilding the onboarding flow, integrating a new payments provider, and dark mode as a stretch goal.",
+  "New payments vendor means no sandbox access until integration begins — access must be provisioned early.",
+  "Localization scope still open — decision deferred to requirements review next week.",
+];
+
+const DEMO_FALLBACK_QA = [
+  { q: "What was decided about payments?",
+    a: "No final vendor decision was made. A new payments provider will be integrated as part of the onboarding rebuild. Person A will push to get sandbox access provisioned this week." },
+  { q: "Who owns the legal review?",
+    a: "Person A is responsible. They committed to engaging legal early to avoid bottlenecks later in the project timeline." },
+  { q: "What is the project timeline?",
+    a: "Five-month launch target. Requirements review next week, then two-week sprint syncs. Dark mode is a stretch goal that may extend the timeline." },
+];
+
+const DEMO_FALLBACK_ENRICHMENTS = [
+  "Person B should also attend the requirements review to discuss localization — this was missed in the baseline summary but confirmed in the transcript.",
+  '"Stakeholder access" resolved to the specific payments provider sandbox — access must be provisioned before integration work can begin (day one dependency).',
+  "Budget or cost impact was not discussed in this meeting — flagged as a gap for the next review session.",
+];
+
+async function fetchDemoData() {
+  try {
+    const res = await fetch("/api/demo/data");
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (_err) {
+    return null;
+  }
+}
+
+function demoBuildContent(data) {
+  const content = {
+    topic: "Project Kickoff",
+    subtitle: "onboarding refresh",
+    keyPoints: DEMO_FALLBACK_KEY_POINTS,
+    actions: DEMO_FALLBACK_CHECKLIST,
+    summaryCard: "Onboarding conversion improvement with visual refresh, targeting five-month launch. Rebuilding onboarding flow, integrating new payments provider, dark mode stretch goal. Legal review and analytics instrumentation running alongside.",
+    enrichments: DEMO_FALLBACK_ENRICHMENTS,
+    qa: DEMO_FALLBACK_QA,
+    audio: "/audio-generation/output/01-kickoff/recording.wav",
+    actionCount: 4,
+    enrichCount: 3,
+  };
+
+  if (!data) return content;
+
+  const stripOwner = (a) => a.replace(/^Person [A-Z]:\s*/, "");
+
+  if (data.phase2_summary) {
+    const p2 = data.phase2_summary;
+    if (p2.topic) content.topic = p2.topic;
+    if (p2.key_points.length) {
+      content.keyPoints = p2.key_points;
+      content.summaryCard = p2.key_points.slice(0, 3).join(" ");
+    }
+    if (p2.actions.length) content.actions = p2.actions.map(stripOwner);
+  } else if (data.phase1_summary) {
+    const p1 = data.phase1_summary;
+    if (p1.key_points.length) content.keyPoints = p1.key_points;
+    if (p1.topic) content.topic = p1.topic;
+    if (p1.actions.length) content.actions = p1.actions.map(stripOwner);
+  }
+
+  if (data.phase3_context && data.phase3_baseline) {
+    const p3c = data.phase3_context;
+    const p3b = data.phase3_baseline;
+    const wordSet = (s) => new Set(s.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/));
+    const overlap = (a, b) => {
+      const sa = wordSet(a), sb = wordSet(b);
+      let shared = 0;
+      for (const w of sa) if (sb.has(w)) shared++;
+      return shared / Math.max(sa.size, sb.size);
+    };
+    const hasMatch = (item, list) => list.some((b) => overlap(item, b) > 0.6);
+
+    const newActions = p3c.actions.filter((a) => !hasMatch(a, p3b.actions));
+    const newKP = p3c.key_points.filter((k) => !hasMatch(k, p3b.key_points));
+
+    const enriched = [...newKP, ...newActions.map((a) => a.replace(/^Person [A-Z]:\s*/, ""))];
+    if (enriched.length) content.enrichments = enriched;
+  }
+
+  if (data.voice_query_history && data.voice_query_history.length) {
+    content.qa = data.voice_query_history.slice(0, 3);
+  }
+
+  if (data.audio) content.audio = data.audio;
+
+  content.actionCount = content.actions.length;
+  content.enrichCount = content.enrichments.length;
+
+  return content;
+}
+
+async function renderDemoPage() {
   const root = document.getElementById("demo-root");
+  root.innerHTML = "<p>Loading…</p>";
+
+  const data = await fetchDemoData();
+  const C = demoBuildContent(data);
 
   const DEMO_TABS = [
     { key: "record",    label: "Record" },
@@ -2706,21 +2814,9 @@ function renderDemoPage() {
     { key: "done",      label: "Done" },
   ];
 
-  const DEMO_CHECKLIST = [
-    "Get payment provider access provisioned this week",
-    "Engage legal early to avoid bottlenecks",
-    "Loop analytics team and scope tracking events",
-    "Bring localization decision to requirements review",
-  ];
+  const DEMO_CHECKLIST = C.actions;
 
-  const DEMO_QA = [
-    { q: "What was decided about payments?",
-      a: "No final vendor decision was made. A new payments provider will be integrated as part of the onboarding rebuild. Person A will push to get sandbox access provisioned this week." },
-    { q: "Who owns the legal review?",
-      a: "Person A is responsible. They committed to engaging legal early to avoid bottlenecks later in the project timeline." },
-    { q: "What is the project timeline?",
-      a: "Five-month launch target. Requirements review next week, then two-week sprint syncs. Dark mode is a stretch goal that may extend the timeline." },
-  ];
+  const DEMO_QA = C.qa;
 
   let demoCurrent = 0;
   let demoClState = DEMO_CHECKLIST.map(() => false);
@@ -2818,8 +2914,8 @@ function renderDemoPage() {
   const screen0 = `
     <div style="padding:40px 16px 0">
       <div class="demo-screen-eyebrow">Meeting recording</div>
-      <div class="demo-screen-title">Project Kickoff</div>
-      <div class="demo-screen-meta">Onboarding refresh &middot; sprint planning</div>
+      <div class="demo-screen-title">${escapeHtml(C.topic)}</div>
+      <div class="demo-screen-meta">${escapeHtml(C.subtitle)} &middot; sprint planning</div>
     </div>
     <div class="demo-rec-center">
       <div class="demo-mic-circle">
@@ -2841,19 +2937,17 @@ function renderDemoPage() {
       </div>
     </div>`;
 
+  const summaryBullets = C.keyPoints.map((kp) =>
+    `<div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>${escapeHtml(kp)}</div></div>`
+  ).join("");
   const screen1 = `
     <div class="demo-screen-hdr">
       <div class="demo-screen-eyebrow">Call summary</div>
-      <div class="demo-screen-title">Project Kickoff</div>
+      <div class="demo-screen-title">${escapeHtml(C.topic)}</div>
       <div class="demo-screen-meta">4 min &middot; recorded today</div>
     </div>
     <div class="demo-screen-body">
-      <div class="demo-bullet-list">
-        <div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>High-level goal is to improve onboarding conversion and provide a visual refresh, targeting launch in five months.</div></div>
-        <div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>Engineering scope includes rebuilding the onboarding flow, integrating a new payments provider, and dark mode as a stretch goal.</div></div>
-        <div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>New payments vendor means no sandbox access until integration begins &mdash; access must be provisioned early.</div></div>
-        <div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>Localization scope still open &mdash; decision deferred to requirements review next week.</div></div>
-      </div>
+      <div class="demo-bullet-list">${summaryBullets}</div>
     </div>
     <div class="demo-screen-footer">
       <button class="demo-btn-primary demo-goto" data-goto="2">Add checklist</button>
@@ -2862,10 +2956,10 @@ function renderDemoPage() {
   const screen2 = `
     <div class="demo-screen-hdr">
       <div class="demo-screen-eyebrow">Summary + checklist</div>
-      <div class="demo-screen-title">Project Kickoff</div>
+      <div class="demo-screen-title">${escapeHtml(C.topic)}</div>
     </div>
     <div class="demo-screen-body" style="gap:0">
-      <div class="demo-summary-card">Onboarding conversion improvement with visual refresh, targeting five-month launch. Rebuilding onboarding flow, integrating new payments provider, dark mode stretch goal. Legal review and analytics instrumentation running alongside.</div>
+      <div class="demo-summary-card">${escapeHtml(C.summaryCard)}</div>
       <div class="demo-section-label">Action items</div>
       <div class="demo-cl-list"></div>
     </div>
@@ -2873,17 +2967,18 @@ function renderDemoPage() {
       <button class="demo-btn-primary demo-goto" data-goto="3">Enrich with context</button>
     </div>`;
 
+  const enrichHtml = C.enrichments.map((e) =>
+    `<div class="demo-enrich">${escapeHtml(e)}</div>`
+  ).join("");
   const screen3 = `
     <div class="demo-screen-hdr">
       <div class="demo-screen-eyebrow">Context-enriched summary</div>
-      <div class="demo-screen-title">Project Kickoff</div>
+      <div class="demo-screen-title">${escapeHtml(C.topic)}</div>
       <span class="demo-context-tag">+ Project docs &amp; PRD</span>
     </div>
     <div class="demo-screen-body" style="gap:10px">
-      <div class="demo-summary-card">Onboarding conversion improvement with visual refresh, targeting five-month launch. Rebuilding onboarding flow, integrating new payments provider, dark mode stretch goal.</div>
-      <div class="demo-enrich">Person B should also attend the requirements review to discuss localization &mdash; this was missed in the baseline summary but confirmed in the transcript.</div>
-      <div class="demo-enrich">"Stakeholder access" resolved to the specific payments provider sandbox &mdash; access must be provisioned before integration work can begin (day one dependency).</div>
-      <div class="demo-enrich">Budget or cost impact was not discussed in this meeting &mdash; flagged as a gap for the next review session.</div>
+      <div class="demo-summary-card">${escapeHtml(C.summaryCard)}</div>
+      ${enrichHtml}
     </div>
     <div class="demo-screen-footer">
       <button class="demo-btn-primary demo-goto" data-goto="4">Ask a question</button>
@@ -2910,12 +3005,12 @@ function renderDemoPage() {
           <svg width="16" height="16" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div class="demo-done-title">Meeting processed</div>
-        <div class="demo-done-sub">Project Kickoff &middot; onboarding refresh summary saved and action items extracted.</div>
+        <div class="demo-done-sub">${escapeHtml(C.topic)} &middot; ${escapeHtml(C.subtitle)} summary saved and action items extracted.</div>
       </div>
       <div class="demo-status-rows">
         <div class="demo-status-row"><span>Summary &amp; checklist</span><span class="demo-status-val green">Saved</span></div>
-        <div class="demo-status-row"><span>4 action items</span><span class="demo-status-val green">Extracted</span></div>
-        <div class="demo-status-row"><span>Context enrichment</span><span class="demo-status-val green">3 insights</span></div>
+        <div class="demo-status-row"><span>${C.actionCount} action items</span><span class="demo-status-val green">Extracted</span></div>
+        <div class="demo-status-row"><span>Context enrichment</span><span class="demo-status-val green">${C.enrichCount} insights</span></div>
         <div class="demo-status-row"><span>Q&amp;A grounding</span><span class="demo-status-val orange">Indexed</span></div>
       </div>
       <button class="demo-btn-ghost demo-reset">Start new recording</button>
