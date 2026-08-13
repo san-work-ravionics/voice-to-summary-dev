@@ -2693,10 +2693,286 @@ function renderConceptsPage() {
   `;
 }
 
+// ---------- Demo Journey page ----------
+function renderDemoPage() {
+  const root = document.getElementById("demo-root");
+
+  const DEMO_TABS = [
+    { key: "record",    label: "Record" },
+    { key: "summary",   label: "Summary" },
+    { key: "checklist", label: "Checklist" },
+    { key: "enriched",  label: "Enriched" },
+    { key: "qa",        label: "Q&A" },
+    { key: "done",      label: "Done" },
+  ];
+
+  const DEMO_CHECKLIST = [
+    "Get payment provider access provisioned this week",
+    "Engage legal early to avoid bottlenecks",
+    "Loop analytics team and scope tracking events",
+    "Bring localization decision to requirements review",
+  ];
+
+  const DEMO_QA = [
+    { q: "What was decided about payments?",
+      a: "No final vendor decision was made. A new payments provider will be integrated as part of the onboarding rebuild. Person A will push to get sandbox access provisioned this week." },
+    { q: "Who owns the legal review?",
+      a: "Person A is responsible. They committed to engaging legal early to avoid bottlenecks later in the project timeline." },
+    { q: "What is the project timeline?",
+      a: "Five-month launch target. Requirements review next week, then two-week sprint syncs. Dark mode is a stretch goal that may extend the timeline." },
+  ];
+
+  let demoCurrent = 0;
+  let demoClState = DEMO_CHECKLIST.map(() => false);
+  let demoQaAsked = 1;
+
+  function waveformHtml() {
+    return Array.from({ length: 24 }, () => {
+      const h = 8 + Math.round(Math.random() * 24);
+      const d = (Math.random() * 0.4).toFixed(2);
+      return `<div class="demo-wave-bar" style="height:${h}px;animation-delay:${d}s"></div>`;
+    }).join("");
+  }
+
+  function renderDemoTabs() {
+    const strip = root.querySelector(".demo-tab-strip");
+    strip.innerHTML = DEMO_TABS.map((t, i) =>
+      `<button class="demo-tab-btn${i === demoCurrent ? " active" : ""}" data-idx="${i}"><div class="demo-tab-num">${i + 1} / ${DEMO_TABS.length}</div><div class="demo-tab-lbl">${escapeHtml(t.label)}</div></button>`
+    ).join("");
+    strip.querySelectorAll(".demo-tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => demoGoTo(Number(btn.dataset.idx)));
+    });
+
+    const dots = root.querySelector(".demo-dots");
+    dots.innerHTML = DEMO_TABS.map((_, i) =>
+      `<div class="demo-dot${i <= demoCurrent ? " filled" : ""}"></div>`
+    ).join("");
+
+    root.querySelector(".demo-step-num").textContent = demoCurrent + 1;
+    root.querySelector(".demo-nav-back").disabled = demoCurrent === 0;
+    root.querySelector(".demo-nav-next").disabled = demoCurrent === DEMO_TABS.length - 1;
+  }
+
+  function renderDemoChecklist() {
+    const el = root.querySelector(".demo-cl-list");
+    if (!el) return;
+    el.innerHTML = DEMO_CHECKLIST.map((label, i) => {
+      const checked = demoClState[i];
+      const tick = checked ? `<svg width="11" height="11" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>` : "";
+      return `<div class="demo-cl-row${checked ? " checked" : ""}" data-idx="${i}"><div class="demo-cl-box">${tick}</div><div class="demo-cl-row-text">${escapeHtml(label)}</div></div>`;
+    }).join("");
+    el.querySelectorAll(".demo-cl-row").forEach((row) => {
+      row.addEventListener("click", () => {
+        demoClState[Number(row.dataset.idx)] = !demoClState[Number(row.dataset.idx)];
+        renderDemoChecklist();
+      });
+    });
+  }
+
+  function renderDemoQA() {
+    const thread = root.querySelector(".demo-qa-thread-inner");
+    if (!thread) return;
+    thread.innerHTML = DEMO_QA.slice(0, demoQaAsked).map((qa) =>
+      `<div class="demo-qa-pair"><div class="demo-q">${escapeHtml(qa.q)}</div><div class="demo-a">${escapeHtml(qa.a)}</div></div>`
+    ).join("");
+    const askBtn = root.querySelector(".demo-ask-btn");
+    if (demoQaAsked < DEMO_QA.length) {
+      askBtn.style.display = "";
+      askBtn.textContent = `Ask: "${DEMO_QA[demoQaAsked].q}"`;
+    } else {
+      askBtn.style.display = "none";
+    }
+  }
+
+  function demoGoTo(idx) {
+    if (idx < 0 || idx >= DEMO_TABS.length) return;
+    demoCurrent = idx;
+    root.querySelectorAll(".demo-device").forEach((d, i) => {
+      d.classList.toggle("active", i === idx);
+    });
+    renderDemoTabs();
+    if (idx === 2) renderDemoChecklist();
+    if (idx === 4) renderDemoQA();
+    const active = root.querySelectorAll(".demo-device")[idx];
+    if (active) active.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }
+
+  function demoReset() {
+    demoClState = DEMO_CHECKLIST.map(() => false);
+    demoQaAsked = 1;
+    demoGoTo(0);
+  }
+
+  function deviceWrap(idx, label, innerHtml) {
+    return `
+      <div class="demo-device${idx === 0 ? " active" : ""}" data-idx="${idx}">
+        <div class="demo-device-label">${escapeHtml(label)}</div>
+        <div class="demo-device-frame">
+          <div class="demo-device-notch"></div>
+          <div class="demo-device-screen">${innerHtml}</div>
+          <div class="demo-device-home"></div>
+        </div>
+      </div>`;
+  }
+
+  const screen0 = `
+    <div style="padding:40px 16px 0">
+      <div class="demo-screen-eyebrow">Meeting recording</div>
+      <div class="demo-screen-title">Project Kickoff</div>
+      <div class="demo-screen-meta">Onboarding refresh &middot; sprint planning</div>
+    </div>
+    <div class="demo-rec-center">
+      <div class="demo-mic-circle">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3z" fill="var(--good)"/><path d="M19 11a7 7 0 01-14 0M12 18v3" stroke="var(--good)" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </div>
+      <div class="demo-rec-status">
+        <div class="demo-rec-dot"></div>
+        <span class="demo-rec-label">Recording</span>
+        <span class="demo-rec-timer">03:47</span>
+      </div>
+      <div class="demo-waveform">${waveformHtml()}</div>
+    </div>
+    <div class="demo-rec-controls">
+      <div class="demo-ctrl-circle demo-ctrl-pause">
+        <svg width="12" height="12" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" fill="var(--text-secondary)"/><rect x="14" y="5" width="4" height="14" fill="var(--text-secondary)"/></svg>
+      </div>
+      <div class="demo-ctrl-circle demo-ctrl-stop demo-goto" data-goto="1">
+        <div style="width:12px;height:12px;border-radius:2px;background:#fff"></div>
+      </div>
+    </div>`;
+
+  const screen1 = `
+    <div class="demo-screen-hdr">
+      <div class="demo-screen-eyebrow">Call summary</div>
+      <div class="demo-screen-title">Project Kickoff</div>
+      <div class="demo-screen-meta">4 min &middot; recorded today</div>
+    </div>
+    <div class="demo-screen-body">
+      <div class="demo-bullet-list">
+        <div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>High-level goal is to improve onboarding conversion and provide a visual refresh, targeting launch in five months.</div></div>
+        <div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>Engineering scope includes rebuilding the onboarding flow, integrating a new payments provider, and dark mode as a stretch goal.</div></div>
+        <div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>New payments vendor means no sandbox access until integration begins &mdash; access must be provisioned early.</div></div>
+        <div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>Localization scope still open &mdash; decision deferred to requirements review next week.</div></div>
+      </div>
+    </div>
+    <div class="demo-screen-footer">
+      <button class="demo-btn-primary demo-goto" data-goto="2">Add checklist</button>
+    </div>`;
+
+  const screen2 = `
+    <div class="demo-screen-hdr">
+      <div class="demo-screen-eyebrow">Summary + checklist</div>
+      <div class="demo-screen-title">Project Kickoff</div>
+    </div>
+    <div class="demo-screen-body" style="gap:0">
+      <div class="demo-summary-card">Onboarding conversion improvement with visual refresh, targeting five-month launch. Rebuilding onboarding flow, integrating new payments provider, dark mode stretch goal. Legal review and analytics instrumentation running alongside.</div>
+      <div class="demo-section-label">Action items</div>
+      <div class="demo-cl-list"></div>
+    </div>
+    <div class="demo-screen-footer">
+      <button class="demo-btn-primary demo-goto" data-goto="3">Enrich with context</button>
+    </div>`;
+
+  const screen3 = `
+    <div class="demo-screen-hdr">
+      <div class="demo-screen-eyebrow">Context-enriched summary</div>
+      <div class="demo-screen-title">Project Kickoff</div>
+      <span class="demo-context-tag">+ Project docs &amp; PRD</span>
+    </div>
+    <div class="demo-screen-body" style="gap:10px">
+      <div class="demo-summary-card">Onboarding conversion improvement with visual refresh, targeting five-month launch. Rebuilding onboarding flow, integrating new payments provider, dark mode stretch goal.</div>
+      <div class="demo-enrich">Person B should also attend the requirements review to discuss localization &mdash; this was missed in the baseline summary but confirmed in the transcript.</div>
+      <div class="demo-enrich">"Stakeholder access" resolved to the specific payments provider sandbox &mdash; access must be provisioned before integration work can begin (day one dependency).</div>
+      <div class="demo-enrich">Budget or cost impact was not discussed in this meeting &mdash; flagged as a gap for the next review session.</div>
+    </div>
+    <div class="demo-screen-footer">
+      <button class="demo-btn-primary demo-goto" data-goto="4">Ask a question</button>
+    </div>`;
+
+  const screen4 = `
+    <div class="demo-screen-hdr" style="padding-bottom:10px">
+      <div class="demo-screen-eyebrow">Ask about this meeting</div>
+    </div>
+    <div class="demo-screen-body" style="gap:0">
+      <div class="demo-qa-thread">
+        <div class="demo-qa-thread-inner"></div>
+      </div>
+    </div>
+    <div class="demo-screen-footer" style="display:flex;flex-direction:column;gap:10px;">
+      <button class="demo-btn-secondary demo-ask-btn"></button>
+      <button class="demo-btn-primary demo-goto" data-goto="5">Finish review</button>
+    </div>`;
+
+  const screen5 = `
+    <div style="padding:40px 16px 16px;flex:1;display:flex;flex-direction:column">
+      <div class="demo-done-center">
+        <div class="demo-done-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="demo-done-title">Meeting processed</div>
+        <div class="demo-done-sub">Project Kickoff &middot; onboarding refresh summary saved and action items extracted.</div>
+      </div>
+      <div class="demo-status-rows">
+        <div class="demo-status-row"><span>Summary &amp; checklist</span><span class="demo-status-val green">Saved</span></div>
+        <div class="demo-status-row"><span>4 action items</span><span class="demo-status-val green">Extracted</span></div>
+        <div class="demo-status-row"><span>Context enrichment</span><span class="demo-status-val green">3 insights</span></div>
+        <div class="demo-status-row"><span>Q&amp;A grounding</span><span class="demo-status-val orange">Indexed</span></div>
+      </div>
+      <button class="demo-btn-ghost demo-reset">Start new recording</button>
+    </div>`;
+
+  root.innerHTML = `
+    <div class="demo-banner">
+      <div>
+        <div class="demo-banner-title">Voice to summary <u>demo flow</u></div>
+        <div class="demo-banner-sub">Project kickoff meeting &middot; onboarding refresh</div>
+      </div>
+      <div class="demo-step-counter">Step <strong class="demo-step-num">1</strong> / 6</div>
+    </div>
+
+    <div class="demo-controls-area">
+      <div class="demo-tab-strip"></div>
+      <div class="demo-dots"></div>
+    </div>
+
+    <div class="demo-filmstrip">
+      ${deviceWrap(0, "1. Record",    screen0)}
+      ${deviceWrap(1, "2. Summary",   screen1)}
+      ${deviceWrap(2, "3. Checklist", screen2)}
+      ${deviceWrap(3, "4. Enriched",  screen3)}
+      ${deviceWrap(4, "5. Q&A",       screen4)}
+      ${deviceWrap(5, "6. Done",      screen5)}
+    </div>
+
+    <div class="demo-nav-btns">
+      <button class="demo-nav-btn demo-nav-back" disabled>Back</button>
+      <button class="demo-nav-btn demo-nav-next">Next</button>
+    </div>
+  `;
+
+  root.querySelectorAll(".demo-goto").forEach((btn) => {
+    btn.addEventListener("click", () => demoGoTo(Number(btn.dataset.goto)));
+  });
+  root.querySelectorAll(".demo-device").forEach((d) => {
+    d.addEventListener("click", () => demoGoTo(Number(d.dataset.idx)));
+  });
+  root.querySelector(".demo-nav-back").addEventListener("click", () => demoGoTo(demoCurrent - 1));
+  root.querySelector(".demo-nav-next").addEventListener("click", () => demoGoTo(demoCurrent + 1));
+  root.querySelector(".demo-reset").addEventListener("click", demoReset);
+  root.querySelector(".demo-ask-btn").addEventListener("click", () => {
+    if (demoQaAsked < DEMO_QA.length) { demoQaAsked++; renderDemoQA(); }
+  });
+
+  renderDemoTabs();
+  renderDemoChecklist();
+  renderDemoQA();
+}
+
 // ---------- Nav ----------
 function setupNav() {
   const navItems = document.querySelectorAll(".nav-item");
   const pages = {
+    demo: document.getElementById("demo-page"),
     concepts: document.getElementById("concepts-page"),
     scenarios: document.getElementById("scenarios-page"),
     story: document.getElementById("story-page"),
@@ -2716,6 +2992,10 @@ function setupNav() {
       // Always re-render on nav click, not just the first visit — both pages
       // can change from Pipeline-triggered runs (phase6-history/phase1-4 scenarios re-summarized,
       // new judged runs added to history) after the first time you look.
+      if (item.dataset.page === "demo") {
+        renderDemoPage();
+      }
+
       if (item.dataset.page === "concepts") {
         renderConceptsPage();
       }
