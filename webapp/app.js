@@ -3063,11 +3063,524 @@ async function renderDemoPage() {
   renderDemoQA();
 }
 
+// ---------- RM Demo Journey page ----------
+
+const RM_PREV_MEETINGS = [
+  {
+    title: "Portfolio Review",
+    date: "12 Jun 2026",
+    duration: "1 min",
+    notes: "Reviewed current portfolio allocation and discussed rebalancing strategy. Agreed to increase international diversification.",
+    actions: [
+      "Rebalance portfolio toward international exposure",
+      "Review fund performance next quarter",
+      "Share updated portfolio statement",
+    ],
+  },
+  {
+    title: "Insurance Review",
+    date: "26 Jun 2026",
+    duration: "1 min",
+    notes: "Coverage review identified gap in disability insurance. Discussed estate planning timeline and beneficiary updates.",
+    actions: [
+      "Source insurance quotes from three providers",
+      "Schedule estate planning consultation",
+      "Update beneficiary details across accounts",
+    ],
+  },
+  {
+    title: "Tax Planning Review",
+    date: "10 Jul 2026",
+    duration: "1 min",
+    notes: "Reviewed tax-saving instruments and advance tax obligations. Identified opportunities for additional deductions under current regulations.",
+    actions: [
+      "Evaluate additional tax-saving instruments",
+      "Set advance tax payment reminders",
+    ],
+  },
+  {
+    title: "Goal Assessment",
+    date: "24 Jul 2026",
+    duration: "1 min",
+    notes: "Assessed progress against financial goals. Reviewed risk tolerance and adjusted investment strategy accordingly.",
+    actions: [
+      "Update risk profile assessment",
+      "Realign investment mix with revised goals",
+      "Document updated financial targets",
+    ],
+  },
+];
+
+const RM_CURRENT_MEETING = {
+  title: "Financial Planning",
+  date: "14 Aug 2026",
+  duration: "1 min",
+  summary: "Discussed retirement timeline and target corpus. Reviewed tax-efficient strategies and contribution optimization for the accumulation phase.",
+  actions: [
+    "Increase monthly contributions across funds",
+    "File advance tax before deadline",
+    "Schedule estate planning follow-up",
+    "Review additional tax-saving options",
+    "Set up quarterly review alerts",
+  ],
+};
+
+const RM_CHECKLIST = [
+  { item: "Retirement goals", covered: true },
+  { item: "Tax planning", covered: true },
+  { item: "Insurance review", covered: true },
+  { item: "Risk assessment", covered: false },
+  { item: "Succession planning", covered: false },
+];
+
+const RM_OVERALL = {
+  summary: "Across five meetings, the financial plan has been comprehensively reviewed and updated. Portfolio rebalanced with international exposure, insurance gap identified, tax strategy optimized, goals reassessed, and retirement framework established with increased contributions.",
+  outcomes: [
+    "Portfolio rebalanced with international diversification — confirmed",
+    "Insurance gap identified — quotes being sourced from providers",
+    "Tax-saving instruments evaluated and advance filing scheduled",
+    "Risk profile updated and investment mix realigned with goals",
+    "Retirement framework established with increased contributions",
+    "Estate planning consultation scheduled, beneficiaries being updated",
+  ],
+};
+
+function renderRmDemoPage() {
+  const root = document.getElementById("rmdemo-root");
+
+  const RM_TABS = [
+    { key: "meetings",  label: "Meetings" },
+    { key: "summary",   label: "Summary" },
+    { key: "update",    label: "Update" },
+    { key: "overall",   label: "Overall" },
+    { key: "save",      label: "Save" },
+    { key: "done",      label: "Done" },
+  ];
+
+  let rmCurrent = 0;
+
+  function renderRmTabs() {
+    const strip = root.querySelector(".demo-tab-strip");
+    strip.innerHTML = RM_TABS.map((t, i) =>
+      `<button class="demo-tab-btn${i === rmCurrent ? " active" : ""}" data-idx="${i}"><div class="demo-tab-num">${i + 1} / ${RM_TABS.length}</div><div class="demo-tab-lbl">${escapeHtml(t.label)}</div></button>`
+    ).join("");
+    strip.querySelectorAll(".demo-tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => rmGoTo(Number(btn.dataset.idx)));
+    });
+
+    const dots = root.querySelector(".demo-dots");
+    dots.innerHTML = RM_TABS.map((_, i) =>
+      `<div class="demo-dot${i <= rmCurrent ? " filled" : ""}"></div>`
+    ).join("");
+
+    root.querySelector(".demo-step-num").textContent = rmCurrent + 1;
+  }
+
+  function rmGoTo(idx) {
+    if (idx < 0 || idx >= RM_TABS.length) return;
+    rmCurrent = idx;
+    root.querySelectorAll(".demo-device").forEach((d, i) => {
+      d.classList.toggle("active", i === idx);
+    });
+    renderRmTabs();
+    if (idx === 1) renderSummaryScreen();
+    const active = root.querySelectorAll(".demo-device")[idx];
+    if (active) active.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }
+
+  let recState = "idle";
+
+  function waveformHtml() {
+    return Array.from({ length: 24 }, () => {
+      const h = 8 + Math.round(Math.random() * 24);
+      const d = (Math.random() * 0.4).toFixed(2);
+      return `<div class="demo-wave-bar" style="height:${h}px;animation-delay:${d}s"></div>`;
+    }).join("");
+  }
+
+  function renderRecArea() {
+    const area = root.querySelector("#rm-rec-area");
+    if (!area) return;
+
+    if (recState === "idle") {
+      area.innerHTML = `
+        <div class="demo-section-label">New meeting</div>
+        <button class="rm-record-btn" id="rm-start-rec">
+          <div class="demo-mic-circle" style="width:36px;height:36px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3z" fill="var(--good)"/><path d="M19 11a7 7 0 01-14 0M12 18v3" stroke="var(--good)" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+          <span>Record New Meeting</span>
+        </button>`;
+      area.querySelector("#rm-start-rec").addEventListener("click", () => {
+        recState = "recording";
+        renderRecArea();
+      });
+    } else if (recState === "recording") {
+      area.innerHTML = `
+        <div class="rm-recording-live">
+          <div class="demo-rec-status">
+            <div class="demo-rec-dot"></div>
+            <span class="demo-rec-label">Recording</span>
+            <span class="demo-rec-timer">00:47</span>
+          </div>
+          <div class="demo-waveform">${waveformHtml()}</div>
+          <button class="rm-stop-btn" id="rm-stop-rec">
+            <div style="width:10px;height:10px;border-radius:2px;background:#fff"></div>
+            <span>Stop Recording</span>
+          </button>
+        </div>`;
+      area.querySelector("#rm-stop-rec").addEventListener("click", () => {
+        recState = "done";
+        renderRecArea();
+      });
+    } else {
+      area.innerHTML = `
+        <div class="demo-section-label">Current meeting</div>
+        <div class="rm-meeting-item rm-current">
+          <svg width="12" height="12" viewBox="0 0 24 24" style="flex-shrink:0;margin-left:6px"><path d="M5 13l4 4L19 7" stroke="var(--good)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div>
+            <div class="rm-meeting-title">${escapeHtml(RM_CURRENT_MEETING.title)}</div>
+            <div class="rm-meeting-meta">Today · ${escapeHtml(RM_CURRENT_MEETING.duration)} · Recorded</div>
+          </div>
+        </div>`;
+    }
+  }
+
+  let selectedMeetingIdx = RM_PREV_MEETINGS.length;
+  let feedbackState = "idle";
+
+  function renderFeedbackArea() {
+    const area = root.querySelector("#rm-feedback-area");
+    if (!area) return;
+
+    if (feedbackState === "idle") {
+      area.innerHTML = `
+        <button class="rm-record-btn" id="rm-start-feedback">
+          <div class="demo-mic-circle" style="width:28px;height:28px">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 003-3V6a3 3 0 10-6 0v6a3 3 0 003 3z" fill="var(--good)"/><path d="M19 11a7 7 0 01-14 0M12 18v3" stroke="var(--good)" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+          <span>Record Feedback</span>
+        </button>`;
+      area.querySelector("#rm-start-feedback").addEventListener("click", (e) => {
+        e.stopPropagation();
+        feedbackState = "recording";
+        renderFeedbackArea();
+      });
+    } else if (feedbackState === "recording") {
+      area.innerHTML = `
+        <div class="rm-recording-live" style="padding:6px 0">
+          <div class="demo-rec-status">
+            <div class="demo-rec-dot"></div>
+            <span class="demo-rec-label">Recording feedback</span>
+          </div>
+          <div class="demo-waveform">${waveformHtml()}</div>
+          <button class="rm-stop-btn" id="rm-stop-feedback">
+            <div style="width:10px;height:10px;border-radius:2px;background:#fff"></div>
+            <span>Stop</span>
+          </button>
+        </div>`;
+      area.querySelector("#rm-stop-feedback").addEventListener("click", (e) => {
+        e.stopPropagation();
+        feedbackState = "done";
+        renderFeedbackArea();
+      });
+    } else {
+      area.innerHTML = `
+        <div class="rm-meeting-item rm-current" style="margin-top:2px">
+          <svg width="12" height="12" viewBox="0 0 24 24" style="flex-shrink:0;margin-left:6px"><path d="M5 13l4 4L19 7" stroke="var(--good)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><div class="rm-meeting-title">Feedback recorded</div></div>
+        </div>`;
+    }
+  }
+
+  function renderSummaryScreen() {
+    const allMeetings = [...RM_PREV_MEETINGS, RM_CURRENT_MEETING];
+    const m = allMeetings[selectedMeetingIdx];
+    if (!m) return;
+    const isCurrent = selectedMeetingIdx === RM_PREV_MEETINGS.length;
+
+    const title = root.querySelector("#rm-summary-title");
+    const meta = root.querySelector("#rm-summary-meta");
+    const body = root.querySelector("#rm-summary-body");
+    if (!title || !body) return;
+
+    title.textContent = m.title;
+    meta.textContent = `${m.date} · ${m.duration}`;
+
+    const summaryText = m.summary || m.notes;
+    const actionBullets = m.actions.map((a) =>
+      `<div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>${escapeHtml(a)}</div></div>`
+    ).join("");
+
+    let checklistHtml = "";
+    if (isCurrent) {
+      const rows = RM_CHECKLIST.map((c) => `
+        <div class="rm-coverage-row">
+          <span class="rm-coverage-icon ${c.covered ? "yes" : "no"}">${c.covered ? "✓" : "✗"}</span>
+          <span class="rm-coverage-label">${escapeHtml(c.item)}</span>
+        </div>`).join("");
+      checklistHtml = `
+        <div class="demo-section-label" style="margin-top:8px">Checklist coverage</div>
+        <div class="rm-coverage-list">${rows}</div>`;
+    }
+
+    body.innerHTML = `
+      <div class="demo-summary-card">${escapeHtml(summaryText)}</div>
+      <div class="demo-section-label" style="margin-top:8px">Action items</div>
+      <div class="demo-bullet-list" style="flex:none">${actionBullets}</div>
+      ${checklistHtml}
+      <div class="demo-section-label" style="margin-top:8px">Feedback</div>
+      <div id="rm-feedback-area"></div>`;
+
+    feedbackState = "idle";
+    renderFeedbackArea();
+  }
+
+  function rmReset() {
+    recState = "idle";
+    selectedMeetingIdx = RM_PREV_MEETINGS.length;
+    feedbackState = "idle";
+    rmGoTo(0);
+    renderRecArea();
+  }
+
+  function deviceWrap(idx, label, innerHtml) {
+    return `
+      <div class="demo-device${idx === 0 ? " active" : ""}" data-idx="${idx}">
+        <div class="demo-device-label">${escapeHtml(label)}</div>
+        <div class="demo-device-frame">
+          <div class="demo-device-notch"></div>
+          <div class="demo-device-screen">${innerHtml}</div>
+          <div class="demo-device-home"></div>
+        </div>
+      </div>`;
+  }
+
+  // Screen 1: Meetings Hub
+  const meetingCards = RM_PREV_MEETINGS.map((m) => `
+    <div class="rm-meeting-card">
+      <div class="rm-play-circle">
+        <svg width="10" height="10" viewBox="0 0 24 24"><polygon points="8,4 20,12 8,20" fill="var(--good)"/></svg>
+      </div>
+      <div class="rm-meeting-title">${escapeHtml(m.title)}</div>
+      <div class="rm-meeting-meta">${escapeHtml(m.date)} · ${escapeHtml(m.duration)}</div>
+    </div>
+  `).join("");
+
+  const screen0 = `
+    <div class="demo-screen-hdr">
+      <div class="demo-screen-eyebrow">Client meetings</div>
+      <div class="demo-screen-title">Meeting History</div>
+      <div class="demo-screen-meta">Relationship Manager</div>
+    </div>
+    <div class="demo-screen-body" style="gap:4px">
+      <div class="demo-section-label">Previous meetings</div>
+      <div class="rm-meeting-grid">${meetingCards}</div>
+      <div class="rm-divider"></div>
+      <div id="rm-rec-area"></div>
+    </div>
+    <div class="demo-screen-footer">
+      <button class="demo-btn-primary" id="rm-screen0-next">Next</button>
+    </div>`;
+
+  // Screen 2: Summary (dynamic — populated by renderSummaryScreen)
+  const screen1 = `
+    <div class="demo-screen-hdr">
+      <button class="rm-back-arrow" id="rm-summary-back">
+        <svg width="12" height="12" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Back</span>
+      </button>
+      <div class="demo-screen-eyebrow">Meeting summary</div>
+      <div class="demo-screen-title" id="rm-summary-title">${escapeHtml(RM_CURRENT_MEETING.title)}</div>
+      <div class="demo-screen-meta" id="rm-summary-meta">${escapeHtml(RM_CURRENT_MEETING.date)} · ${escapeHtml(RM_CURRENT_MEETING.duration)}</div>
+    </div>
+    <div class="demo-screen-body" style="gap:0" id="rm-summary-body"></div>
+    <div class="demo-screen-footer" style="display:flex;gap:6px">
+      <button class="demo-btn-secondary" id="rm-summary-back-footer" style="text-align:center;flex:1">Back</button>
+      <button class="demo-btn-primary rm-goto" data-goto="2" style="flex:1">Next</button>
+    </div>`;
+
+  // Screen 3: Review Meeting Notes
+  const allMeetings = [...RM_PREV_MEETINGS, RM_CURRENT_MEETING];
+  const reviewBlocks = allMeetings.map((m, i) => `
+    <div class="rm-edit-block">
+      <div class="rm-edit-label">Meeting ${i + 1}: ${escapeHtml(m.title)}</div>
+      <div class="rm-edit-area">${escapeHtml(m.notes || m.summary)}</div>
+    </div>
+  `).join("");
+
+  const screen2 = `
+    <div class="demo-screen-hdr">
+      <div class="demo-screen-eyebrow">Review</div>
+      <div class="demo-screen-title">Review Meeting Notes</div>
+    </div>
+    <div class="demo-screen-body" style="gap:6px">
+      ${reviewBlocks}
+    </div>
+    <div class="demo-screen-footer">
+      <button class="demo-btn-primary rm-save-btn">Continue</button>
+    </div>`;
+
+  // Screen 4: Overall Summary
+  const coveredCount = RM_CHECKLIST.filter((c) => c.covered).length;
+  const totalActions = RM_PREV_MEETINGS.reduce((sum, m) => sum + m.actions.length, 0) + RM_CURRENT_MEETING.actions.length;
+  const openItems = RM_CHECKLIST.length - coveredCount;
+
+  const outcomeBullets = RM_OVERALL.outcomes.map((o) =>
+    `<div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>${escapeHtml(o)}</div></div>`
+  ).join("");
+
+  const overallChecklistRows = RM_CHECKLIST.map((c) => `
+    <div class="rm-coverage-row">
+      <span class="rm-coverage-icon ${c.covered ? "yes" : "no"}">${c.covered ? "✓" : "✗"}</span>
+      <span class="rm-coverage-label">${escapeHtml(c.item)}</span>
+    </div>`).join("");
+
+  const screen3 = `
+    <div class="demo-screen-hdr">
+      <div class="demo-screen-eyebrow">Consolidated view</div>
+      <div class="demo-screen-title">Overall Summary</div>
+      <span class="demo-context-tag">5 meetings</span>
+    </div>
+    <div class="demo-screen-body" style="gap:6px">
+      <div class="demo-summary-card">${escapeHtml(RM_OVERALL.summary)}</div>
+      <div class="demo-section-label">Key outcomes</div>
+      <div class="demo-bullet-list" style="flex:none">${outcomeBullets}</div>
+      <div class="demo-section-label">Checklist coverage</div>
+      <div class="rm-coverage-list">${overallChecklistRows}</div>
+      <div class="demo-section-label">Key metrics</div>
+      <div class="rm-metrics-grid">
+        <div class="rm-metric-tile"><div class="rm-metric-value">5</div><div class="rm-metric-label">Meetings</div></div>
+        <div class="rm-metric-tile"><div class="rm-metric-value">${totalActions}</div><div class="rm-metric-label">Actions</div></div>
+        <div class="rm-metric-tile"><div class="rm-metric-value">${coveredCount}/${RM_CHECKLIST.length}</div><div class="rm-metric-label">Coverage</div></div>
+        <div class="rm-metric-tile"><div class="rm-metric-value">${openItems}</div><div class="rm-metric-label">Open items</div></div>
+      </div>
+    </div>
+    <div class="demo-screen-footer">
+      <button class="demo-btn-primary rm-goto" data-goto="4">Next</button>
+    </div>`;
+
+  // Screen 5: Save & Key Data
+  const latestActions = RM_CURRENT_MEETING.actions.slice(0, 3).map((a) =>
+    `<div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>${escapeHtml(a)}</div></div>`
+  ).join("");
+
+  const screen4 = `
+    <div class="demo-screen-hdr">
+      <div class="demo-screen-eyebrow">Save & confirm</div>
+      <div class="demo-screen-title">Key Data</div>
+      <div class="demo-screen-meta">${escapeHtml(RM_CURRENT_MEETING.title)} · latest</div>
+    </div>
+    <div class="demo-screen-body" style="gap:4px">
+      <div class="demo-summary-card">${escapeHtml(RM_CURRENT_MEETING.summary)}</div>
+      <div class="demo-section-label">Key metrics</div>
+      <div class="rm-metrics-grid">
+        <div class="rm-metric-tile"><div class="rm-metric-value">5</div><div class="rm-metric-label">Meetings</div></div>
+        <div class="rm-metric-tile"><div class="rm-metric-value">${totalActions}</div><div class="rm-metric-label">Actions</div></div>
+        <div class="rm-metric-tile"><div class="rm-metric-value">${coveredCount}/${RM_CHECKLIST.length}</div><div class="rm-metric-label">Coverage</div></div>
+        <div class="rm-metric-tile"><div class="rm-metric-value">${openItems}</div><div class="rm-metric-label">Open items</div></div>
+      </div>
+      <div class="demo-section-label">Top actions</div>
+      <div class="demo-bullet-list" style="flex:none">${latestActions}</div>
+    </div>
+    <div class="demo-screen-footer">
+      <button class="demo-btn-primary rm-goto" data-goto="5">Sync Data</button>
+    </div>`;
+
+  // Screen 6: Done
+  const screen5 = `
+    <div style="padding:40px 16px 16px;flex:1;display:flex;flex-direction:column">
+      <div class="demo-done-center">
+        <div class="demo-done-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="demo-done-title">Meeting cycle complete</div>
+        <div class="demo-done-sub">All meeting notes saved and action items extracted across 5 sessions.</div>
+      </div>
+      <div class="demo-status-rows">
+        <div class="demo-status-row"><span>Summary & notes</span><span class="demo-status-val green">Saved</span></div>
+        <div class="demo-status-row"><span>${totalActions} action items</span><span class="demo-status-val green">Extracted</span></div>
+        <div class="demo-status-row"><span>Checklist coverage</span><span class="demo-status-val green">${coveredCount}/${RM_CHECKLIST.length} covered</span></div>
+        <div class="demo-status-row"><span>Records</span><span class="demo-status-val orange">Synced</span></div>
+      </div>
+      <button class="demo-btn-ghost rm-reset">Start new meeting cycle</button>
+    </div>`;
+
+  root.innerHTML = `
+    <div class="demo-banner">
+      <div>
+        <div class="demo-banner-title">RM client <u>meeting flow</u></div>
+        <div class="demo-banner-sub">5-meeting review cycle · relationship manager workflow</div>
+      </div>
+      <div class="demo-step-counter">Step <strong class="demo-step-num">1</strong> / 6</div>
+    </div>
+
+    <div class="demo-controls-area">
+      <div class="demo-tab-strip"></div>
+      <div class="demo-dots"></div>
+    </div>
+
+    <div class="demo-filmstrip">
+      ${deviceWrap(0, "1. Meetings",  screen0)}
+      ${deviceWrap(1, "2. Summary",   screen1)}
+      ${deviceWrap(2, "3. Update",    screen2)}
+      ${deviceWrap(3, "4. Overall",   screen3)}
+      ${deviceWrap(4, "5. Save",      screen4)}
+      ${deviceWrap(5, "6. Done",      screen5)}
+    </div>
+
+    <div class="rm-reset-bar">
+      <button class="demo-nav-btn demo-nav-back rm-reset-main">Reset</button>
+    </div>
+  `;
+
+  root.querySelectorAll(".rm-goto").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      rmGoTo(Number(btn.dataset.goto));
+    });
+  });
+  root.querySelectorAll(".demo-device").forEach((d) => {
+    d.addEventListener("click", (e) => {
+      if (e.target.closest("button, .rm-play-circle, .rm-meeting-card")) return;
+      rmGoTo(Number(d.dataset.idx));
+    });
+  });
+  root.querySelectorAll(".rm-meeting-card").forEach((card, i) => {
+    card.addEventListener("click", (e) => {
+      e.stopPropagation();
+      selectedMeetingIdx = i;
+      rmGoTo(1);
+    });
+  });
+  root.querySelector("#rm-screen0-next").addEventListener("click", (e) => {
+    e.stopPropagation();
+    selectedMeetingIdx = RM_PREV_MEETINGS.length;
+    rmGoTo(1);
+  });
+  root.querySelector("#rm-summary-back").addEventListener("click", (e) => {
+    e.stopPropagation();
+    rmGoTo(0);
+  });
+  root.querySelector("#rm-summary-back-footer").addEventListener("click", (e) => {
+    e.stopPropagation();
+    rmGoTo(0);
+  });
+  root.querySelector(".rm-reset-main").addEventListener("click", rmReset);
+  root.querySelector(".rm-reset").addEventListener("click", rmReset);
+  root.querySelector(".rm-save-btn").addEventListener("click", () => rmGoTo(3));
+
+  renderRmTabs();
+  renderRecArea();
+  renderSummaryScreen();
+}
+
 // ---------- Nav ----------
 function setupNav() {
   const navItems = document.querySelectorAll(".nav-item");
   const pages = {
     demo: document.getElementById("demo-page"),
+    rmdemo: document.getElementById("rmdemo-page"),
     concepts: document.getElementById("concepts-page"),
     scenarios: document.getElementById("scenarios-page"),
     story: document.getElementById("story-page"),
@@ -3089,6 +3602,10 @@ function setupNav() {
       // new judged runs added to history) after the first time you look.
       if (item.dataset.page === "demo") {
         renderDemoPage();
+      }
+
+      if (item.dataset.page === "rmdemo") {
+        renderRmDemoPage();
       }
 
       if (item.dataset.page === "concepts") {
