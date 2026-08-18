@@ -20,6 +20,8 @@ from run_history import read_history  # noqa: E402
 
 logger = get_logger("webapp")
 
+_BOOT_VERSION = hashlib.md5(str(os.getpid()).encode() + str(os.path.getmtime(__file__)).encode()).hexdigest()[:10]
+
 sys.path.insert(0, os.path.join(PROJECT_ROOT, "phase8-voice-query", "src"))
 from query_history import read_history as read_voice_query_history  # noqa: E402
 
@@ -456,6 +458,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._no_cache = False
         super().end_headers()
 
+    def _serve_index_html(self):
+        index_path = os.path.join(PROJECT_ROOT, "webapp", "index.html")
+        with open(index_path, "r") as f:
+            html = f.read()
+        v = _BOOT_VERSION
+        html = html.replace("/webapp/style.css", f"/webapp/style.css?v={v}")
+        html = html.replace("/webapp/app.js", f"/webapp/app.js?v={v}")
+        self._send_html(html)
+
     def _send_json(self, payload, status=200):
         body = json.dumps(payload).encode("utf-8")
         self.send_response(status)
@@ -584,6 +595,9 @@ window.location.href = "/webapp/index.html";
             return self._handle_voice_query_status(urllib.parse.parse_qs(parsed.query))
         if parsed.path == "/api/voice-query/history":
             return self._handle_voice_query_history()
+        if parsed.path == "/webapp/index.html":
+            self._no_cache = True
+            return self._serve_index_html()
         if parsed.path.startswith("/webapp/"):
             self._no_cache = True
         return super().do_GET()
