@@ -3421,11 +3421,38 @@ function renderRmDemoPage() {
       <button class="demo-btn-primary rm-save-btn">Continue</button>
     </div>`;
 
-  // Screen 4: Overall Summary
+  // Screen 4: Key Data
   const coveredCount = RM_CHECKLIST.filter((c) => c.covered).length;
   const totalActions = RM_PREV_MEETINGS.reduce((sum, m) => sum + m.actions.length, 0) + RM_CURRENT_MEETING.actions.length;
   const openItems = RM_CHECKLIST.length - coveredCount;
 
+  const latestActions = RM_CURRENT_MEETING.actions.slice(0, 3).map((a) =>
+    `<div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>${escapeHtml(a)}</div></div>`
+  ).join("");
+
+  const screen3 = `
+    <div class="demo-screen-hdr">
+      <div class="demo-screen-eyebrow">Save & confirm</div>
+      <div class="demo-screen-title">Key Data</div>
+      <div class="demo-screen-meta">${escapeHtml(RM_CURRENT_MEETING.title)} · latest</div>
+    </div>
+    <div class="demo-screen-body" style="gap:4px">
+      <div class="demo-summary-card">${escapeHtml(RM_CURRENT_MEETING.summary)}</div>
+      <div class="demo-section-label">Key metrics</div>
+      <div class="rm-metrics-grid">
+        <div class="rm-metric-tile"><div class="rm-metric-value">5</div><div class="rm-metric-label">Meetings</div></div>
+        <div class="rm-metric-tile"><div class="rm-metric-value">${totalActions}</div><div class="rm-metric-label">Actions</div></div>
+        <div class="rm-metric-tile"><div class="rm-metric-value">${coveredCount}/${RM_CHECKLIST.length}</div><div class="rm-metric-label">Coverage</div></div>
+        <div class="rm-metric-tile"><div class="rm-metric-value">${openItems}</div><div class="rm-metric-label">Open items</div></div>
+      </div>
+      <div class="demo-section-label">Top actions</div>
+      <div class="demo-bullet-list" style="flex:none">${latestActions}</div>
+    </div>
+    <div class="demo-screen-footer">
+      <button class="demo-btn-primary rm-goto" data-goto="4">Sync Data</button>
+    </div>`;
+
+  // Screen 5: Overall Summary
   const outcomeBullets = RM_OVERALL.outcomes.map((o) =>
     `<div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>${escapeHtml(o)}</div></div>`
   ).join("");
@@ -3436,7 +3463,7 @@ function renderRmDemoPage() {
       <span class="rm-coverage-label">${escapeHtml(c.item)}</span>
     </div>`).join("");
 
-  const screen3 = `
+  const screen4 = `
     <div class="demo-screen-hdr">
       <div class="demo-screen-eyebrow">Consolidated view</div>
       <div class="demo-screen-title">Overall Summary</div>
@@ -3457,34 +3484,7 @@ function renderRmDemoPage() {
       </div>
     </div>
     <div class="demo-screen-footer">
-      <button class="demo-btn-primary rm-goto" data-goto="4">Next</button>
-    </div>`;
-
-  // Screen 5: Save & Key Data
-  const latestActions = RM_CURRENT_MEETING.actions.slice(0, 3).map((a) =>
-    `<div class="demo-bullet-item"><div class="demo-bullet-dot"></div><div>${escapeHtml(a)}</div></div>`
-  ).join("");
-
-  const screen4 = `
-    <div class="demo-screen-hdr">
-      <div class="demo-screen-eyebrow">Save & confirm</div>
-      <div class="demo-screen-title">Key Data</div>
-      <div class="demo-screen-meta">${escapeHtml(RM_CURRENT_MEETING.title)} · latest</div>
-    </div>
-    <div class="demo-screen-body" style="gap:4px">
-      <div class="demo-summary-card">${escapeHtml(RM_CURRENT_MEETING.summary)}</div>
-      <div class="demo-section-label">Key metrics</div>
-      <div class="rm-metrics-grid">
-        <div class="rm-metric-tile"><div class="rm-metric-value">5</div><div class="rm-metric-label">Meetings</div></div>
-        <div class="rm-metric-tile"><div class="rm-metric-value">${totalActions}</div><div class="rm-metric-label">Actions</div></div>
-        <div class="rm-metric-tile"><div class="rm-metric-value">${coveredCount}/${RM_CHECKLIST.length}</div><div class="rm-metric-label">Coverage</div></div>
-        <div class="rm-metric-tile"><div class="rm-metric-value">${openItems}</div><div class="rm-metric-label">Open items</div></div>
-      </div>
-      <div class="demo-section-label">Top actions</div>
-      <div class="demo-bullet-list" style="flex:none">${latestActions}</div>
-    </div>
-    <div class="demo-screen-footer">
-      <button class="demo-btn-primary rm-goto" data-goto="5">Sync Data</button>
+      <button class="demo-btn-primary rm-goto" data-goto="5">Next</button>
     </div>`;
 
   // Screen 6: Done
@@ -3494,7 +3494,7 @@ function renderRmDemoPage() {
         <div class="demo-done-icon">
           <svg width="16" height="16" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <div class="demo-done-title">Meeting cycle complete</div>
+        <div class="demo-done-title">Workflow complete</div>
         <div class="demo-done-sub">All meeting notes saved and action items extracted across 5 sessions.</div>
       </div>
       <div class="demo-status-rows">
@@ -3524,8 +3524,8 @@ function renderRmDemoPage() {
       ${deviceWrap(0, "1. Meetings",  screen0)}
       ${deviceWrap(1, "2. Summary",   screen1)}
       ${deviceWrap(2, "3. Update",    screen2)}
-      ${deviceWrap(3, "4. Overall",   screen3)}
-      ${deviceWrap(4, "5. Save",      screen4)}
+      ${deviceWrap(3, "4. Key Data",  screen3)}
+      ${deviceWrap(4, "5. Overall",   screen4)}
       ${deviceWrap(5, "6. Done",      screen5)}
     </div>
 
