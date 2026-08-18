@@ -450,6 +450,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=PROJECT_ROOT, **kwargs)
 
+    def end_headers(self):
+        if getattr(self, "_no_cache", False):
+            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+            self._no_cache = False
+        super().end_headers()
+
     def _send_json(self, payload, status=200):
         body = json.dumps(payload).encode("utf-8")
         self.send_response(status)
@@ -578,6 +584,8 @@ window.location.href = "/webapp/index.html";
             return self._handle_voice_query_status(urllib.parse.parse_qs(parsed.query))
         if parsed.path == "/api/voice-query/history":
             return self._handle_voice_query_history()
+        if parsed.path.startswith("/webapp/"):
+            self._no_cache = True
         return super().do_GET()
 
     def do_POST(self):
