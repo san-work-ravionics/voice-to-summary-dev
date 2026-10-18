@@ -2409,7 +2409,7 @@ function renderVoiceQueryProgress() {
     else if (state === "active") secs = `${((performance.now() - st.startedAt[stage]) / 1000).toFixed(1)} s`;
     const detail = state === "failed" ? "" : (state === "active" && st.detail) || (state === "pending" ? "" : VOICE_QUERY_STAGE_HINTS[stage] || "");
     const icon = state === "done" ? "✓" : state === "failed" ? "✕" : state === "active" ? `<span class="vq-spin"></span>` : i + 1;
-    return `<li class="vq-step ${state}"><span class="vq-icon">${icon}</span><div class="vq-body"><div class="vq-label">${escapeHtml(VOICE_QUERY_STAGE_LABELS[stage])}</div>${detail ? `<div class="vq-detail">${escapeHtml(detail)}</div>` : ""}</div><span class="vq-time">${secs}</span></li>`;
+    return `<li class="vq-step ${state}"><div class="vq-head"><span class="vq-icon">${icon}</span><span class="vq-label">${escapeHtml(VOICE_QUERY_STAGE_LABELS[stage])}</span></div>${detail ? `<div class="vq-detail">${escapeHtml(detail)}</div>` : ""}<div class="vq-time">${secs}</div></li>`;
   });
   el.innerHTML = `<ol class="vq-steps">${rows.join("")}</ol>`;
 }
