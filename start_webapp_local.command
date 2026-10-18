@@ -24,6 +24,14 @@ if [ ! -x "$VENV/bin/python" ]; then
   exit 1
 fi
 
+# Load API keys etc. from .env (docker-compose does this for the Docker
+# launcher; a plain local run does not, so provider=claude had no credentials).
+if [ -f .env ]; then
+  set -a
+  . ./.env
+  set +a
+fi
+
 # Free the port if a previous local run is still holding it, so re-launching
 # doesn't fail with "Address already in use".
 if lsof -ti "tcp:$PORT" >/dev/null 2>&1; then
