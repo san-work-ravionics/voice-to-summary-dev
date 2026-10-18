@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from answer import answer_question, grounding_score
 from corpus import build_corpus, build_index, query as query_index
 from cost_estimate import estimate_cost_usd
-from llm_provider import build_generator
+from llm_provider import build_generator, preload
 from pipeline_status import write_status
 from query_history import append_query
 from transcription import transcribe
@@ -60,7 +60,13 @@ def run_query(audio_path, provider=None, top_k=5, retrieval="tfidf", on_stage=No
     # run would be indistinguishable in the saved output.
     generator = build_generator(provider)
 
-    on_stage("answering")
+    if generator.provider != "claude":
+        on_stage("loading_model", generator.model_name)
+        preload(generator)
+    if generator.provider == "claude":
+        on_stage("answering", f"Request sent to Claude API ({generator.model_name}), waiting for response")
+    else:
+        on_stage("answering", f"Generating with {generator.model_name} on CPU")
     t0 = time.time()
     answer_text = answer_question(question_text, retrieved, provider=generator.provider, model_name=generator.model_name)
     timings["answer_s"] = time.time() - t0

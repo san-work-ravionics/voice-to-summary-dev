@@ -1792,3 +1792,24 @@ table.story-table th.story-th-group {
 }
 :root[data-theme="dark"] .rm-current { background: #1a2e1f; }
 :root[data-theme="dark"] .rm-coverage-icon.no { background: #2e1a18; border-color: #5a2820; color: #e85040; }
+
+/* Voice query step-by-step progress checklist */
+.vq-steps { list-style: none; margin: 12px 0 0; padding: 0; }
+.vq-step { display: grid; grid-template-columns: 24px 1fr auto; column-gap: 10px; position: relative; padding-bottom: 14px; }
+.vq-step:last-child { padding-bottom: 0; }
+.vq-step::before { content: ""; position: absolute; left: 11px; top: 24px; bottom: 0; width: 2px; background: var(--gridline); }
+.vq-step:last-child::before { display: none; }
+.vq-step.done::before { background: var(--good); }
+.vq-icon { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--gridline); background: var(--surface-1); color: var(--text-muted); font-size: 11px; z-index: 1; }
+.vq-step.done .vq-icon { background: var(--good); border-color: var(--good); color: #fff; }
+.vq-step.active .vq-icon { border-color: var(--seq-500); }
+.vq-step.failed .vq-icon { background: var(--critical); border-color: var(--critical); color: #fff; }
+.vq-spin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--seq-100); border-top-color: var(--seq-500); animation: vq-spin .8s linear infinite; }
+@keyframes vq-spin { to { transform: rotate(360deg); } }
+.vq-body { min-width: 0; padding-top: 2px; }
+.vq-label { font-weight: 500; }
+.vq-step.pending .vq-label { color: var(--text-muted); }
+.vq-step.failed .vq-label { color: var(--critical); }
+.vq-detail { font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.vq-time { font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; padding-top: 3px; white-space: nowrap; }
+.vq-step.done .vq-time { color: var(--good); }

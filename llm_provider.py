@@ -71,6 +71,13 @@ def _local_pipeline(model_name):
     return _local_pipelines[model_name]
 
 
+def preload(generator):
+    """Loads a local model's weights up front so callers can report loading
+    separately from generating. No-op for the claude provider (API call)."""
+    if generator.provider != "claude":
+        _local_pipeline(generator.model_name)
+
+
 def _get_claude_client():
     global _claude_client_instance
     if _claude_client_instance is None:

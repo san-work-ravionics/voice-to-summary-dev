@@ -2324,11 +2324,95 @@ async function renderRoadmapPage() {
 
 // ---------- Voice Query page (Phase 8) ----------
 const VOICE_QUERY_STAGE_LABELS = {
-  transcribing: "Transcribing",
-  retrieving: "Retrieving",
-  answering: "Answering",
+  uploading: "Uploading audio",
+  transcribing: "Transcribing speech",
+  retrieving: "Finding relevant meeting notes",
+  loading_model: "Loading model",
+  answering: "Writing the answer",
   done: "Done",
 };
+
+const VOICE_QUERY_STAGE_HINTS = {
+  uploading: "Sending your recording to the server",
+  transcribing: "Whisper, running on this server",
+  retrieving: "Searching all meeting outputs",
+  loading_model: "Loading model weights into memory (first use downloads them)",
+  answering: "",
+};
+
+// Claude is an API call, so there is no model to load.
+function voiceQuerySteps(provider) {
+  const steps = ["uploading", "transcribing", "retrieving"];
+  if (provider !== "claude") steps.push("loading_model");
+  steps.push("answering");
+  return steps;
+}
+
+// Checklist state lives here so the 250 ms ticker can redraw elapsed time
+// between the 1.5 s status polls.
+let voiceQueryProgressState = null;
+let voiceQueryTickTimer = null;
+
+function startVoiceQueryProgress(provider) {
+  voiceQueryProgressState = {
+    steps: voiceQuerySteps(provider),
+    current: "uploading",
+    detail: null,
+    failed: false,
+    startedAt: { uploading: performance.now() },
+    elapsed: {},
+  };
+  clearInterval(voiceQueryTickTimer);
+  voiceQueryTickTimer = setInterval(renderVoiceQueryProgress, 250);
+  renderVoiceQueryProgress();
+}
+
+function advanceVoiceQueryProgress(stage, detail) {
+  const st = voiceQueryProgressState;
+  if (!st) return;
+  if (stage && stage !== st.current) {
+    const now = performance.now();
+    if (st.startedAt[st.current] != null && st.elapsed[st.current] == null) {
+      st.elapsed[st.current] = (now - st.startedAt[st.current]) / 1000;
+    }
+    st.current = stage;
+    st.startedAt[stage] = now;
+  }
+  if (detail !== undefined) st.detail = detail;
+  renderVoiceQueryProgress();
+}
+
+function finishVoiceQueryProgress(failed) {
+  const st = voiceQueryProgressState;
+  if (!st) return;
+  clearInterval(voiceQueryTickTimer);
+  const now = performance.now();
+  if (st.startedAt[st.current] != null && st.elapsed[st.current] == null) {
+    st.elapsed[st.current] = (now - st.startedAt[st.current]) / 1000;
+  }
+  st.failed = failed;
+  st.finished = true;
+  renderVoiceQueryProgress();
+}
+
+function renderVoiceQueryProgress() {
+  const el = document.getElementById("voicequery-progress");
+  const st = voiceQueryProgressState;
+  if (!el || !st) return;
+  const curIdx = st.steps.indexOf(st.current);
+  const rows = st.steps.map((stage, i) => {
+    let state = "pending";
+    if (st.current === "done" || i < curIdx) state = "done";
+    else if (i === curIdx) state = st.failed ? "failed" : st.finished ? "done" : "active";
+    let secs = "";
+    if (state === "done" || state === "failed") secs = st.elapsed[stage] != null ? `${st.elapsed[stage].toFixed(1)} s` : "";
+    else if (state === "active") secs = `${((performance.now() - st.startedAt[stage]) / 1000).toFixed(1)} s`;
+    const detail = state === "failed" ? "" : (state === "active" && st.detail) || (state === "pending" ? "" : VOICE_QUERY_STAGE_HINTS[stage] || "");
+    const icon = state === "done" ? "✓" : state === "failed" ? "✕" : state === "active" ? `<span class="vq-spin"></span>` : i + 1;
+    return `<li class="vq-step ${state}"><span class="vq-icon">${icon}</span><div class="vq-body"><div class="vq-label">${escapeHtml(VOICE_QUERY_STAGE_LABELS[stage])}</div>${detail ? `<div class="vq-detail">${escapeHtml(detail)}</div>` : ""}</div><span class="vq-time">${secs}</span></li>`;
+  });
+  el.innerHTML = `<ol class="vq-steps">${rows.join("")}</ol>`;
+}
 
 const VOICE_QUERY_PROVIDER_HINTS = {
   claude: { text: "~15–30 s (transcribe ~10 s + retrieve <1 s + API answer ~5 s)", slow: false },
@@ -2493,7 +2577,8 @@ async function submitVoiceQuery(blob) {
   const provider = document.getElementById("voicequery-provider").value;
   const retrieval = document.getElementById("voicequery-retrieval").value;
   btn.disabled = true;
-  status.textContent = "Uploading…";
+  status.textContent = "";
+  startVoiceQueryProgress(provider);
 
   let job;
   try {
@@ -2505,13 +2590,14 @@ async function submitVoiceQuery(blob) {
     if (!res.ok) throw new Error(`upload failed: ${res.status}`);
     job = (await res.json()).job;
   } catch (err) {
+    finishVoiceQueryProgress(true);
     status.textContent = `Upload failed (${err.message}).`;
     btn.disabled = false;
     btn.textContent = "Start recording";
     return;
   }
 
-  status.textContent = "Processing…";
+  advanceVoiceQueryProgress("transcribing", null);
   pollVoiceQuery(job);
 }
 
@@ -2530,20 +2616,22 @@ function pollVoiceQuery(job) {
       return;
     }
 
-    if (data.stage) {
-      progress.textContent = `Stage: ${VOICE_QUERY_STAGE_LABELS[data.stage] || data.stage}`;
+    if (data.stage && data.status === "running") {
+      advanceVoiceQueryProgress(data.stage, data.detail);
     }
 
     if (data.status === "done") {
       clearInterval(voiceQueryPollTimer);
+      advanceVoiceQueryProgress("done", null);
+      finishVoiceQueryProgress(false);
       status.textContent = "";
-      progress.textContent = "";
       btn.disabled = false;
       btn.textContent = "Start recording";
       renderVoiceQueryResult(data.result);
       renderVoiceQueryHistory();
     } else if (data.status === "error") {
       clearInterval(voiceQueryPollTimer);
+      finishVoiceQueryProgress(true);
       const err = data.error || "unknown";
       const isOOM = /killed|memoryerror|out of memory|signal 9/i.test(err);
       if (isOOM) {

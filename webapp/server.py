@@ -225,8 +225,9 @@ def _voice_query_status(job_id):
 
     file_status = read_status(job["status_file"])
     stage = file_status.get("stage") if file_status else None
+    detail = file_status.get("detail") if file_status else None
 
-    payload = {"status": job["status"], "stage": stage, "error": job["error"], "result": None}
+    payload = {"status": job["status"], "stage": stage, "detail": detail, "error": job["error"], "result": None}
     if job["status"] == "done":
         try:
             with open(job["result_file"]) as f:
