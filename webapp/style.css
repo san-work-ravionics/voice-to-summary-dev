@@ -1812,3 +1812,4 @@ table.story-table th.story-th-group {
 .vq-detail { font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
 .vq-time { margin-top: auto; font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; min-height: 1.2em; }
 .vq-step.done .vq-time { color: var(--good); }
+.vq-heard { color: var(--text-primary); font-style: italic; }

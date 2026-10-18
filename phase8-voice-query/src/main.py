@@ -39,7 +39,7 @@ def run_query(audio_path, provider=None, top_k=5, retrieval="tfidf", on_stage=No
     Returns a dict with the answer, retrieved sources, per-stage timing, and
     a deterministic grounding score; also writes all of it to
     output/query-N/."""
-    on_stage = on_stage or (lambda stage, detail=None: None)
+    on_stage = on_stage or (lambda stage, detail=None, extra=None: None)
     timings = {}
     t_total = time.time()
 
@@ -48,7 +48,7 @@ def run_query(audio_path, provider=None, top_k=5, retrieval="tfidf", on_stage=No
     question_text = transcribe(audio_path)
     timings["transcribe_s"] = time.time() - t0
 
-    on_stage("retrieving")
+    on_stage("retrieving", None, {"heard": question_text})
     t0 = time.time()
     index = build_index(build_corpus(), method=retrieval)
     retrieved = query_index(index, question_text, top_k=top_k, method=retrieval)
@@ -61,12 +61,12 @@ def run_query(audio_path, provider=None, top_k=5, retrieval="tfidf", on_stage=No
     generator = build_generator(provider)
 
     if generator.provider != "claude":
-        on_stage("loading_model", generator.model_name)
+        on_stage("loading_model", generator.model_name, {"heard": question_text})
         preload(generator)
     if generator.provider == "claude":
-        on_stage("answering", f"Request sent to Claude API ({generator.model_name}), waiting for response")
+        on_stage("answering", f"Request sent to Claude API ({generator.model_name}), waiting for response", {"heard": question_text})
     else:
-        on_stage("answering", f"Generating with {generator.model_name} on CPU")
+        on_stage("answering", f"Generating with {generator.model_name} on CPU", {"heard": question_text})
     t0 = time.time()
     answer_text = answer_question(question_text, retrieved, provider=generator.provider, model_name=generator.model_name)
     timings["answer_s"] = time.time() - t0
@@ -132,7 +132,7 @@ def main():
 
     on_stage = None
     if args.status_file:
-        on_stage = lambda stage, detail=None: write_status(args.status_file, stage, detail)  # noqa: E731
+        on_stage = lambda stage, detail=None, extra=None: write_status(args.status_file, stage, detail, extra)  # noqa: E731
 
     result = run_query(
         args.audio_path, provider=args.provider, top_k=args.top_k,

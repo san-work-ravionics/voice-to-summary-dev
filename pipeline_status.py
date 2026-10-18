@@ -10,10 +10,10 @@ import os
 import time
 
 
-def write_status(status_file, stage, detail=None):
+def write_status(status_file, stage, detail=None, extra=None):
     tmp = status_file + ".tmp"
     with open(tmp, "w") as f:
-        json.dump({"stage": stage, "detail": detail, "updated_at": time.time()}, f)
+        json.dump({"stage": stage, "detail": detail, "updated_at": time.time(), **(extra or {})}, f)
     os.replace(tmp, status_file)  # atomic on POSIX, avoids a torn read
 
 

@@ -2367,9 +2367,10 @@ function startVoiceQueryProgress(provider) {
   renderVoiceQueryProgress();
 }
 
-function advanceVoiceQueryProgress(stage, detail) {
+function advanceVoiceQueryProgress(stage, detail, heard) {
   const st = voiceQueryProgressState;
   if (!st) return;
+  if (heard) st.heard = heard;
   if (stage && stage !== st.current) {
     const now = performance.now();
     if (st.startedAt[st.current] != null && st.elapsed[st.current] == null) {
@@ -2407,6 +2408,9 @@ function renderVoiceQueryProgress() {
     let secs = "";
     if (state === "done" || state === "failed") secs = st.elapsed[stage] != null ? `${st.elapsed[stage].toFixed(1)} s` : "";
     else if (state === "active") secs = `${((performance.now() - st.startedAt[stage]) / 1000).toFixed(1)} s`;
+    if (stage === "transcribing" && st.heard) {
+      return `<li class="vq-step ${state}"><div class="vq-head"><span class="vq-icon">${state === "done" ? "✓" : i + 1}</span><span class="vq-label">${escapeHtml(VOICE_QUERY_STAGE_LABELS[stage])}</span></div><div class="vq-detail vq-heard">Heard: “${escapeHtml(st.heard)}”</div><div class="vq-time">${st.elapsed[stage] != null ? `${st.elapsed[stage].toFixed(1)} s` : ""}</div></li>`;
+    }
     const detail = state === "failed" ? "" : (state === "active" && st.detail) || (state === "pending" ? "" : VOICE_QUERY_STAGE_HINTS[stage] || "");
     const icon = state === "done" ? "✓" : state === "failed" ? "✕" : state === "active" ? `<span class="vq-spin"></span>` : i + 1;
     return `<li class="vq-step ${state}"><div class="vq-head"><span class="vq-icon">${icon}</span><span class="vq-label">${escapeHtml(VOICE_QUERY_STAGE_LABELS[stage])}</span></div>${detail ? `<div class="vq-detail">${escapeHtml(detail)}</div>` : ""}<div class="vq-time">${secs}</div></li>`;
@@ -2617,7 +2621,7 @@ function pollVoiceQuery(job) {
     }
 
     if (data.stage && data.status === "running") {
-      advanceVoiceQueryProgress(data.stage, data.detail);
+      advanceVoiceQueryProgress(data.stage, data.detail, data.heard);
     }
 
     if (data.status === "done") {
